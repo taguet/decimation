@@ -396,3 +396,15 @@ FodyWeavers.xsd
 
 # JetBrains Rider
 *.sln.iml
+/meshes.rc
+/dat/torus.off
+/dat/sphere.off
+/dat/cow.off
+/dat/bunny.off
+/dat/bumpy_sphere.off
+/resource5.h
+/resource4.h
+/resource3.h
+/resource2.h
+/resource1.h
+/resource.h
