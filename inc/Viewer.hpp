@@ -15,6 +15,8 @@
 
 #include "MeshViewer.hpp"
 #include "ComputingTools.hpp"
+#include <Windows.h>
+#include <commdlg.h>
 
 
 //== CLASS DEFINITION =========================================================
@@ -80,6 +82,8 @@ protected:
   { return mesh.property(eweight_, _eh); }
 
 
+  /// keyboard interaction
+  void keyboard(int key, int x, int y);
 
 private:
 

@@ -15,7 +15,6 @@
 
 //== IMPLEMENTATION ========================================================== 
 
-
 Viewer::Viewer(const char* _title, int _width, int _height): MeshViewer(_title, _width, _height) {
 
   mesh.request_vertex_colors();
@@ -479,6 +478,38 @@ void Viewer::color_1_ring(Mesh::VertexHandle _vh) {
 	Mesh::Color neighbor_color = Mesh::Color(255, 0, 0);
 	for (auto vv_it = mesh.vv_iter(_vh); vv_it; ++vv_it) {
 		mesh.set_color(vv_it, neighbor_color);
+	}
+}
+
+
+void Viewer::keyboard(int key, int x, int y) {
+	switch (key)
+	{
+		case 'o':
+		{
+			OPENFILENAME ofn;
+			wchar_t szPath[100];
+			ZeroMemory(&ofn, sizeof(ofn));
+
+			ofn.lStructSize = sizeof(ofn);
+			ofn.lpstrFilter = L"Mesh\0*.off\0\0";
+			ofn.lpstrFile = szPath;
+			ofn.lpstrFile[0] = '\0';
+			ofn.nMaxFile = 100;
+			ofn.Flags = OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST;
+
+			if (GetOpenFileName(&ofn)) {
+				wstring ws(szPath);
+				string str(ws.begin(), ws.end());
+				open_mesh(str.c_str());
+			}
+			break;
+		}
+		default:
+		{
+			MeshViewer::keyboard(key, x, y);
+			break;
+		}
 	}
 }
 
