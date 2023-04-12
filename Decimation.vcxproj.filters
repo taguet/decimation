@@ -77,21 +77,6 @@
     <ClInclude Include="inc\Viewer.hpp">
       <Filter>Fichiers d%27en-tête</Filter>
     </ClInclude>
-    <ClInclude Include="resource1.h">
-      <Filter>Fichiers d%27en-tête</Filter>
-    </ClInclude>
-    <ClInclude Include="resource2.h">
-      <Filter>Fichiers d%27en-tête</Filter>
-    </ClInclude>
-    <ClInclude Include="resource3.h">
-      <Filter>Fichiers d%27en-tête</Filter>
-    </ClInclude>
-    <ClInclude Include="resource4.h">
-      <Filter>Fichiers d%27en-tête</Filter>
-    </ClInclude>
-    <ClInclude Include="resource5.h">
-      <Filter>Fichiers d%27en-tête</Filter>
-    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="meshes.rc">
@@ -99,10 +84,20 @@
     </ResourceCompile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="dat\bumpy_sphere.off" />
-    <None Include="dat\bunny.off" />
-    <None Include="dat\cow.off" />
-    <None Include="dat\sphere.off" />
-    <None Include="dat\torus.off" />
+    <None Include="dat\torus.off">
+      <Filter>Fichiers de ressources</Filter>
+    </None>
+    <None Include="dat\bumpy_sphere.off">
+      <Filter>Fichiers de ressources</Filter>
+    </None>
+    <None Include="dat\bunny.off">
+      <Filter>Fichiers de ressources</Filter>
+    </None>
+    <None Include="dat\cow.off">
+      <Filter>Fichiers de ressources</Filter>
+    </None>
+    <None Include="dat\sphere.off">
+      <Filter>Fichiers de ressources</Filter>
+    </None>
   </ItemGroup>
 </Project>
