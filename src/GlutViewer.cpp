@@ -27,6 +27,7 @@ GlutViewer(const char* _title, int _width, int _height) : width_(_width), height
   glutInitDisplayMode(GLUT_RGB | GLUT_DEPTH | GLUT_DOUBLE | GLUT_ALPHA);
   glutInitWindowSize(_width, _height);
   windowID_ = glutCreateWindow(_title);
+  int mainID = windowID_;
   windows__[windowID_] = this;
 
   // register callbacks
@@ -39,6 +40,14 @@ GlutViewer(const char* _title, int _width, int _height) : width_(_width), height
   glutReshapeFunc(reshape__); 
   glutVisibilityFunc(visibility__);
 
+  // create subwindow 
+  /*
+  windowID_ = glutCreateSubWindow(windowID_, 0, 0, 10, 20);
+  windows__[windowID_] = this;
+  glutDisplayFunc(subDisplay__);
+
+  glutSetWindow(mainID);
+  */
 
   // create menu
   n_draw_modes_ = 0;
@@ -110,6 +119,10 @@ GlutViewer* GlutViewer::current_window() {
 
 void GlutViewer::display__(void) {
   current_window()->display();
+}
+
+void GlutViewer::subDisplay__(void) {
+  current_window()->displaySub();
 }
 
 void GlutViewer::idle__(void) {
@@ -217,6 +230,14 @@ void GlutViewer::display(void)
     draw("");
 
   glutSwapBuffers();
+}
+
+
+void GlutViewer::displaySub(void)
+{
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    draw("");
+    glutSwapBuffers();
 }
 
 

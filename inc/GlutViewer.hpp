@@ -48,6 +48,7 @@ protected:
   void toggle_idle(bool _b) { glutIdleFunc( _b ? idle__ : NULL );	}
 
   virtual void display(void);
+  virtual void displaySub(void);
   virtual void idle(void); 
   virtual void keyboard(int key, int x, int y);
   virtual void special(int key, int x, int y);
@@ -64,6 +65,7 @@ protected:
 private:
 
   static void display__(void);
+  static void subDisplay__(void);
   static void idle__(void); 
   static void keyboard__(unsigned char key, int x, int y);
   static void motion__(int x, int y);
@@ -81,7 +83,7 @@ private:
 
 private:
 
-  int  windowID_, menuID_, subwindowID_; 
+  int  windowID_, menuID_; 
 
   bool fullscreen_;
   int  bak_left_, bak_top_, bak_width_, bak_height_;
