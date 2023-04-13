@@ -481,28 +481,32 @@ void Viewer::color_1_ring(Mesh::VertexHandle _vh) {
 	}
 }
 
+// Opens file explorer to select a new mesh file
+void Viewer::browse_meshes() {
+	OPENFILENAME ofn;
+	wchar_t szPath[100];
+	ZeroMemory(&ofn, sizeof(ofn));
+
+	ofn.lStructSize = sizeof(ofn);
+	ofn.lpstrFilter = L"Mesh\0*.off\0\0";
+	ofn.lpstrFile = szPath;
+	ofn.lpstrFile[0] = '\0';
+	ofn.nMaxFile = 100;
+	ofn.Flags = OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST;
+
+	if (GetOpenFileName(&ofn)) {
+		wstring ws(szPath);
+		string str(ws.begin(), ws.end());
+		open_mesh(str.c_str());
+	}
+}
 
 void Viewer::keyboard(int key, int x, int y) {
 	switch (key)
 	{
 		case 'o':
 		{
-			OPENFILENAME ofn;
-			wchar_t szPath[100];
-			ZeroMemory(&ofn, sizeof(ofn));
-
-			ofn.lStructSize = sizeof(ofn);
-			ofn.lpstrFilter = L"Mesh\0*.off\0\0";
-			ofn.lpstrFile = szPath;
-			ofn.lpstrFile[0] = '\0';
-			ofn.nMaxFile = 100;
-			ofn.Flags = OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST;
-
-			if (GetOpenFileName(&ofn)) {
-				wstring ws(szPath);
-				string str(ws.begin(), ws.end());
-				open_mesh(str.c_str());
-			}
+			browse_meshes();
 			break;
 		}
 		default:

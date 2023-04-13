@@ -85,6 +85,9 @@ protected:
   /// keyboard interaction
   void keyboard(int key, int x, int y);
 
+  /// open file explorer
+  void browse_meshes();
+
 private:
 
   OpenMesh::VPropHandleT<Mesh::Scalar>  vweight_, v_mean_curvature_, v_gauss_curvature_;
