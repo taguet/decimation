@@ -15,6 +15,7 @@
 
 #include "MeshViewer.hpp"
 #include "ComputingTools.hpp"
+#include "MeshTools.h"
 #include <Windows.h>
 #include <commdlg.h>
 
@@ -55,6 +56,9 @@ protected:
   // calculate gaussian curvature per vertex
   void calc_gauss_curvature();
 
+  // calculate dicrete laplacian per vertex
+  void calc_discrete_laplacian();
+
   /// set vertex color from vertex curvature
   void color_coding(OpenMesh::VPropHandleT<Mesh::Scalar> _curv);
 
@@ -76,6 +80,11 @@ protected:
 	  return mesh.property(v_gauss_curvature_, _vh);
   }
 
+  OpenMesh::Vec3f& laplacian_displacement(Mesh::VertexHandle _vh)
+  {
+	  return mesh.property(laplacian, _vh);
+  }
+
 
   // easier access to edge weights
   Mesh::Scalar& weight(Mesh::EdgeHandle _eh) 
@@ -92,9 +101,11 @@ private:
 
   OpenMesh::VPropHandleT<Mesh::Scalar>  vweight_, v_mean_curvature_, v_gauss_curvature_;
   OpenMesh::EPropHandleT<Mesh::Scalar>  eweight_;
+  OpenMesh::VPropHandleT<OpenMesh::Vec3f> laplacian;
 
   GLuint  textureID_;
   ComputingTools ctools;
+  MeshTools mtools;
 };
 
 

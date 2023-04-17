@@ -25,10 +25,13 @@ Viewer::Viewer(const char* _title, int _width, int _height): MeshViewer(_title, 
   mesh.add_property(vweight_);
   mesh.add_property(eweight_);
 
+  mesh.add_property(laplacian);
+
   add_draw_mode("Mean Curvature");
   add_draw_mode("Gaussian Curvature");
   add_draw_mode("Reflection Lines");
   add_draw_mode("Vertex 1-Ring");
+  add_draw_mode("Discrete Laplacian");
 
   init();
 }
@@ -53,6 +56,7 @@ void Viewer::init() {
   // base class first
   MeshViewer::init();
   ctools = ComputingTools();
+  mtools = MeshTools();
 	
 	
   // generate checkerboard-like image
@@ -99,11 +103,13 @@ bool Viewer::open_mesh(const char* _filename) {
 	  if (MeshViewer::open_mesh(_filename))
 	  {
 		ctools.set_mesh(mesh);
+		mtools.setMesh(mesh);
 		ctools.calc_princ_curvatures();
 		
 		//Compute all the information about curvature
 		calc_mean_curvature();
 		calc_gauss_curvature();
+		calc_discrete_laplacian();
 
 		glutPostRedisplay();
 		return true;
@@ -332,6 +338,12 @@ void Viewer::color_coding(OpenMesh::VPropHandleT<Mesh::Scalar> _curv) {
 		
 			mesh.set_color(v_it, col);
 	  }
+}
+
+void Viewer::calc_discrete_laplacian() {
+	for (auto v_iter{ mesh.vertices_begin() }; v_iter != mesh.vertices_end(); ++v_iter) {
+		laplacian_displacement(v_iter) = mtools.discreteLaplacian(v_iter);
+	}
 }
 
 

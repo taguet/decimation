@@ -23,6 +23,7 @@
     <ClCompile Include="src\GlutExaminer.cpp" />
     <ClCompile Include="src\GlutViewer.cpp" />
     <ClCompile Include="src\main.cpp" />
+    <ClCompile Include="src\MeshTools.cpp" />
     <ClCompile Include="src\MeshViewer.cpp" />
     <ClCompile Include="src\ProgressiveBar.cpp" />
     <ClCompile Include="src\TaucsSolver.cpp" />
@@ -35,6 +36,7 @@
     <ClInclude Include="inc\gl.h" />
     <ClInclude Include="inc\GlutExaminer.hpp" />
     <ClInclude Include="inc\GlutViewer.hpp" />
+    <ClInclude Include="inc\MeshTools.h" />
     <ClInclude Include="inc\MeshViewer.hpp" />
     <ClInclude Include="inc\OpenMeshUtils.h" />
     <ClInclude Include="inc\ProgressiveBar.h" />
