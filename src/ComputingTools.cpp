@@ -285,7 +285,7 @@ void ComputingTools::compute_local_principalCurvatures(float &_k1, float &_k2, c
 }	
 
 
-void ComputingTools::set_mesh(Mesh _mesh)
+void ComputingTools::set_mesh(Mesh& _mesh)
 {
 	mesh_ = _mesh;
 }

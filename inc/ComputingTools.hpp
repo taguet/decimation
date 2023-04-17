@@ -44,7 +44,7 @@ public:
 
 	void compute_local_principalCurvatures(float &_k1, float &_k2, const OpenMesh::VertexHandle _vh);
 
-	void set_mesh(Mesh _mesh);
+	void set_mesh(Mesh& _mesh);
 
 	std::vector<std::vector<float>> principal_curvatures();
 

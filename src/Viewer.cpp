@@ -25,8 +25,6 @@ Viewer::Viewer(const char* _title, int _width, int _height): MeshViewer(_title, 
   mesh.add_property(vweight_);
   mesh.add_property(eweight_);
 
-  mesh.add_property(laplacian);
-
   add_draw_mode("Mean Curvature");
   add_draw_mode("Gaussian Curvature");
   add_draw_mode("Reflection Lines");
@@ -102,6 +100,7 @@ bool Viewer::open_mesh(const char* _filename) {
 	  // load mesh
 	  if (MeshViewer::open_mesh(_filename))
 	  {
+		  isModified = false;
 		ctools.set_mesh(mesh);
 		mtools.setMesh(mesh);
 		ctools.calc_princ_curvatures();
@@ -342,7 +341,8 @@ void Viewer::color_coding(OpenMesh::VPropHandleT<Mesh::Scalar> _curv) {
 
 void Viewer::calc_discrete_laplacian() {
 	for (auto v_iter{ mesh.vertices_begin() }; v_iter != mesh.vertices_end(); ++v_iter) {
-		laplacian_displacement(v_iter) = mtools.discreteLaplacian(v_iter);
+		mtools.laplacian_displacement(v_iter) = mtools.discreteLaplacian(v_iter);
+		//mtools.laplacian_displacement(v_iter) = mtools.uniformLaplacian(v_iter);
 	}
 }
 
@@ -476,6 +476,33 @@ void Viewer::draw(const std::string& _draw_mode) {
 		glColor3f(0.0, 0.0, 0.0);
 		glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, &indices[0]);
 		glDisable(GL_POLYGON_OFFSET_FILL);
+
+		prev_draw_mode = current_draw_mode;
+		prev_id_draw_mode = get_draw_mode();
+	}
+
+	else if (_draw_mode == "Discrete Laplacian") {
+		if (!isModified) {
+			mtools.smoothMesh(1, 1);
+			isModified = true;
+		}
+		glEnable(GL_LIGHTING);
+
+		glShadeModel(GL_SMOOTH);
+		glColor3f(0.3, 0.3, 0.3);
+		glColorMaterial(GL_FRONT_AND_BACK, GL_AMBIENT);
+		glEnable(GL_COLOR_MATERIAL);
+
+		glEnableClientState(GL_VERTEX_ARRAY);
+		glEnableClientState(GL_NORMAL_ARRAY);
+		GL::glVertexPointer(mtools.getMesh()->points());
+		GL::glNormalPointer(mtools.getMesh()->vertex_normals());
+
+		glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, &indices[0]);
+
+		glDisableClientState(GL_VERTEX_ARRAY);
+		glDisableClientState(GL_NORMAL_ARRAY);
+
 
 		prev_draw_mode = current_draw_mode;
 		prev_id_draw_mode = get_draw_mode();
