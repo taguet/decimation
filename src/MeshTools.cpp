@@ -106,6 +106,16 @@ float MeshTools::computeDistanceWeight(const OpenMesh::FaceHandle fh, const Open
 }
 
 
+float MeshTools::computeProximityWeight(const OpenMesh::FaceHandle fh, const OpenMesh::FaceHandle neighbour, float threshold=0.349f) {
+	Mesh::Normal n_0, n_1;
+	n_0 = mesh_.normal(fh);
+	n_1 = mesh_.normal(neighbour);
+	float num{pow(1 - OpenMesh::dot(n_0, n_1), 2)};
+	float denom{pow(1 - cos(threshold), 2)};
+	return exp( - num / denom );
+}
+
+
 OpenMesh::Vec3f MeshTools::cotangentLaplacian(const OpenMesh::VertexHandle vh) {
 	OpenMesh::Vec3f sum{0.0f, 0.0f, 0.0f};
 	for (auto voh_it{ mesh_.voh_iter(vh) }; voh_it; ++voh_it) {

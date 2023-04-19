@@ -24,6 +24,7 @@ public:
 	Mesh::Normal filterFaceNormal(const OpenMesh::FaceHandle fh);
 
 	float computeDistanceWeight(const OpenMesh::FaceHandle fh, const OpenMesh::FaceHandle neighbour);
+	float computeProximityWeight(const OpenMesh::FaceHandle fh, const OpenMesh::FaceHandle neighbour, float threshold);
 
 	OpenMesh::Vec3f cotangentLaplacian(const OpenMesh::VertexHandle vh);
 	OpenMesh::Vec3f uniformLaplacian(const OpenMesh::VertexHandle vh);
