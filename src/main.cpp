@@ -30,7 +30,7 @@
 //#define OS_LINUX
 
 #define PATH_DATA "dat/"
-#define FILENAME "torus.off"
+#define FILENAME "bumpy_sphere.off"
 
 //torus.off : 288v
 //bumpy_sphere.off : 5724v

@@ -340,8 +340,10 @@ void Viewer::color_coding(OpenMesh::VPropHandleT<Mesh::Scalar> _curv) {
 }
 
 void Viewer::calc_discrete_laplacian() {
+	std::cout << "LAPL" << std::endl;
 	for (auto v_iter{ mesh.vertices_begin() }; v_iter != mesh.vertices_end(); ++v_iter) {
-		mtools.laplacian_displacement(v_iter) = mtools.discreteLaplacian(v_iter);
+		mtools.laplacian_displacement(v_iter) = mtools.cotangentLaplacian(v_iter).normalize();
+		std::cout << mtools.laplacian_displacement(v_iter) << std::endl;
 		//mtools.laplacian_displacement(v_iter) = mtools.uniformLaplacian(v_iter);
 	}
 }
@@ -483,7 +485,7 @@ void Viewer::draw(const std::string& _draw_mode) {
 
 	else if (_draw_mode == "Discrete Laplacian") {
 		if (!isModified) {
-			mtools.smoothMesh(1, 1);
+			mtools.taubinSmoothing(2, -1);
 			isModified = true;
 		}
 		glEnable(GL_LIGHTING);
