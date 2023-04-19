@@ -90,10 +90,22 @@ OpenMesh::Vec3f MeshTools::computeCentroid(const OpenMesh::HalfedgeHandle heh) {
 }
 
 
-Mesh::Normal MeshTools::filterFaceNormal(const OpenMesh::FaceHandle fh) {
+Mesh::Normal MeshTools::filterFaceNormal(const OpenMesh::FaceHandle fh, float threshold) {
 	float area{ computeFaceArea(mesh_.halfedge_handle(fh)) };
-	Mesh::Normal normal{ mesh_.normal(fh) };
-	//TODO weights
+	Mesh::Normal f_normal{weighFaceNormal(fh, fh, area)};
+	for (auto ff_it{ mesh_.ff_iter(fh) }; ff_it; ++ff_it) {
+		if (dot(mesh_.normal(ff_it), mesh_.normal(fh)) >= cos(threshold))
+			continue;
+		f_normal += weighFaceNormal(fh, ff_it, area);
+	}
+	return f_normal / f_normal.norm();
+}
+
+
+Mesh::Normal MeshTools::weighFaceNormal(const OpenMesh::FaceHandle fh_i, const OpenMesh::FaceHandle fh_j, const float area) {
+	float alpha{ computeDistanceWeight(fh_i, fh_j) };
+	float beta{ computeProximityWeight(fh_i, fh_j) };
+	return area * alpha * beta * mesh_.normal(fh_j);
 }
 
 
@@ -106,12 +118,12 @@ float MeshTools::computeDistanceWeight(const OpenMesh::FaceHandle fh, const Open
 }
 
 
-float MeshTools::computeProximityWeight(const OpenMesh::FaceHandle fh, const OpenMesh::FaceHandle neighbour, float threshold=0.349f) {
+float MeshTools::computeProximityWeight(const OpenMesh::FaceHandle fh, const OpenMesh::FaceHandle neighbour, float threshold) {
 	Mesh::Normal n_0, n_1;
 	n_0 = mesh_.normal(fh);
 	n_1 = mesh_.normal(neighbour);
-	float num{pow(1 - OpenMesh::dot(n_0, n_1), 2)};
-	float denom{pow(1 - cos(threshold), 2)};
+	float num{pow(1 - dot(n_0, n_1), 2.0f)};
+	float denom{pow(1 - cos(threshold), 2.0f)};
 	return exp( - num / denom );
 }
 
@@ -134,7 +146,10 @@ OpenMesh::Vec3f MeshTools::uniformLaplacian(const OpenMesh::VertexHandle vh) {
 	for (auto voh_it{ mesh_.voh_iter(vh) }; voh_it; ++voh_it, ++i) {
 		sum += mesh_.point(mesh_.to_vertex_handle(voh_it)) - mesh_.point(vh);
 	}
-	return sum / i;
+	if (i == 0)
+		return sum;
+	else
+		return sum / i;
 }
 
 
@@ -143,27 +158,28 @@ OpenMesh::Vec3f MeshTools::anisotropicLaplacian(const OpenMesh::VertexHandle vh)
 	int i{ 0 };
 	for (auto voh_it{ mesh_.voh_iter(vh) }; voh_it; ++voh_it, ++i) {
 		Mesh::Point centroid{ computeCentroid(voh_it) };
-		//TODO: Filtered normal
-		Mesh::Normal n{ mesh_.normal(mesh_.face_handle(voh_it)) };
+		OpenMesh::Vec3f f_normal{ filterFaceNormal(mesh_.face_handle(voh_it)) };
+		OpenMesh::Vec3f normal{ mesh_.normal(mesh_.face_handle(voh_it)) };
+		OpenMesh::Vec3f toCentroid{ centroid - mesh_.point(vh) };
+		sum += dot(toCentroid, f_normal) * normal;
 	}
-	return sum; //TODO
+	if (i == 0)	
+		return sum;
+	else
+		return sum / i;
 }
 
 
 void MeshTools::taubinSmoothing(float lambda, float mu) {
 	for (auto v_it{ mesh_.vertices_begin() }; v_it != mesh_.vertices_end(); ++v_it) {
-		mesh_.set_point(v_it, position(v_it) + laplacian_displacement(v_it) * lambda);
-		mesh_.set_point(v_it, position(v_it) + laplacian_displacement(v_it) * mu);
+		mesh_.set_point(v_it, mesh_.point(v_it) + laplacian_displacement(v_it) * lambda);
+		mesh_.set_point(v_it, mesh_.point(v_it) + laplacian_displacement(v_it) * mu);
 	}
 }
 
-void MeshTools::smoothMesh(int iterations=1) {
+void MeshTools::smoothMesh() {
+	//std::cout << "COS(THETA)=" << cos(0.349066f) << std::endl;
 	for (auto v_it{ mesh_.vertices_begin() }; v_it != mesh_.vertices_end(); ++v_it) {
-		OpenMesh::Vec3f lapl{ laplacian_displacement(v_it) };
-		for (int i{ 1 }; i < iterations; ++i) {
-			lapl *= laplacian_displacement(v_it);
-		}
-		auto p{ mesh_.point(v_it) };
-		mesh_.set_point(v_it, p + lapl);
+		mesh_.set_point(v_it, mesh_.point(v_it) + laplacian_displacement(v_it));
 	}
 }
