@@ -470,7 +470,7 @@ void Viewer::draw(const std::string& _draw_mode) {
 	else if (_draw_mode == "Discrete Laplacian") {
 		if (!isModified) {
 			//mtools.taubinSmoothing(2, -1,3);
-			mtools.smoothMesh(5);
+			mtools.smoothMesh(20);
 			isModified = true;
 		}
 		glEnable(GL_LIGHTING);
@@ -519,6 +519,11 @@ void Viewer::draw(const std::string& _draw_mode) {
 
 		if (cur_oh != oh) {
 			cur_oh = oh;
+			std::cout << "v_i=" << mesh.point(mesh.from_vertex_handle(oh)) << '\n';
+			std::cout << "v_j=" << mesh.point(mesh.to_vertex_handle(oh)) << std::endl; 
+			Vec3f a;
+			mesh.calc_edge_vector(left, a);
+			std::cout << "next()=" << a << std::endl;
 			std::pair<float, float> angles{ mtools.getOppositeAngles(oh) };
 			Vec3f e1, e2;
 			mesh.calc_sector_vectors(left, e1, e2);
@@ -577,7 +582,8 @@ void Viewer::draw(const std::string& _draw_mode) {
 		static int cur_v_id = -1;
 		if (cur_v_id != v_id) {
 			std::cout << "v_i=" << mesh.point(_vh) << '\n';
-			std::cout << "L(v_i)=" << mtools.cotangentLaplacian(_vh) << std::endl;
+			std::cout << "L(v_i)=" << mtools.cotangentLaplacian(_vh) << '\n';
+			std::cout << "A(v_i)=" << mtools.computeVertexArea(_vh) << std::endl;
 			cur_v_id = v_id;
 		}
 		glDisable(GL_LIGHTING);

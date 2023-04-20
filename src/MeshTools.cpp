@@ -15,7 +15,7 @@ void MeshTools::setMesh(Mesh& mesh) {
 void MeshTools::calc_discrete_laplacian() {
 	for (auto v_iter{ mesh_.vertices_begin() }; v_iter != mesh_.vertices_end(); ++v_iter) {
 		//laplacian_displacement(v_iter) = anisotropicLaplacian(v_iter);
-		laplacian_displacement(v_iter) = cotangentLaplacian(v_iter);
+		laplacian_displacement(v_iter) = cotangentLaplacian(v_iter).normalize();
 		//laplacian_displacement(v_iter) = uniformLaplacian(v_iter);
 		//std::cout << laplacian_displacement(v_iter) << std::endl;
 	}
@@ -66,7 +66,6 @@ float MeshTools::computeVertexArea(const OpenMesh::VertexHandle vh) {
 
 
 float MeshTools::cotan(float angle) {
-	//if (angle == 0)	return 0;
 	return 1.0f / tanf(angle);
 }
 
@@ -182,9 +181,15 @@ OpenMesh::Vec3f MeshTools::anisotropicLaplacian(const OpenMesh::VertexHandle vh)
 
 void MeshTools::taubinSmoothing(float lambda, float mu, int iterations) {
 	for (int i{ 0 }; i < iterations; ++i) {
+		variance_edge_length = computeVarianceEdgeLength();
 		calc_discrete_laplacian();
 		for (auto v_it{ mesh_.vertices_begin() }; v_it != mesh_.vertices_end(); ++v_it) {
 			mesh_.set_point(v_it, mesh_.point(v_it) + laplacian_displacement(v_it) * lambda);
+		}
+		variance_edge_length = computeVarianceEdgeLength();
+		mesh_.update_normals();
+		calc_discrete_laplacian();
+		for (auto v_it{ mesh_.vertices_begin() }; v_it != mesh_.vertices_end(); ++v_it) {
 			mesh_.set_point(v_it, mesh_.point(v_it) + laplacian_displacement(v_it) * mu);
 		}
 		mesh_.update_normals();
@@ -198,7 +203,7 @@ void MeshTools::smoothMesh(int iterations) {
 		calc_discrete_laplacian();
 		for (auto v_it{ mesh_.vertices_begin() }; v_it != mesh_.vertices_end(); ++v_it) {
 			//std::cout << "Point: " << mesh_.point(v_it) << "\tLaplacien: " << laplacian_displacement(v_it) << std::endl;
-			mesh_.set_point(v_it, mesh_.point(v_it) + laplacian_displacement(v_it));
+			mesh_.set_point(v_it, mesh_.point(v_it) + laplacian_displacement(v_it) * 0.05);
 		}
 		mesh_.update_normals();
 	}
