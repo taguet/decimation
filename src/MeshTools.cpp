@@ -75,6 +75,7 @@ std::pair<float, float> MeshTools::getOppositeAngles(const OpenMesh::HalfedgeHan
 	OpenMesh::HalfedgeHandle opposite{ mesh_.opposite_halfedge_handle(oh) };
 	OpenMesh::HalfedgeHandle left{ mesh_.next_halfedge_handle(oh) };
 	OpenMesh::HalfedgeHandle right{ mesh_.next_halfedge_handle(opposite) };
+
 	return { computeAngle(left), computeAngle(right) };
 }
 
@@ -141,6 +142,7 @@ OpenMesh::Vec3f MeshTools::cotangentLaplacian(const OpenMesh::VertexHandle vh) {
 	OpenMesh::Vec3f sum{0.0f, 0.0f, 0.0f};
 	for (auto voh_it{ mesh_.voh_iter(vh) }; voh_it; ++voh_it) {
 		std::pair<float, float> angles{getOppositeAngles(voh_it)};
+		return sum;
 		float weight{ cotan(angles.first) + cotan(angles.second) };
 		OpenMesh::Vec3f vec{ mesh_.point(mesh_.to_vertex_handle(voh_it)) - mesh_.point(vh) };
 		sum += weight * vec;

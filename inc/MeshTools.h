@@ -1,5 +1,6 @@
 #pragma once
 
+#include "gl.h"
 #include <OpenMesh/Core/Mesh/Types/TriMesh_ArrayKernelT.hh>
 
 

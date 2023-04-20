@@ -31,6 +31,8 @@ Viewer::Viewer(const char* _title, int _width, int _height): MeshViewer(_title, 
   add_draw_mode("Vertex 1-Ring");
   add_draw_mode("Discrete Laplacian");
 
+  add_draw_mode("Debug opposite angles");
+
   init();
 }
 
@@ -101,6 +103,8 @@ bool Viewer::open_mesh(const char* _filename) {
 	  if (MeshViewer::open_mesh(_filename))
 	  {
 		  isModified = false;
+		  v_id = 0;
+		  neighbour_offset = 0;
 		ctools.set_mesh(mesh);
 		mtools.setMesh(mesh);
 		ctools.calc_princ_curvatures();
@@ -439,7 +443,7 @@ void Viewer::draw(const std::string& _draw_mode) {
 	{
 		glDisable(GL_LIGHTING);
 
-		VertexHandle _vh = mesh.vertex_handle(0); //TODO
+		VertexHandle _vh = mesh.vertex_handle(v_id); //TODO
 		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 		glEnable(GL_POLYGON_OFFSET_LINE);
 		glPolygonOffset(1.0, -1.0);
@@ -479,7 +483,7 @@ void Viewer::draw(const std::string& _draw_mode) {
 			isModified = true;
 		}
 		glEnable(GL_LIGHTING);
-
+		
 		glShadeModel(GL_SMOOTH);
 		glColor3f(0.3, 0.3, 0.3);
 		glColorMaterial(GL_FRONT_AND_BACK, GL_AMBIENT);
@@ -494,12 +498,84 @@ void Viewer::draw(const std::string& _draw_mode) {
 
 		glDisableClientState(GL_VERTEX_ARRAY);
 		glDisableClientState(GL_NORMAL_ARRAY);
-
+	
 
 		prev_draw_mode = current_draw_mode;
 		prev_id_draw_mode = get_draw_mode();
 	}
 	
+	else if (_draw_mode == "Debug opposite angles") {
+		static int cur_v_id = -1;
+		static std::vector<OpenMesh::HalfedgeHandle> ohs{};
+		if (cur_v_id != v_id) {
+			ohs.clear();
+			for (auto voh_it{ mesh.voh_iter(mesh.vertex_handle(v_id)) }; voh_it; ++voh_it)
+				ohs.push_back(voh_it);
+			cur_v_id = v_id;
+		}
+
+		HalfedgeHandle oh{ ohs[neighbour_offset % ohs.size()] };
+		glDisable(GL_LIGHTING);
+
+		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+		glEnable(GL_POLYGON_OFFSET_LINE);
+		glPolygonOffset(.5, 1.0);
+
+		OpenMesh::HalfedgeHandle opposite{ mesh.opposite_halfedge_handle(oh) };
+		OpenMesh::HalfedgeHandle left{ mesh.next_halfedge_handle(oh) };
+		OpenMesh::HalfedgeHandle right{ mesh.next_halfedge_handle(opposite) };
+
+		glBegin(GL_LINE_LOOP);
+			glColor3f(0.5, 0.5, 0.5);
+			for (auto vv_it = mesh.vv_iter(mesh.vertex_handle(v_id)); vv_it; ++vv_it) {
+				GL::glVertex(mesh.point(vv_it));
+			}
+		glEnd();
+
+		glPolygonOffset(1.0, -1.0);
+		glBegin(GL_LINES);
+			glColor3f(0.0, 0.0, 1.0);
+			GL::glVertex(mesh.point(mesh.from_vertex_handle(oh)));
+			GL::glVertex(mesh.point(mesh.to_vertex_handle(oh)));
+		glEnd();
+
+		glBegin(GL_LINE_STRIP);
+			glColor3f(1.0, 0.0, 0.0);
+			GL::glVertex(mesh.point(mesh.from_vertex_handle(left)));
+			GL::glVertex(mesh.point(mesh.to_vertex_handle(left)));
+			GL::glVertex(mesh.point(mesh.to_vertex_handle(mesh.next_halfedge_handle(left))));
+		glEnd();
+
+		glBegin(GL_LINE_STRIP);
+			glColor3f(0.0, 1.0, 0.0);
+			GL::glVertex(mesh.point(mesh.from_vertex_handle(right)));
+			GL::glVertex(mesh.point(mesh.to_vertex_handle(right)));
+			GL::glVertex(mesh.point(mesh.to_vertex_handle(mesh.next_halfedge_handle(right))));
+		glEnd();
+		glDisable(GL_POLYGON_OFFSET_LINE);
+
+		glDisable(GL_POLYGON_OFFSET_LINE);
+
+		glColor3f(.2, .2, .2);
+		glEnableClientState(GL_VERTEX_ARRAY);
+		GL::glVertexPointer(mesh.points());
+
+
+		glEnable(GL_DEPTH_TEST);
+		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+		glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, &indices[0]);
+
+		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+		glEnable(GL_POLYGON_OFFSET_FILL);
+		glPolygonOffset(1.0, 1.0);
+		glColor3f(0.0, 0.0, 0.0);
+		glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, &indices[0]);
+		glDisable(GL_POLYGON_OFFSET_FILL);
+
+		prev_draw_mode = current_draw_mode;
+		prev_id_draw_mode = get_draw_mode();
+	}
+
   else 
 	  MeshViewer::draw(_draw_mode);
 }
@@ -538,6 +614,34 @@ void Viewer::keyboard(int key, int x, int y) {
 		case 'o':
 		{
 			browse_meshes();
+			break;
+		}
+		case GLUT_KEY_LEFT:
+		{
+			v_id = (v_id - 1) % mesh.n_vertices();
+			std::cout << "v_id=" << v_id << std::endl;
+			glutPostRedisplay();
+			break;
+		}
+		case GLUT_KEY_RIGHT:
+		{
+			v_id = (v_id + 1) % mesh.n_vertices();
+			std::cout << "v_id=" << v_id << std::endl;
+			glutPostRedisplay();
+			break;
+		}		
+		case GLUT_KEY_UP:
+		{
+			++neighbour_offset;
+			std::cout << "neighbour_offset=" << neighbour_offset << std::endl;
+			glutPostRedisplay();
+			break;
+		}		
+		case GLUT_KEY_DOWN:
+		{
+			--neighbour_offset;
+			std::cout << "neighbour_offset=" << neighbour_offset << std::endl;
+			glutPostRedisplay();
 			break;
 		}
 		default:
