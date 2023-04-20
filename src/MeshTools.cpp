@@ -75,7 +75,6 @@ std::pair<float, float> MeshTools::getOppositeAngles(const OpenMesh::HalfedgeHan
 	OpenMesh::HalfedgeHandle opposite{ mesh_.opposite_halfedge_handle(oh) };
 	OpenMesh::HalfedgeHandle left{ mesh_.next_halfedge_handle(oh) };
 	OpenMesh::HalfedgeHandle right{ mesh_.next_halfedge_handle(opposite) };
-
 	return { computeAngle(left), computeAngle(right) };
 }
 

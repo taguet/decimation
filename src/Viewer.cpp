@@ -529,7 +529,11 @@ void Viewer::draw(const std::string& _draw_mode) {
 		if (cur_oh != oh) {
 			cur_oh = oh;
 			std::pair<float, float> angles{ mtools.getOppositeAngles(oh) };
-			std::cout << "alpha=" << angles.first << "\tbeta=" << angles.second << std::endl;
+			Vec3f e1, e2;
+			mesh.calc_sector_vectors(left, e1, e2);
+			std::cout << "alpha=" << angles.first << "\te1=" << e1 << "\te2=" << e2 << std::endl;
+			mesh.calc_sector_vectors(right, e1, e2);
+			std::cout << "beta=" << angles.second << "\te1=" << e1 << "\te2=" << e2 << std::endl;
 		}
 
 		glBegin(GL_LINE_LOOP);
