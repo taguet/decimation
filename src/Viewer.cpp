@@ -506,13 +506,14 @@ void Viewer::draw(const std::string& _draw_mode) {
 	
 	else if (_draw_mode == "Debug opposite angles") {
 		static int cur_v_id = -1;
-		static std::vector<OpenMesh::HalfedgeHandle> ohs{};
+		static std::vector<HalfedgeHandle> ohs{};
 		if (cur_v_id != v_id) {
 			ohs.clear();
 			for (auto voh_it{ mesh.voh_iter(mesh.vertex_handle(v_id)) }; voh_it; ++voh_it)
 				ohs.push_back(voh_it);
 			cur_v_id = v_id;
 		}
+		static HalfedgeHandle cur_oh{};
 
 		HalfedgeHandle oh{ ohs[neighbour_offset % ohs.size()] };
 		glDisable(GL_LIGHTING);
@@ -524,6 +525,12 @@ void Viewer::draw(const std::string& _draw_mode) {
 		OpenMesh::HalfedgeHandle opposite{ mesh.opposite_halfedge_handle(oh) };
 		OpenMesh::HalfedgeHandle left{ mesh.next_halfedge_handle(oh) };
 		OpenMesh::HalfedgeHandle right{ mesh.next_halfedge_handle(opposite) };
+
+		if (cur_oh != oh) {
+			cur_oh = oh;
+			std::pair<float, float> angles{ mtools.getOppositeAngles(oh) };
+			std::cout << "alpha=" << angles.first << "\tbeta=" << angles.second << std::endl;
+		}
 
 		glBegin(GL_LINE_LOOP);
 			glColor3f(0.5, 0.5, 0.5);
