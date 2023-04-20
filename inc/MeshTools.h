@@ -15,9 +15,11 @@ public:
 	void setMesh(Mesh &mesh);
 	const Mesh* getMesh();
 	OpenMesh::Vec3f position(const OpenMesh::VertexHandle vh);
+	void calc_discrete_laplacian();
+
 	float computeFaceArea(const OpenMesh::HalfedgeHandle heh);
 	float computeVertexArea(const OpenMesh::VertexHandle vh);
-	float cotan(double angle);
+	float cotan(float angle);
 	std::pair<float, float> getOppositeAngles(const OpenMesh::HalfedgeHandle oh);
 	float computeAngle(const OpenMesh::HalfedgeHandle heh);
 	OpenMesh::Vec3f computeCentroid(const OpenMesh::HalfedgeHandle heh);
@@ -30,8 +32,8 @@ public:
 	OpenMesh::Vec3f uniformLaplacian(const OpenMesh::VertexHandle vh);
 	OpenMesh::Vec3f anisotropicLaplacian(const OpenMesh::VertexHandle vh);
 
-	void taubinSmoothing(float lambda, float mu);
-	void smoothMesh();
+	void taubinSmoothing(float lambda, float mu, int iterations=1);
+	void smoothMesh(int iterations=1);
 
 	OpenMesh::Vec3f& laplacian_displacement(Mesh::VertexHandle _vh)
 	{

@@ -236,7 +236,7 @@ void ComputingTools::compute_local_principalCurvatures(float &_k1, float &_k2, c
 
 	H_loc *=0.25f*3.0f/area_i;
 	
-	std::cout << H_loc << " ";
+	//std::cout << H_loc << " ";
 	
 	H_loc = 0;
 
@@ -266,7 +266,7 @@ void ComputingTools::compute_local_principalCurvatures(float &_k1, float &_k2, c
 	H_loc *= 0.25f;
 	H_loc /= denom;
 
-	std::cout << H_loc <<std::endl;
+	//std::cout << H_loc <<std::endl;
 
 
 

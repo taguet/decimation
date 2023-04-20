@@ -108,7 +108,6 @@ bool Viewer::open_mesh(const char* _filename) {
 		//Compute all the information about curvature
 		calc_mean_curvature();
 		calc_gauss_curvature();
-		calc_discrete_laplacian();
 
 		glutPostRedisplay();
 		return true;
@@ -339,17 +338,6 @@ void Viewer::color_coding(OpenMesh::VPropHandleT<Mesh::Scalar> _curv) {
 	  }
 }
 
-void Viewer::calc_discrete_laplacian() {
-	//std::cout << "LAPL" << std::endl;
-	for (auto v_iter{ mesh.vertices_begin() }; v_iter != mesh.vertices_end(); ++v_iter) {
-		mtools.laplacian_displacement(v_iter) = mtools.anisotropicLaplacian(v_iter);
-		//mtools.laplacian_displacement(v_iter) = mtools.cotangentLaplacian(v_iter).normalize();
-		std::cout << mtools.laplacian_displacement(v_iter) << std::endl;
-		//mtools.laplacian_displacement(v_iter) = mtools.uniformLaplacian(v_iter);
-	}
-}
-
-
 //-----------------------------------------------------------------------------
 
 
@@ -486,8 +474,8 @@ void Viewer::draw(const std::string& _draw_mode) {
 
 	else if (_draw_mode == "Discrete Laplacian") {
 		if (!isModified) {
-			//mtools.taubinSmoothing(2, -1);
-			mtools.smoothMesh();
+			//mtools.taubinSmoothing(2, -1,3);
+			mtools.smoothMesh(5);
 			isModified = true;
 		}
 		glEnable(GL_LIGHTING);

@@ -9,7 +9,16 @@ MeshTools::MeshTools(void) {
 void MeshTools::setMesh(Mesh& mesh) {
 	this->mesh_ = mesh;
 	this->mesh_.add_property(laplacian);
-	this->variance_edge_length = computeVarianceEdgeLength();
+}
+
+
+void MeshTools::calc_discrete_laplacian() {
+	for (auto v_iter{ mesh_.vertices_begin() }; v_iter != mesh_.vertices_end(); ++v_iter) {
+		//laplacian_displacement(v_iter) = anisotropicLaplacian(v_iter);
+		laplacian_displacement(v_iter) = cotangentLaplacian(v_iter);
+		//laplacian_displacement(v_iter) = uniformLaplacian(v_iter);
+		//std::cout << laplacian_displacement(v_iter) << std::endl;
+	}
 }
 
 
@@ -26,7 +35,7 @@ float MeshTools::computeVarianceEdgeLength() {
 	float avrg_edge_length{ computeAverageEdgeLength() };
 	float variance{ 0.0f };
 	for (auto e_it{ mesh_.edges_begin() }; e_it != mesh_.edges_end(); ++e_it) {
-		variance += pow(mesh_.calc_edge_length(e_it) - avrg_edge_length, 2);
+		variance += powf(mesh_.calc_edge_length(e_it) - avrg_edge_length, 2);
 	}
 	return variance / mesh_.n_edges();
 }
@@ -48,17 +57,17 @@ float MeshTools::computeFaceArea(const OpenMesh::HalfedgeHandle heh) {
 
 // Computes the vertex area of a given vertex, which corresponds to one third of the sum of all surrounding faces' areas.
 float MeshTools::computeVertexArea(const OpenMesh::VertexHandle vh) {
-	double area{ 0.0 };
+	float area{ 0.0f };
 	for (auto voh_it{ mesh_.voh_iter(vh) }; voh_it; ++voh_it) {
 		area += computeFaceArea(voh_it);
 	}
-	return area / 3.0;
+	return area / 3.0f;
 }
 
 
-float MeshTools::cotan(double angle) {
-	if (angle == 0)	return 0;
-	return 1.0 / tan(angle);
+float MeshTools::cotan(float angle) {
+	//if (angle == 0)	return 0;
+	return 1.0f / tanf(angle);
 }
 
 // Computes the opposite angles to a given halfedge.
@@ -73,7 +82,7 @@ std::pair<float, float> MeshTools::getOppositeAngles(const OpenMesh::HalfedgeHan
 float MeshTools::computeAngle(const OpenMesh::HalfedgeHandle heh) {
 	OpenMesh::Vec3f e1, e2;
 	mesh_.calc_sector_vectors(heh, e1, e2);
-	return cos(OpenMesh::dot(e1.normalize(), e2.normalize()));
+	return acosf(dot(e1.normalize(), e2.normalize()));
 }
 
 
@@ -132,11 +141,11 @@ OpenMesh::Vec3f MeshTools::cotangentLaplacian(const OpenMesh::VertexHandle vh) {
 	OpenMesh::Vec3f sum{0.0f, 0.0f, 0.0f};
 	for (auto voh_it{ mesh_.voh_iter(vh) }; voh_it; ++voh_it) {
 		std::pair<float, float> angles{getOppositeAngles(voh_it)};
-		float weight{ (cotan(angles.first) + cotan(angles.second)) };
-		OpenMesh::Vec3f vec{ (mesh_.point(mesh_.to_vertex_handle(voh_it)) - mesh_.point(vh)) };
+		float weight{ cotan(angles.first) + cotan(angles.second) };
+		OpenMesh::Vec3f vec{ mesh_.point(mesh_.to_vertex_handle(voh_it)) - mesh_.point(vh) };
 		sum += weight * vec;
 	}
-	return sum / (2.0 * computeVertexArea(vh));
+	return sum / (2.0f * computeVertexArea(vh));
 }
 
 
@@ -157,6 +166,7 @@ OpenMesh::Vec3f MeshTools::anisotropicLaplacian(const OpenMesh::VertexHandle vh)
 	OpenMesh::Vec3f sum{ 0.0f, 0.0f, 0.0f };
 	int i{ 0 };
 	for (auto voh_it{ mesh_.voh_iter(vh) }; voh_it; ++voh_it, ++i) {
+		//std::cout << "Vi=" << vh.idx() << "\tVj=" << mesh_.to_vertex_handle(voh_it).idx() << std::endl;
 		Mesh::Point centroid{ computeCentroid(voh_it) };
 		OpenMesh::Vec3f f_normal{ filterFaceNormal(mesh_.face_handle(voh_it)) };
 		OpenMesh::Vec3f normal{ mesh_.normal(mesh_.face_handle(voh_it)) };
@@ -170,16 +180,24 @@ OpenMesh::Vec3f MeshTools::anisotropicLaplacian(const OpenMesh::VertexHandle vh)
 }
 
 
-void MeshTools::taubinSmoothing(float lambda, float mu) {
-	for (auto v_it{ mesh_.vertices_begin() }; v_it != mesh_.vertices_end(); ++v_it) {
-		mesh_.set_point(v_it, mesh_.point(v_it) + laplacian_displacement(v_it) * lambda);
-		mesh_.set_point(v_it, mesh_.point(v_it) + laplacian_displacement(v_it) * mu);
+void MeshTools::taubinSmoothing(float lambda, float mu, int iterations) {
+	for (int i{ 0 }; i < iterations; ++i) {
+		calc_discrete_laplacian();
+		for (auto v_it{ mesh_.vertices_begin() }; v_it != mesh_.vertices_end(); ++v_it) {
+			mesh_.set_point(v_it, mesh_.point(v_it) + laplacian_displacement(v_it) * lambda);
+			mesh_.set_point(v_it, mesh_.point(v_it) + laplacian_displacement(v_it) * mu);
+		}
 	}
 }
 
-void MeshTools::smoothMesh() {
-	//std::cout << "COS(THETA)=" << cos(0.349066f) << std::endl;
-	for (auto v_it{ mesh_.vertices_begin() }; v_it != mesh_.vertices_end(); ++v_it) {
-		mesh_.set_point(v_it, mesh_.point(v_it) + laplacian_displacement(v_it));
+void MeshTools::smoothMesh(int iterations) {
+	for (int i{ 0 }; i < iterations; ++i) {
+		std::cout << "Iteration " << i + 1 << std::endl;
+		variance_edge_length = computeVarianceEdgeLength();
+		calc_discrete_laplacian();
+		for (auto v_it{ mesh_.vertices_begin() }; v_it != mesh_.vertices_end(); ++v_it) {
+			//std::cout << "Point: " << mesh_.point(v_it) << "\tLaplacien: " << laplacian_displacement(v_it) << std::endl;
+			mesh_.set_point(v_it, mesh_.point(v_it) + laplacian_displacement(v_it));
+		}
 	}
 }

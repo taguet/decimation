@@ -56,9 +56,6 @@ protected:
   // calculate gaussian curvature per vertex
   void calc_gauss_curvature();
 
-  // calculate dicrete laplacian per vertex
-  void calc_discrete_laplacian();
-
   /// set vertex color from vertex curvature
   void color_coding(OpenMesh::VPropHandleT<Mesh::Scalar> _curv);
 
