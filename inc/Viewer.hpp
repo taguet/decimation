@@ -101,6 +101,8 @@ private:
   bool isModified{ false };
   int v_id{ 0 };
   int neighbour_offset{ 0 };
+
+  void draw_1_ring(const VertexHandle vh, Vec3f color);
 };
 
 

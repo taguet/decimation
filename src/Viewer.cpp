@@ -32,6 +32,7 @@ Viewer::Viewer(const char* _title, int _width, int _height): MeshViewer(_title, 
   add_draw_mode("Discrete Laplacian");
 
   add_draw_mode("Debug opposite angles");
+  add_draw_mode("Debug laplacien cotangente");
 
   init();
 }
@@ -443,18 +444,8 @@ void Viewer::draw(const std::string& _draw_mode) {
 	{
 		glDisable(GL_LIGHTING);
 
-		VertexHandle _vh = mesh.vertex_handle(v_id); //TODO
-		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-		glEnable(GL_POLYGON_OFFSET_LINE);
-		glPolygonOffset(1.0, -1.0);
-
-		glBegin(GL_LINE_LOOP);
-		glColor3f(1.0, 0.0, 0.0);
-		for (auto vv_it = mesh.vv_iter(_vh); vv_it; ++vv_it) {
-			GL::glVertex(mesh.point(vv_it));
-		}
-		glEnd();
-		glDisable(GL_POLYGON_OFFSET_LINE);
+		VertexHandle _vh = mesh.vertex_handle(v_id);
+		draw_1_ring(_vh, { 1.0, 0.0, 0.0 });
 
 		glColor3f(.2, .2, .2);
 		glEnableClientState(GL_VERTEX_ARRAY);
@@ -536,12 +527,7 @@ void Viewer::draw(const std::string& _draw_mode) {
 			std::cout << "beta=" << angles.second << "\te1=" << e1 << "\te2=" << e2 << std::endl;
 		}
 
-		glBegin(GL_LINE_LOOP);
-			glColor3f(0.5, 0.5, 0.5);
-			for (auto vv_it = mesh.vv_iter(mesh.vertex_handle(v_id)); vv_it; ++vv_it) {
-				GL::glVertex(mesh.point(vv_it));
-			}
-		glEnd();
+		draw_1_ring(mesh.vertex_handle(v_id), {0.5, 0.5, 0.5});
 
 		glPolygonOffset(1.0, -1.0);
 		glBegin(GL_LINES);
@@ -586,9 +572,63 @@ void Viewer::draw(const std::string& _draw_mode) {
 		prev_draw_mode = current_draw_mode;
 		prev_id_draw_mode = get_draw_mode();
 	}
+	else if (_draw_mode == "Debug laplacien cotangente") {
+		VertexHandle _vh = mesh.vertex_handle(v_id);
+		static int cur_v_id = -1;
+		if (cur_v_id != v_id) {
+			std::cout << "v_i=" << mesh.point(_vh) << '\n';
+			std::cout << "L(v_i)=" << mtools.cotangentLaplacian(_vh) << std::endl;
+			cur_v_id = v_id;
+		}
+		glDisable(GL_LIGHTING);
+		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+		glEnable(GL_POLYGON_OFFSET_LINE);
+		glPolygonOffset(1.0, -1.0);
+
+		glBegin(GL_LINE_LOOP);
+		glColor3f(1.0, 0.0, 0.0);
+		for (auto vv_it = mesh.vv_iter(_vh); vv_it; ++vv_it) {
+			GL::glVertex(mesh.point(vv_it));
+		}
+		glEnd();
+		glDisable(GL_POLYGON_OFFSET_LINE);
+
+		glColor3f(.2, .2, .2);
+		glEnableClientState(GL_VERTEX_ARRAY);
+		GL::glVertexPointer(mesh.points());
+
+
+		glEnable(GL_DEPTH_TEST);
+		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+		glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, &indices[0]);
+
+		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+		glEnable(GL_POLYGON_OFFSET_FILL);
+		glPolygonOffset(1.0, 1.0);
+		glColor3f(0.0, 0.0, 0.0);
+		glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, &indices[0]);
+		glDisable(GL_POLYGON_OFFSET_FILL);
+
+		prev_draw_mode = current_draw_mode;
+		prev_id_draw_mode = get_draw_mode();
+	}
 
   else 
 	  MeshViewer::draw(_draw_mode);
+}
+
+void Viewer::draw_1_ring(const VertexHandle vh, Vec3f color) {
+	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+	glEnable(GL_POLYGON_OFFSET_LINE);
+	glPolygonOffset(1.0, -1.0);
+
+	glBegin(GL_LINE_LOOP);
+	glColor3f(color[0], color[1], color[2]);
+	for (auto vv_it = mesh.vv_iter(vh); vv_it; ++vv_it) {
+		GL::glVertex(mesh.point(vv_it));
+	}
+	glEnd();
+	glDisable(GL_POLYGON_OFFSET_LINE);
 }
 
 // Colors faces of the 1-ring of a given vertex

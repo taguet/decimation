@@ -141,7 +141,6 @@ OpenMesh::Vec3f MeshTools::cotangentLaplacian(const OpenMesh::VertexHandle vh) {
 	OpenMesh::Vec3f sum{0.0f, 0.0f, 0.0f};
 	for (auto voh_it{ mesh_.voh_iter(vh) }; voh_it; ++voh_it) {
 		std::pair<float, float> angles{getOppositeAngles(voh_it)};
-		return sum;
 		float weight{ cotan(angles.first) + cotan(angles.second) };
 		OpenMesh::Vec3f vec{ mesh_.point(mesh_.to_vertex_handle(voh_it)) - mesh_.point(vh) };
 		sum += weight * vec;
@@ -188,6 +187,7 @@ void MeshTools::taubinSmoothing(float lambda, float mu, int iterations) {
 			mesh_.set_point(v_it, mesh_.point(v_it) + laplacian_displacement(v_it) * lambda);
 			mesh_.set_point(v_it, mesh_.point(v_it) + laplacian_displacement(v_it) * mu);
 		}
+		mesh_.update_normals();
 	}
 }
 
@@ -200,5 +200,6 @@ void MeshTools::smoothMesh(int iterations) {
 			//std::cout << "Point: " << mesh_.point(v_it) << "\tLaplacien: " << laplacian_displacement(v_it) << std::endl;
 			mesh_.set_point(v_it, mesh_.point(v_it) + laplacian_displacement(v_it));
 		}
+		mesh_.update_normals();
 	}
 }
