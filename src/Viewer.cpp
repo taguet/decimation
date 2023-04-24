@@ -731,6 +731,7 @@ void Viewer::keyboard(int key, int x, int y) {
 		case 32:
 		{
 			calledSmoothing = true;
+			break;
 		}
 		default:
 		{

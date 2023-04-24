@@ -34,7 +34,7 @@ public:
 	OpenMesh::Vec3f anisotropicLaplacian(const OpenMesh::VertexHandle vh);
 
 	void taubinSmoothing(float lambda, float mu, int iterations=1);
-	void smoothMesh(int iterations=1);
+	void smoothMesh(int iterations=1, float factor=0.2);
 
 	OpenMesh::Vec3f& laplacian_displacement(Mesh::VertexHandle _vh)
 	{
