@@ -15,7 +15,7 @@ void MeshTools::setMesh(Mesh& mesh) {
 void MeshTools::calc_discrete_laplacian() {
 	for (auto v_iter{ mesh_.vertices_begin() }; v_iter != mesh_.vertices_end(); ++v_iter) {
 		//laplacian_displacement(v_iter) = anisotropicLaplacian(v_iter);
-		laplacian_displacement(v_iter) = cotangentLaplacian(v_iter).normalize();
+		laplacian_displacement(v_iter) = cotangentLaplacian(v_iter);
 		//laplacian_displacement(v_iter) = uniformLaplacian(v_iter);
 		//std::cout << laplacian_displacement(v_iter) << std::endl;
 	}
@@ -142,8 +142,10 @@ OpenMesh::Vec3f MeshTools::cotangentLaplacian(const OpenMesh::VertexHandle vh) {
 		std::pair<float, float> angles{getOppositeAngles(voh_it)};
 		float weight{ cotan(angles.first) + cotan(angles.second) };
 		OpenMesh::Vec3f vec{ mesh_.point(mesh_.to_vertex_handle(voh_it)) - mesh_.point(vh) };
+		//std::cout << "sum=" << sum << "\tvec=" << vec << "\tweight=" << weight << std::endl;
 		sum += weight * vec;
 	}
+	//std::cout << "sum=" << sum << "\tarea=" << computeVertexArea(vh) << "\tL=" << sum / (2.0f * computeVertexArea(vh)) << std::endl;
 	return sum / (2.0f * computeVertexArea(vh));
 }
 
@@ -203,7 +205,7 @@ void MeshTools::smoothMesh(int iterations) {
 		calc_discrete_laplacian();
 		for (auto v_it{ mesh_.vertices_begin() }; v_it != mesh_.vertices_end(); ++v_it) {
 			//std::cout << "Point: " << mesh_.point(v_it) << "\tLaplacien: " << laplacian_displacement(v_it) << std::endl;
-			mesh_.set_point(v_it, mesh_.point(v_it) + laplacian_displacement(v_it) * 0.05);
+			mesh_.set_point(v_it, mesh_.point(v_it) + laplacian_displacement(v_it));
 		}
 		mesh_.update_normals();
 	}

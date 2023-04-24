@@ -99,6 +99,7 @@ private:
   MeshTools mtools;
 
   bool isModified{ false };
+  bool calledSmoothing{ false };
   int v_id{ 0 };
   int neighbour_offset{ 0 };
 

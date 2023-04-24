@@ -33,6 +33,7 @@ Viewer::Viewer(const char* _title, int _width, int _height): MeshViewer(_title, 
 
   add_draw_mode("Debug opposite angles");
   add_draw_mode("Debug laplacien cotangente");
+  add_draw_mode("Debug lissage");
 
   init();
 }
@@ -618,9 +619,35 @@ void Viewer::draw(const std::string& _draw_mode) {
 		prev_draw_mode = current_draw_mode;
 		prev_id_draw_mode = get_draw_mode();
 	}
+	else if (_draw_mode == "Debug lissage") {
+		if (calledSmoothing) {
+			mtools.smoothMesh(1);
+		}
+		glEnable(GL_LIGHTING);
+
+		glShadeModel(GL_SMOOTH);
+		glColor3f(0.3, 0.3, 0.3);
+		glColorMaterial(GL_FRONT_AND_BACK, GL_AMBIENT);
+		glEnable(GL_COLOR_MATERIAL);
+
+		glEnableClientState(GL_VERTEX_ARRAY);
+		glEnableClientState(GL_NORMAL_ARRAY);
+		GL::glVertexPointer(mtools.getMesh()->points());
+		GL::glNormalPointer(mtools.getMesh()->vertex_normals());
+
+		glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, &indices[0]);
+
+		glDisableClientState(GL_VERTEX_ARRAY);
+		glDisableClientState(GL_NORMAL_ARRAY);
+
+
+		prev_draw_mode = current_draw_mode;
+		prev_id_draw_mode = get_draw_mode();
+	}
 
   else 
 	  MeshViewer::draw(_draw_mode);
+	calledSmoothing = false;
 }
 
 void Viewer::draw_1_ring(const VertexHandle vh, Vec3f color) {
@@ -700,6 +727,10 @@ void Viewer::keyboard(int key, int x, int y) {
 			std::cout << "neighbour_offset=" << neighbour_offset << std::endl;
 			glutPostRedisplay();
 			break;
+		}
+		case 32:
+		{
+			calledSmoothing = true;
 		}
 		default:
 		{
