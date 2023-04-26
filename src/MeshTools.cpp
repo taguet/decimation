@@ -14,8 +14,8 @@ void MeshTools::setMesh(Mesh& mesh) {
 
 void MeshTools::calc_discrete_laplacian() {
 	for (auto v_iter{ mesh_.vertices_begin() }; v_iter != mesh_.vertices_end(); ++v_iter) {
-		//laplacian_displacement(v_iter) = anisotropicLaplacian(v_iter);
-		laplacian_displacement(v_iter) = cotangentLaplacian(v_iter).normalize();
+		laplacian_displacement(v_iter) = anisotropicLaplacian(v_iter);
+		//laplacian_displacement(v_iter) = cotangentLaplacian(v_iter).normalize();
 		//laplacian_displacement(v_iter) = uniformLaplacian(v_iter);
 		//std::cout << laplacian_displacement(v_iter) << std::endl;
 	}
@@ -102,7 +102,7 @@ Mesh::Normal MeshTools::filterFaceNormal(const OpenMesh::FaceHandle fh, float th
 	float area{ computeFaceArea(mesh_.halfedge_handle(fh)) };
 	Mesh::Normal f_normal{weighFaceNormal(fh, fh, area)};
 	for (auto ff_it{ mesh_.ff_iter(fh) }; ff_it; ++ff_it) {
-		if (dot(mesh_.normal(ff_it), mesh_.normal(fh)) >= cos(threshold))
+		if (dot(mesh_.normal(ff_it), mesh_.normal(fh)) < cos(threshold))
 			continue;
 		f_normal += weighFaceNormal(fh, ff_it, area);
 	}
@@ -167,13 +167,16 @@ OpenMesh::Vec3f MeshTools::uniformLaplacian(const OpenMesh::VertexHandle vh) {
 
 OpenMesh::Vec3f MeshTools::anisotropicLaplacian(const OpenMesh::VertexHandle vh) {
 	OpenMesh::Vec3f sum{ 0.0f, 0.0f, 0.0f };
+	Mesh::Point p_i{ mesh_.point(vh) };
 	int i{ 0 };
 	for (auto voh_it{ mesh_.voh_iter(vh) }; voh_it; ++voh_it, ++i) {
 		//std::cout << "Vi=" << vh.idx() << "\tVj=" << mesh_.to_vertex_handle(voh_it).idx() << std::endl;
+		//Mesh::Point test = mesh_.point(mesh_.to_vertex_handle(voh_it));
 		Mesh::Point centroid{ computeCentroid(voh_it) };
 		OpenMesh::Vec3f f_normal{ filterFaceNormal(mesh_.face_handle(voh_it)) };
 		OpenMesh::Vec3f normal{ mesh_.normal(mesh_.face_handle(voh_it)) };
-		OpenMesh::Vec3f toCentroid{ centroid - mesh_.point(vh) };
+		OpenMesh::Vec3f toCentroid{ centroid - p_i };
+		//std::cout << "dot=" << dot(toCentroid, f_normal) << std::endl;
 		sum += dot(toCentroid, f_normal) * normal;
 	}
 	if (i == 0)	

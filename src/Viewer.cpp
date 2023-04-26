@@ -34,6 +34,7 @@ Viewer::Viewer(const char* _title, int _width, int _height): MeshViewer(_title, 
   add_draw_mode("Debug opposite angles");
   add_draw_mode("Debug laplacien cotangente");
   add_draw_mode("Debug lissage");
+  add_draw_mode("Debug centroïde");
 
   init();
 }
@@ -471,7 +472,7 @@ void Viewer::draw(const std::string& _draw_mode) {
 	else if (_draw_mode == "Discrete Laplacian") {
 		if (!isModified) {
 			//mtools.taubinSmoothing(2, -1,3);
-			mtools.smoothMesh(20);
+			mtools.smoothMesh(20, 30);
 			isModified = true;
 		}
 		glEnable(GL_LIGHTING);
@@ -621,7 +622,7 @@ void Viewer::draw(const std::string& _draw_mode) {
 	}
 	else if (_draw_mode == "Debug lissage") {
 		if (calledSmoothing) {
-			mtools.smoothMesh(1);
+			mtools.smoothMesh(1, 30);
 		}
 		glEnable(GL_LIGHTING);
 
@@ -640,6 +641,73 @@ void Viewer::draw(const std::string& _draw_mode) {
 		glDisableClientState(GL_VERTEX_ARRAY);
 		glDisableClientState(GL_NORMAL_ARRAY);
 
+
+		prev_draw_mode = current_draw_mode;
+		prev_id_draw_mode = get_draw_mode();
+	}
+	else if (_draw_mode == "Debug centroïde") {
+		VertexHandle _vh = mesh.vertex_handle(v_id);
+		static int cur_v_id = -1;
+		static std::vector<HalfedgeHandle> ohs{};
+		if (cur_v_id != v_id) {
+			cur_v_id = v_id;
+			ohs.clear();
+			for (auto voh_it{ mesh.voh_iter(mesh.vertex_handle(v_id)) }; voh_it; ++voh_it)
+				ohs.push_back(voh_it);
+		}
+		static HalfedgeHandle cur_oh{};		
+		HalfedgeHandle oh{ ohs[neighbour_offset % ohs.size()] };
+
+		OpenMesh::VertexHandle v0, v1, v2;
+		v0 = mesh.from_vertex_handle(oh);
+		v1 = mesh.to_vertex_handle(oh);
+		v2 = mesh.to_vertex_handle(mesh.next_halfedge_handle(oh));
+		Mesh::Point p0, p1, p2;
+		p0 = mesh.point(v0);
+		p1 = mesh.point(v1);
+		p2 = mesh.point(v2);
+
+		if (cur_oh != oh) {
+			cur_oh = oh;
+			std::cout << "v_i=" << mesh.point(mesh.from_vertex_handle(oh)) << '\n';
+			std::cout << "v_j=" << mesh.point(mesh.to_vertex_handle(oh)) << std::endl;
+			std::cout << "v0=" << p0 << std::endl;
+			std::cout << "v1=" << p1 << std::endl;
+			std::cout << "v2=" << p2 << std::endl;
+			std::cout << "centroid=" << mtools.computeCentroid(oh) << std::endl;
+			std::cout << (p0 + p1 + p2) / 3.0f << std::endl;
+		}
+
+		glDisable(GL_LIGHTING);
+		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+		glEnable(GL_POLYGON_OFFSET_LINE);
+		glPolygonOffset(1.0, -1.0);
+
+		glBegin(GL_LINE_LOOP);
+		glColor3f(1.0, 0.0, 0.0);
+			GL::glVertex(p0);
+		glColor3f(0.0, 1.0, 0.0);
+			GL::glVertex(p1);
+		glColor3f(0.0, 0.0, 1.0);
+			GL::glVertex(p2);
+		glEnd();
+		glDisable(GL_POLYGON_OFFSET_LINE);
+
+		glColor3f(.2, .2, .2);
+		glEnableClientState(GL_VERTEX_ARRAY);
+		GL::glVertexPointer(mesh.points());
+
+
+		glEnable(GL_DEPTH_TEST);
+		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+		glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, &indices[0]);
+
+		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+		glEnable(GL_POLYGON_OFFSET_FILL);
+		glPolygonOffset(1.0, 1.0);
+		glColor3f(0.0, 0.0, 0.0);
+		glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, &indices[0]);
+		glDisable(GL_POLYGON_OFFSET_FILL);
 
 		prev_draw_mode = current_draw_mode;
 		prev_id_draw_mode = get_draw_mode();
