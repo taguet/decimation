@@ -173,8 +173,10 @@ OpenMesh::Vec3f MeshTools::anisotropicLaplacian(const OpenMesh::VertexHandle vh)
 		//std::cout << "Vi=" << vh.idx() << "\tVj=" << mesh_.to_vertex_handle(voh_it).idx() << std::endl;
 		//Mesh::Point test = mesh_.point(mesh_.to_vertex_handle(voh_it));
 		Mesh::Point centroid{ computeCentroid(voh_it) };
-		OpenMesh::Vec3f f_normal{ filterFaceNormal(mesh_.face_handle(voh_it)) };
-		OpenMesh::Vec3f normal{ mesh_.normal(mesh_.face_handle(voh_it)) };
+		OpenMesh::FaceHandle face{ mesh_.face_handle(voh_it) };
+		if (!face.is_valid())	continue;
+		OpenMesh::Vec3f f_normal{ filterFaceNormal(face) };
+		OpenMesh::Vec3f normal{ mesh_.normal(face) };
 		OpenMesh::Vec3f toCentroid{ centroid - p_i };
 		//std::cout << "dot=" << dot(toCentroid, f_normal) << std::endl;
 		sum += dot(toCentroid, f_normal) * normal;

@@ -472,7 +472,7 @@ void Viewer::draw(const std::string& _draw_mode) {
 	else if (_draw_mode == "Discrete Laplacian") {
 		if (!isModified) {
 			//mtools.taubinSmoothing(2, -1,3);
-			mtools.smoothMesh(20, 30);
+			mtools.smoothMesh(20, 1);
 			isModified = true;
 		}
 		glEnable(GL_LIGHTING);
