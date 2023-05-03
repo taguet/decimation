@@ -28,7 +28,7 @@ public:
 
 	float computeDistanceWeight(const OpenMesh::FaceHandle fh, const OpenMesh::FaceHandle neighbour);
 	float computeProximityWeight(const OpenMesh::FaceHandle fh, const OpenMesh::FaceHandle neighbour, float threshold= 0.349066f);
-
+	//TODO delete
 	OpenMesh::Vec3f cotangentLaplacian(const OpenMesh::VertexHandle vh);
 	OpenMesh::Vec3f uniformLaplacian(const OpenMesh::VertexHandle vh);
 	OpenMesh::Vec3f anisotropicLaplacian(const OpenMesh::VertexHandle vh);
