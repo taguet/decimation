@@ -13,5 +13,10 @@ public:
 	static std::pair<float, float> getOppositeAngles(Mesh& mesh, const OpenMesh::HalfedgeHandle oh);
 	static float computeAngle(Mesh& mesh, const OpenMesh::HalfedgeHandle heh);
 	static float cotan(float angle);
+
+	static OpenMesh::Vec3f computeCentroid(Mesh& mesh, const OpenMesh::HalfedgeHandle heh);
+
+	static float computeAverageEdgeLength(Mesh& mesh);
+	static float computeVarianceEdgeLength(Mesh& mesh);
 };
 

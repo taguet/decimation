@@ -472,7 +472,7 @@ void Viewer::draw(const std::string& _draw_mode) {
 	else if (_draw_mode == "Discrete Laplacian") {
 		if (!isModified) {
 			//mtools.taubinSmoothing(2, -1,3);
-			mtools.smoothMesh(20, 1);
+			mtools.smoothMesh(UniformLaplacian(mesh), 1, 1);
 			isModified = true;
 		}
 		glEnable(GL_LIGHTING);
@@ -484,8 +484,8 @@ void Viewer::draw(const std::string& _draw_mode) {
 
 		glEnableClientState(GL_VERTEX_ARRAY);
 		glEnableClientState(GL_NORMAL_ARRAY);
-		GL::glVertexPointer(mtools.getMesh()->points());
-		GL::glNormalPointer(mtools.getMesh()->vertex_normals());
+		GL::glVertexPointer(mesh.points());
+		GL::glNormalPointer(mesh.vertex_normals());
 
 		glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, &indices[0]);
 
@@ -526,7 +526,7 @@ void Viewer::draw(const std::string& _draw_mode) {
 			Vec3f a;
 			mesh.calc_edge_vector(left, a);
 			std::cout << "next()=" << a << std::endl;
-			std::pair<float, float> angles{ mtools.getOppositeAngles(oh) };
+			std::pair<float, float> angles{ MeshUtils::getOppositeAngles(mesh, oh) };
 			Vec3f e1, e2;
 			mesh.calc_sector_vectors(left, e1, e2);
 			std::cout << "alpha=" << angles.first << "\te1=" << e1 << "\te2=" << e2 << std::endl;
@@ -582,10 +582,11 @@ void Viewer::draw(const std::string& _draw_mode) {
 	else if (_draw_mode == "Debug laplacien cotangente") {
 		VertexHandle _vh = mesh.vertex_handle(v_id);
 		static int cur_v_id = -1;
+		static CotangentLaplacian debug_clapl{ CotangentLaplacian(mesh) };
 		if (cur_v_id != v_id) {
 			std::cout << "v_i=" << mesh.point(_vh) << '\n';
-			std::cout << "L(v_i)=" << mtools.cotangentLaplacian(_vh) << '\n';
-			std::cout << "A(v_i)=" << mtools.computeVertexArea(_vh) << std::endl;
+			std::cout << "L(v_i)=" << debug_clapl.computeLaplacian(_vh) << '\n';
+			std::cout << "A(v_i)=" << MeshUtils::computeVertexArea(mesh, _vh) << std::endl;
 			cur_v_id = v_id;
 		}
 		glDisable(GL_LIGHTING);
@@ -622,7 +623,7 @@ void Viewer::draw(const std::string& _draw_mode) {
 	}
 	else if (_draw_mode == "Debug lissage") {
 		if (calledSmoothing) {
-			mtools.smoothMesh(1, 30);
+			mtools.smoothMesh(UniformLaplacian(mesh), 1, 1);
 		}
 		glEnable(GL_LIGHTING);
 
@@ -633,8 +634,8 @@ void Viewer::draw(const std::string& _draw_mode) {
 
 		glEnableClientState(GL_VERTEX_ARRAY);
 		glEnableClientState(GL_NORMAL_ARRAY);
-		GL::glVertexPointer(mtools.getMesh()->points());
-		GL::glNormalPointer(mtools.getMesh()->vertex_normals());
+		GL::glVertexPointer(mesh.points());
+		GL::glNormalPointer(mesh.vertex_normals());
 
 		glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, &indices[0]);
 
@@ -674,7 +675,7 @@ void Viewer::draw(const std::string& _draw_mode) {
 			std::cout << "v0=" << p0 << std::endl;
 			std::cout << "v1=" << p1 << std::endl;
 			std::cout << "v2=" << p2 << std::endl;
-			std::cout << "centroid=" << mtools.computeCentroid(oh) << std::endl;
+			std::cout << "centroid=" << MeshUtils::computeCentroid(mesh, oh) << std::endl;
 			std::cout << (p0 + p1 + p2) / 3.0f << std::endl;
 		}
 
