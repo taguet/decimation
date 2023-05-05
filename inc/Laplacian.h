@@ -27,7 +27,7 @@ class UniformLaplacian : public Laplacian
 {
 public:
 	UniformLaplacian(Mesh& mesh);
-	OpenMesh::Vec3f computeLaplacian(const OpenMesh::VertexHandle vh);
+	OpenMesh::Vec3f computeLaplacian(const OpenMesh::VertexHandle vh) override;
 };
 
 
@@ -35,7 +35,7 @@ class CotangentLaplacian : public Laplacian
 {
 public:
 	CotangentLaplacian(Mesh& mesh);
-	OpenMesh::Vec3f computeLaplacian(const OpenMesh::VertexHandle vh);
+	OpenMesh::Vec3f computeLaplacian(const OpenMesh::VertexHandle vh) override;
 };
 
 
@@ -43,7 +43,7 @@ class AnisotropicLaplacian : public Laplacian
 {
 public:
 	AnisotropicLaplacian(Mesh& mesh);
-	OpenMesh::Vec3f computeLaplacian(const OpenMesh::VertexHandle vh);
+	OpenMesh::Vec3f computeLaplacian(const OpenMesh::VertexHandle vh) override;
 	void computeLaplacians();
 
 	Mesh::Normal filterFaceNormal(const OpenMesh::FaceHandle fh, float threshold = 0.349066f);

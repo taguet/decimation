@@ -471,8 +471,8 @@ void Viewer::draw(const std::string& _draw_mode) {
 
 	else if (_draw_mode == "Discrete Laplacian") {
 		if (!isModified) {
-			//mtools.taubinSmoothing(2, -1,3);
-			mtools.smoothMesh(UniformLaplacian(mesh), 1, 1);
+			//mtools.taubinSmoothing<UniformLaplacian>(20, 1, -.5);
+			mtools.smoothMesh<UniformLaplacian>(20, 1);
 			isModified = true;
 		}
 		glEnable(GL_LIGHTING);
@@ -623,7 +623,7 @@ void Viewer::draw(const std::string& _draw_mode) {
 	}
 	else if (_draw_mode == "Debug lissage") {
 		if (calledSmoothing) {
-			mtools.smoothMesh(UniformLaplacian(mesh), 1, 1);
+			mtools.smoothMesh<UniformLaplacian>(1, 1);
 		}
 		glEnable(GL_LIGHTING);
 
