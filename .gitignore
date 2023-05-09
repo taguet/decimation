@@ -408,3 +408,6 @@ FodyWeavers.xsd
 /resource2.h
 /resource1.h
 /resource.h
+dat/cube.stl
+dat/rounded_cube.stl
+dat/rounded_cube1.stl
