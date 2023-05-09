@@ -38,6 +38,7 @@ MeshViewer(const char* _title, int _width, int _height)
   add_draw_mode("Normal Vectors");
 
   prev_id_draw_mode=4;
+  default_id_draw_mode = prev_id_draw_mode;
 
   set_draw_mode(prev_id_draw_mode);
 }

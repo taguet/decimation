@@ -47,6 +47,10 @@ protected:
 
   virtual void draw(const std::string& _draw_mode);
 
+  void store_initial_points();
+
+  void reset_mesh();
+
   /// calculate vertex and edge weights
   void calc_mean_weights();
 
@@ -77,6 +81,11 @@ protected:
 	  return mesh.property(v_gauss_curvature_, _vh);
   }
 
+  Vec3f& initial_coord(Mesh::VertexHandle _vh)
+  {
+	  return mesh.property(initial_coords, _vh);
+  }
+
 
   // easier access to edge weights
   Mesh::Scalar& weight(Mesh::EdgeHandle _eh) 
@@ -93,6 +102,7 @@ private:
 
   OpenMesh::VPropHandleT<Mesh::Scalar>  vweight_, v_mean_curvature_, v_gauss_curvature_;
   OpenMesh::EPropHandleT<Mesh::Scalar>  eweight_;
+  OpenMesh::VPropHandleT<Vec3f> initial_coords;
 
   GLuint  textureID_;
   ComputingTools ctools;

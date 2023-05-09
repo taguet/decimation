@@ -19,6 +19,8 @@ Viewer::Viewer(const char* _title, int _width, int _height): MeshViewer(_title, 
 
   mesh.request_vertex_colors();
 	
+  mesh.add_property(initial_coords);
+
   mesh.add_property(v_mean_curvature_);
   mesh.add_property(v_gauss_curvature_);
 
@@ -111,6 +113,9 @@ bool Viewer::open_mesh(const char* _filename) {
 		ctools.set_mesh(mesh);
 		mtools.setMesh(mesh);
 		ctools.calc_princ_curvatures();
+
+		//Store initial coordinates for all vertices
+		store_initial_points();
 		
 		//Compute all the information about curvature
 		calc_mean_curvature();
@@ -124,6 +129,22 @@ bool Viewer::open_mesh(const char* _filename) {
 
 
 //-----------------------------------------------------------------------------
+
+void Viewer::store_initial_points() {
+	for (auto v_it{ mesh.vertices_begin() }; v_it != mesh.vertices_end(); ++v_it) {
+		initial_coord(v_it) = mesh.point(v_it);
+	}
+}
+
+
+void Viewer::reset_mesh() {
+	for (auto v_it{ mesh.vertices_begin() }; v_it != mesh.vertices_end(); ++v_it) {
+		mesh.set_point(v_it, initial_coord(v_it));
+	}
+	isModified = false;
+	mesh.update_normals();
+	set_draw_mode(default_id_draw_mode);
+}
 
 
 void Viewer::calc_mean_weights() {
@@ -475,26 +496,9 @@ void Viewer::draw(const std::string& _draw_mode) {
 			mtools.smoothMesh<UniformLaplacian>(20, 1);
 			isModified = true;
 		}
-		glEnable(GL_LIGHTING);
-		
-		glShadeModel(GL_SMOOTH);
-		glColor3f(0.3, 0.3, 0.3);
-		glColorMaterial(GL_FRONT_AND_BACK, GL_AMBIENT);
-		glEnable(GL_COLOR_MATERIAL);
-
-		glEnableClientState(GL_VERTEX_ARRAY);
-		glEnableClientState(GL_NORMAL_ARRAY);
-		GL::glVertexPointer(mesh.points());
-		GL::glNormalPointer(mesh.vertex_normals());
-
-		glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, &indices[0]);
-
-		glDisableClientState(GL_VERTEX_ARRAY);
-		glDisableClientState(GL_NORMAL_ARRAY);
-	
-
 		prev_draw_mode = current_draw_mode;
 		prev_id_draw_mode = get_draw_mode();
+		draw("Solid Smooth");
 	}
 	
 	else if (_draw_mode == "Debug opposite angles") {
@@ -800,6 +804,11 @@ void Viewer::keyboard(int key, int x, int y) {
 		case 32:
 		{
 			calledSmoothing = true;
+			break;
+		}
+		case 'r':
+		{
+			reset_mesh();
 			break;
 		}
 		default:

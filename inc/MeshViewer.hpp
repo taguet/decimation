@@ -58,6 +58,7 @@ protected:
   vector<unsigned int> indices;
   
   unsigned int prev_id_draw_mode;
+  unsigned int default_id_draw_mode;
   string prev_draw_mode;
   string current_draw_mode;
 
