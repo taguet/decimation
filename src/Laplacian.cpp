@@ -54,7 +54,7 @@ OpenMesh::Vec3f CotangentLaplacian::computeLaplacian(const OpenMesh::VertexHandl
 		OpenMesh::Vec3f vec{ p_neighbour - p_i };
 		sum += weight * vec;
 	}
-	return sum / (2.0f * MeshUtils::computeVertexArea(*mesh_, vh));
+	return (sum / (2.0f * MeshUtils::computeVertexArea(*mesh_, vh))).normalize();
 }
 
 
@@ -72,13 +72,16 @@ OpenMesh::Vec3f AnisotropicLaplacian::computeLaplacian(const OpenMesh::VertexHan
 	for (auto voh_it{ mesh_->voh_iter(vh) }; voh_it; ++voh_it, ++i) {
 		Mesh::Point centroid{ MeshUtils::computeCentroid(*mesh_, voh_it) };
 		OpenMesh::FaceHandle face{ mesh_->face_handle(voh_it) };
-		if (!face.is_valid())	continue;
+		if (!face.is_valid()) {
+			--i;
+			continue;
+		}
 		OpenMesh::Vec3f f_normal{ filterFaceNormal(face) };
 		OpenMesh::Vec3f normal{ mesh_->normal(face) };
 		OpenMesh::Vec3f toCentroid{ centroid - p_i };
 		sum += dot(toCentroid, f_normal) * normal;
 	}
-	if (i == 0)
+	if (i <= 0)
 		return sum;
 	else
 		return sum / i;
@@ -93,11 +96,11 @@ void AnisotropicLaplacian::computeLaplacians() {
 
 Mesh::Normal AnisotropicLaplacian::filterFaceNormal(const OpenMesh::FaceHandle fh, float threshold) {
 	float area{ MeshUtils::computeFaceArea(*mesh_, mesh_->halfedge_handle(fh)) };
-	Mesh::Normal f_normal{ weighFaceNormal(fh, fh, area) };
+	Mesh::Normal f_normal{ weighFaceNormal(fh, fh, area, threshold) };
 	for (auto ff_it{ mesh_->ff_iter(fh) }; ff_it; ++ff_it) {
 		if (dot(mesh_->normal(ff_it), mesh_->normal(fh)) < cos(threshold))
 			continue;
-		f_normal += weighFaceNormal(fh, ff_it, area);
+		f_normal += weighFaceNormal(fh, ff_it, area, threshold);
 	}
 	return f_normal / f_normal.norm();
 }
@@ -122,8 +125,8 @@ float AnisotropicLaplacian::computeProximityWeight(const OpenMesh::FaceHandle fh
 }
 
 
-Mesh::Normal AnisotropicLaplacian::weighFaceNormal(const OpenMesh::FaceHandle fh_i, const OpenMesh::FaceHandle fh_j, const float area) {
+Mesh::Normal AnisotropicLaplacian::weighFaceNormal(const OpenMesh::FaceHandle fh_i, const OpenMesh::FaceHandle fh_j, const float area, const float threshold) {
 	float alpha{ computeDistanceWeight(fh_i, fh_j) };
-	float beta{ computeProximityWeight(fh_i, fh_j) };
+	float beta{ computeProximityWeight(fh_i, fh_j, threshold) };
 	return area * alpha * beta * mesh_->normal(fh_j);
 }

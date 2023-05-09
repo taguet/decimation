@@ -51,7 +51,7 @@ public:
 	float computeProximityWeight(const OpenMesh::FaceHandle fh1, const OpenMesh::FaceHandle fh2, float threshold = 0.349066f);
 
 protected:
-	Mesh::Normal weighFaceNormal(const OpenMesh::FaceHandle fh_i, const OpenMesh::FaceHandle fh_j, const float area);	
+	Mesh::Normal weighFaceNormal(const OpenMesh::FaceHandle fh_i, const OpenMesh::FaceHandle fh_j, const float area, const float threshold);	
 
 	float variance_edge_length;
 };

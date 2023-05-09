@@ -31,7 +31,9 @@ Viewer::Viewer(const char* _title, int _width, int _height): MeshViewer(_title, 
   add_draw_mode("Gaussian Curvature");
   add_draw_mode("Reflection Lines");
   add_draw_mode("Vertex 1-Ring");
-  add_draw_mode("Discrete Laplacian");
+  add_draw_mode("Uniform Laplacian");
+  add_draw_mode("Cotangent Laplacian");
+  add_draw_mode("Anisotropic Laplacian");
 
   add_draw_mode("Debug opposite angles");
   add_draw_mode("Debug laplacien cotangente");
@@ -490,7 +492,7 @@ void Viewer::draw(const std::string& _draw_mode) {
 		prev_id_draw_mode = get_draw_mode();
 	}
 
-	else if (_draw_mode == "Discrete Laplacian") {
+	else if (_draw_mode == "Uniform Laplacian") {
 		if (!isModified) {
 			//mtools.taubinSmoothing<UniformLaplacian>(20, 1, -.5);
 			mtools.smoothMesh<UniformLaplacian>(20, 1);
@@ -500,7 +502,26 @@ void Viewer::draw(const std::string& _draw_mode) {
 		prev_id_draw_mode = get_draw_mode();
 		draw("Solid Smooth");
 	}
-	
+	else if (_draw_mode == "Cotangent Laplacian") {
+		if (!isModified) {
+			//mtools.taubinSmoothing<UniformLaplacian>(20, 1, -.5);
+			mtools.smoothMesh<CotangentLaplacian>(20, .05);
+			isModified = true;
+		}
+		prev_draw_mode = current_draw_mode;
+		prev_id_draw_mode = get_draw_mode();
+		draw("Solid Smooth");
+	}
+	else if (_draw_mode == "Anisotropic Laplacian") {
+		if (!isModified) {
+			//mtools.taubinSmoothing<UniformLaplacian>(20, 1, -.5);
+			mtools.smoothMesh<AnisotropicLaplacian>(20, 1);
+			isModified = true;
+		}
+		prev_draw_mode = current_draw_mode;
+		prev_id_draw_mode = get_draw_mode();
+		draw("Solid Smooth");
+	}
 	else if (_draw_mode == "Debug opposite angles") {
 		static int cur_v_id = -1;
 		static std::vector<HalfedgeHandle> ohs{};
@@ -752,7 +773,7 @@ void Viewer::browse_meshes() {
 	ZeroMemory(&ofn, sizeof(ofn));
 
 	ofn.lStructSize = sizeof(ofn);
-	ofn.lpstrFilter = L"Mesh\0*.off\0\0";
+	ofn.lpstrFilter = L"Mesh\0*.off;*.stl\0\0";
 	ofn.lpstrFile = szPath;
 	ofn.lpstrFile[0] = '\0';
 	ofn.nMaxFile = 100;
