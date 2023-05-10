@@ -42,9 +42,6 @@
     <ClCompile Include="src\Viewer.cpp">
       <Filter>Fichiers sources</Filter>
     </ClCompile>
-    <ClCompile Include="src\MeshTools.cpp">
-      <Filter>Fichiers sources</Filter>
-    </ClCompile>
     <ClCompile Include="src\Laplacian.cpp">
       <Filter>Fichiers sources</Filter>
     </ClCompile>

@@ -24,7 +24,6 @@
     <ClCompile Include="src\GlutViewer.cpp" />
     <ClCompile Include="src\Laplacian.cpp" />
     <ClCompile Include="src\main.cpp" />
-    <ClCompile Include="src\MeshTools.cpp" />
     <ClCompile Include="src\MeshUtils.cpp" />
     <ClCompile Include="src\MeshViewer.cpp" />
     <ClCompile Include="src\ProgressiveBar.cpp" />

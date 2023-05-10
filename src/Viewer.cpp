@@ -115,7 +115,7 @@ bool Viewer::open_mesh(const char* _filename) {
 		ctools.set_mesh(mesh);
 		mtools.setMesh(mesh);
 		ctools.calc_princ_curvatures();
-
+		
 		//Store initial coordinates for all vertices
 		store_initial_points();
 		
@@ -555,8 +555,10 @@ void Viewer::draw(const std::string& _draw_mode) {
 			Vec3f e1, e2;
 			mesh.calc_sector_vectors(left, e1, e2);
 			std::cout << "alpha=" << angles.first << "\te1=" << e1 << "\te2=" << e2 << std::endl;
+			std::cout << "cotan alpha=" << MeshUtils::cotan(angles.first) << std::endl;
 			mesh.calc_sector_vectors(right, e1, e2);
 			std::cout << "beta=" << angles.second << "\te1=" << e1 << "\te2=" << e2 << std::endl;
+			std::cout << "cotan beta=" << MeshUtils::cotan(angles.second) << std::endl;
 		}
 
 		draw_1_ring(mesh.vertex_handle(v_id), {0.5, 0.5, 0.5});
@@ -648,7 +650,7 @@ void Viewer::draw(const std::string& _draw_mode) {
 	}
 	else if (_draw_mode == "Debug lissage") {
 		if (calledSmoothing) {
-			mtools.smoothMesh<UniformLaplacian>(1, 1);
+			mtools.smoothMesh<CotangentLaplacian>(1, 0.05);
 		}
 		glEnable(GL_LIGHTING);
 

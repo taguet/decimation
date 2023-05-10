@@ -13,9 +13,9 @@ private:
 	Mesh* mesh_{ nullptr };
 public:
 	
-	MeshTools(void);
-	MeshTools(Mesh& mesh);
-	void setMesh(Mesh &mesh);
+	MeshTools(void) = default;
+	MeshTools(Mesh& mesh) { this->mesh_ = &mesh; }
+	void setMesh(Mesh &mesh) { this->mesh_ = &mesh; }
 
 
 	template <typename T>
@@ -41,6 +41,7 @@ public:
 	/// factor is the scalar diffusion coefficient
 	template <typename T>
 	void smoothMesh(int iterations=1, float factor=0.2) {
+		static_assert(std::is_base_of_v<Laplacian, T>);
 		std::unique_ptr<Laplacian> laplacian{ new T(*mesh_) };
 		for (int i{ 0 }; i < iterations; ++i) {
 			std::cout << "Iteration " << i + 1 << std::endl;
