@@ -107,7 +107,7 @@ public:
 	/// This weight is given by \f[
 	///		\beta_{f_if_j}=exp\left (-\frac{\left \| 1-n_{f_i}\cdot n_{f_j} \right \|^2}{(1-cos(\theta))^2} \right )
 	/// \f],
-	/// with \f[\theta\f] the angle threshold, set by default to 20°.
+	/// with \f[\theta\f] the angle threshold, set by default to 20 degrees.
 	/// 
 	/// @param fh1 A given face handle. 
 	/// @param fh2 The neighbouring face's handle.
