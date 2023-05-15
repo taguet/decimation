@@ -63,5 +63,18 @@ public:
 			mesh_->update_normals();
 		}
 	}
+
+
+	void extractRegions();
+
+
+	int& faceGroup(Mesh::FaceHandle fh) {
+		return mesh_->property(f_group, fh);
+	}
+
+private:
+	OpenMesh::FPropHandleT<int> f_group;
+
+	void growRegions(std::list<Mesh::FaceHandle>& ungrouped_faces);
 };
 

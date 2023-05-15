@@ -66,3 +66,11 @@ float MeshUtils::computeVarianceEdgeLength(Mesh& mesh) {
 	}
 	return variance / mesh.n_edges();
 }
+
+
+std::list<Mesh::FaceHandle>& MeshUtils::getFaceNeighbors(Mesh& mesh, Mesh::FaceHandle fh, std::list<Mesh::FaceHandle>& neighbors) {
+	for (auto f_iter{ mesh.ff_iter(fh) }; f_iter; ++f_iter) {
+		neighbors.push_back(f_iter);
+	}
+	return neighbors;
+}

@@ -1,6 +1,7 @@
 #pragma once
 
 #include <OpenMesh/Core/Mesh/Types/TriMesh_ArrayKernelT.hh>
+#include <list>
 
 typedef OpenMesh::TriMesh_ArrayKernelT<>  Mesh;
 
@@ -54,5 +55,8 @@ public:
 	/// @param mesh 
 	/// @return The variance of the edges' length.
 	static float computeVarianceEdgeLength(Mesh& mesh);
+
+
+	static std::list<Mesh::FaceHandle>& getFaceNeighbors(Mesh& mesh, const Mesh::FaceHandle, std::list<Mesh::FaceHandle>& neighbors);
 };
 

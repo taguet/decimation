@@ -19,6 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="MeshTools.cpp" />
     <ClCompile Include="src\ComputingTools.cpp" />
     <ClCompile Include="src\GlutExaminer.cpp" />
     <ClCompile Include="src\GlutViewer.cpp" />
