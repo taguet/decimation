@@ -10,6 +10,8 @@
 
 #include "Viewer.hpp"
 #include <vector>
+#include <set>
+#include <map>
 #include <float.h>
 
 
@@ -34,6 +36,7 @@ Viewer::Viewer(const char* _title, int _width, int _height): MeshViewer(_title, 
   add_draw_mode("Uniform Laplacian");
   add_draw_mode("Cotangent Laplacian");
   add_draw_mode("Anisotropic Laplacian");
+  add_draw_mode("Planar Region Extraction");
 
   add_draw_mode("Debug opposite angles");
   add_draw_mode("Debug laplacien cotangente");
@@ -521,6 +524,40 @@ void Viewer::draw(const std::string& _draw_mode) {
 		prev_draw_mode = current_draw_mode;
 		prev_id_draw_mode = get_draw_mode();
 		draw("Solid Smooth");
+	}
+	else if (_draw_mode == "Planar Region Extraction") {
+		static std::map<int, std::unique_ptr<int[]>> rgb{};
+		if (!isModified) {
+			isModified = true;
+			rgb.clear();
+			mtools.extractRegions();
+			srand(time(0));
+			std::set<int> groups_found{};
+			for (auto f_iter{ mesh.faces_begin() }; f_iter != mesh.faces_end(); ++f_iter) {
+				if (groups_found.find(mtools.faceGroup(f_iter)) == groups_found.end()) {
+					int id{ mtools.faceGroup(f_iter) };
+					groups_found.emplace(id);
+					std::unique_ptr<int[]> color{ new int[3] {rand() % 256, rand() % 256, rand() % 256} };
+					rgb[mtools.faceGroup(f_iter)] = std::move(color);
+					std::cout << "r=" << rgb.at(id)[0] << " g=" << rgb.at(id)[1] << " b=" << rgb.at(id)[2] << std::endl;
+				}
+			}
+			std::cout << "Found " << groups_found.size() << " groups." << std::endl;
+		}
+		glDisable(GL_LIGHTING);
+		for (auto f_iter{ mesh.faces_begin() }; f_iter != mesh.faces_end(); ++f_iter) {
+			int id{ mtools.faceGroup(f_iter) };
+			glColor3ub(rgb.at(id)[0], rgb.at(id)[1], rgb.at(id)[2]);
+			glBegin(GL_TRIANGLES);
+			Mesh::HalfedgeHandle heh{ mesh.halfedge_handle(f_iter) };
+			GL::glVertex(mesh.point(mesh.from_vertex_handle(heh)));
+			GL::glVertex(mesh.point(mesh.to_vertex_handle(heh)));
+			GL::glVertex(mesh.point(mesh.to_vertex_handle(mesh.next_halfedge_handle(heh))));
+			glEnd();
+		}
+
+		prev_draw_mode = current_draw_mode;
+		prev_id_draw_mode = get_draw_mode();
 	}
 	else if (_draw_mode == "Debug opposite angles") {
 		static int cur_v_id = -1;
