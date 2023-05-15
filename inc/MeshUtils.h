@@ -57,6 +57,6 @@ public:
 	static float computeVarianceEdgeLength(Mesh& mesh);
 
 
-	static std::list<Mesh::FaceHandle>& getFaceNeighbors(Mesh& mesh, const Mesh::FaceHandle, std::list<Mesh::FaceHandle>& neighbors);
+	static void getFaceNeighbors(Mesh& mesh, const Mesh::FaceHandle, std::list<Mesh::FaceHandle>& neighbors);
 };
 
