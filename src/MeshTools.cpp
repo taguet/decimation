@@ -17,12 +17,14 @@ void MeshTools::extractRegions() {
 
 void MeshTools::growRegions(std::list<Mesh::FaceHandle>& ungrouped_faces) {
 	AnisotropicLaplacian lapl{ *mesh_ };	//We need this for filtered normals
+	int g{-1};
 	while (!ungrouped_faces.empty()) {
 		Mesh::FaceHandle fh{ ungrouped_faces.front() };
 		ungrouped_faces.pop_front();
-		++faceGroup(fh);
-		std::list<Mesh::FaceHandle>  neighbors{ MeshUtils::getFaceNeighbors(*mesh_, fh, neighbors) };
-		for (auto f_neighbor{ neighbors.begin() }; f_neighbor != neighbors.end(); ++f_neighbor) {
+		faceGroup(fh) = ++g;
+		std::list<Mesh::FaceHandle>  neighbors{  };
+		neighbors = MeshUtils::getFaceNeighbors(*mesh_, fh, neighbors);
+		for (auto f_neighbor{ neighbors.begin() }; f_neighbor != neighbors.end(); ) {
 			Mesh::Normal f_normal_neighbor{ lapl.filterFaceNormal(*f_neighbor) };
 			Mesh::Normal f_normal{ lapl.filterFaceNormal(fh) };
 			if (faceGroup(*f_neighbor) != -1) {
@@ -30,11 +32,13 @@ void MeshTools::growRegions(std::list<Mesh::FaceHandle>& ungrouped_faces) {
 				continue;
 			}
 			else if (dot(f_normal_neighbor, f_normal) > sin(0.349066f)) {
-				std::list<Mesh::FaceHandle> extended_neighborhood{ MeshUtils::getFaceNeighbors(*mesh_, *f_neighbor, extended_neighborhood) };
-				neighbors.splice(neighbors.end(), extended_neighborhood);
-				faceGroup(*f_neighbor) = faceGroup(fh);
+				faceGroup(*f_neighbor) = g;
+				std::list<Mesh::FaceHandle> extended_neighborhood{  };
+				extended_neighborhood = MeshUtils::getFaceNeighbors(*mesh_, *f_neighbor, extended_neighborhood);
 				ungrouped_faces.remove(*f_neighbor);
+				neighbors.splice(neighbors.end(), extended_neighborhood);
 			}
+			++f_neighbor;
 		}
 	}
 }
