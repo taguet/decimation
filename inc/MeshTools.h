@@ -2,6 +2,8 @@
 
 #include "gl.h"
 #include <OpenMesh/Core/Mesh/Types/TriMesh_ArrayKernelT.hh>
+#include <map>
+#include <set>
 #include "Laplacian.h"
 
 
@@ -75,6 +77,12 @@ public:
 private:
 	OpenMesh::FPropHandleT<int> f_group;
 
+	/// @brief Region growing algorithm to detect and separate all planar regions.
+	/// @param ungrouped_faces Every faces in the mesh that haven't been sorted in a group yet.
 	void growRegions(std::list<Mesh::FaceHandle>& ungrouped_faces);
+
+	/// @brief Build a topology graph connecting all neighbouring regions.
+	/// @param graph The graph to build.
+	void buildTopologyGraph(std::map<int, std::set<int>>& graph);
 };
 
