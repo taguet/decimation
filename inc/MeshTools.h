@@ -75,16 +75,47 @@ public:
 	}
 
 private:
+	class TopologyGraph {
+	private:
+		class Node {
+		public:
+			const int id;
+
+			Node(int id) : id{ id } {}
+			void add(Mesh::FaceHandle fh) { faces.insert(fh); }
+			bool empty() { return faces.empty(); }
+			float computeArea();
+		private:
+			std::set<Mesh::FaceHandle> faces;
+		};
+
+		std::map<int, Node> regions;
+		std::map<int, std::set<int>> edges;
+	public:
+		int size() {
+			return regions.size();
+		}
+
+		void addFaceToRegion(int regionID, Mesh::FaceHandle fh) {
+			auto it_region{ regions.find(regionID)};
+			if (it_region == regions.end()) {
+				regions.insert(std::make_pair(regionID, Node{ regionID }));
+			}
+			regions.at(regionID).add(fh);
+		}
+
+		void insertEdge(int node_1, int node_2);
+	};
+
 	OpenMesh::FPropHandleT<int> f_group;
 
 	/// @brief Region growing algorithm to detect and separate all planar regions.
 	/// @param ungrouped_faces Every faces in the mesh that haven't been sorted in a group yet.
-	void growRegions(std::list<Mesh::FaceHandle>& ungrouped_faces);
+	/// @param graph The topology graph to update throughout the process.
+	void growRegions(std::list<Mesh::FaceHandle>& ungrouped_faces, TopologyGraph& graph);
 
 	/// @brief Build a topology graph connecting all neighbouring regions.
 	/// @param graph The graph to build.
-	void buildTopologyGraph(std::map<int, std::set<int>>& graph);
-
-	void insertEdge(std::map<int, std::set<int>>& graph, int node_1, int node_2);
+	void buildTopologyGraph(TopologyGraph& graph);
 };
 

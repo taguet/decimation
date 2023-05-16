@@ -10,19 +10,20 @@ void MeshTools::extractRegions() {
 		ungrouped_faces.push_back(f_iter);
 	}
 
-	growRegions(ungrouped_faces);
-	std::map<int, std::set<int>> graph{};
+	TopologyGraph graph{};
+	growRegions(ungrouped_faces, graph);
 	buildTopologyGraph(graph);
 }
 
 
-void MeshTools::growRegions(std::list<Mesh::FaceHandle>& ungrouped_faces) {
+void MeshTools::growRegions(std::list<Mesh::FaceHandle>& ungrouped_faces, TopologyGraph& graph) {
 	AnisotropicLaplacian lapl{ *mesh_ };	//We need this for filtered normals
 	int g{-1};
 	while (!ungrouped_faces.empty()) {
 		Mesh::FaceHandle fh{ ungrouped_faces.front() };
 		ungrouped_faces.pop_front();
 		faceGroup(fh) = ++g;
+		graph.addFaceToRegion(g, fh);
 		std::list<Mesh::FaceHandle>  neighbors{  };
 		MeshUtils::getFaceNeighbors(*mesh_, fh, neighbors);
 		for (auto f_neighbor{ neighbors.begin() }; f_neighbor != neighbors.end(); ) {
@@ -34,6 +35,7 @@ void MeshTools::growRegions(std::list<Mesh::FaceHandle>& ungrouped_faces) {
 			}
 			else if (dot(f_normal_neighbor, f_normal) > sin(0.349066f)) {
 				faceGroup(*f_neighbor) = g;
+				graph.addFaceToRegion(g, *f_neighbor);
 				std::list<Mesh::FaceHandle> extended_neighborhood{  };
 				MeshUtils::getFaceNeighbors(*mesh_, *f_neighbor, extended_neighborhood);
 				ungrouped_faces.remove(*f_neighbor);
@@ -45,19 +47,25 @@ void MeshTools::growRegions(std::list<Mesh::FaceHandle>& ungrouped_faces) {
 }
 
 
-void MeshTools::buildTopologyGraph(std::map<int, std::set<int>>& graph) {
+void MeshTools::buildTopologyGraph(TopologyGraph& graph) {
 	for (auto f_iter{ mesh_->faces_begin() }; f_iter != mesh_->faces_end(); ++f_iter) {
 		for (auto neighbor{ mesh_->ff_iter(f_iter) }; neighbor; ++neighbor) {
 			if (faceGroup(f_iter) != faceGroup(neighbor)) {
-				insertEdge(graph, faceGroup(f_iter), faceGroup(neighbor));
-				insertEdge(graph, faceGroup(neighbor), faceGroup(f_iter));
+				graph.insertEdge(faceGroup(f_iter), faceGroup(neighbor));
+				graph.insertEdge(faceGroup(neighbor), faceGroup(f_iter));
 			}
 		}
 	}
 }
 
 
-void MeshTools::insertEdge(std::map<int, std::set<int>>& graph, int node_1, int node_2) {
-	std::set<int>& edges{ graph[node_1] };
-	edges.insert(node_2);
+void MeshTools::TopologyGraph::insertEdge(int node_1, int node_2) {
+	std::set<int>& connected_nodes{ edges[node_1] };
+	connected_nodes.insert(node_2);
+}
+
+
+float MeshTools::TopologyGraph::Node::computeArea() {
+	//TODO
+	return 0.0f;
 }
