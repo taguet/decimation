@@ -84,5 +84,7 @@ private:
 	/// @brief Build a topology graph connecting all neighbouring regions.
 	/// @param graph The graph to build.
 	void buildTopologyGraph(std::map<int, std::set<int>>& graph);
+
+	void insertEdge(std::map<int, std::set<int>>& graph, int node_1, int node_2);
 };
 

@@ -13,9 +13,6 @@ void MeshTools::extractRegions() {
 	growRegions(ungrouped_faces);
 	std::map<int, std::set<int>> graph{};
 	buildTopologyGraph(graph);
-	for (auto pair : graph) {
-		//std::cout << pair.first << " -> " << pair.second << std::endl;
-	}
 }
 
 
@@ -52,9 +49,15 @@ void MeshTools::buildTopologyGraph(std::map<int, std::set<int>>& graph) {
 	for (auto f_iter{ mesh_->faces_begin() }; f_iter != mesh_->faces_end(); ++f_iter) {
 		for (auto neighbor{ mesh_->ff_iter(f_iter) }; neighbor; ++neighbor) {
 			if (faceGroup(f_iter) != faceGroup(neighbor)) {
-				//graph.insert({ faceGroup(f_iter), faceGroup(neighbor) });
-				//graph.insert({ faceGroup(neighbor), faceGroup(f_iter) });
+				insertEdge(graph, faceGroup(f_iter), faceGroup(neighbor));
+				insertEdge(graph, faceGroup(neighbor), faceGroup(f_iter));
 			}
 		}
 	}
+}
+
+
+void MeshTools::insertEdge(std::map<int, std::set<int>>& graph, int node_1, int node_2) {
+	std::set<int>& edges{ graph[node_1] };
+	edges.insert(node_2);
 }

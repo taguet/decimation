@@ -531,7 +531,7 @@ void Viewer::draw(const std::string& _draw_mode) {
 			isModified = true;
 			rgb.clear();
 			mtools.extractRegions();
-			srand(time(0));
+			srand(0);
 			std::set<int> groups_found{};
 			for (auto f_iter{ mesh.faces_begin() }; f_iter != mesh.faces_end(); ++f_iter) {
 				if (groups_found.find(mtools.faceGroup(f_iter)) == groups_found.end()) {
@@ -539,7 +539,7 @@ void Viewer::draw(const std::string& _draw_mode) {
 					groups_found.emplace(id);
 					std::unique_ptr<int[]> color{ new int[3] {rand() % 256, rand() % 256, rand() % 256} };
 					rgb[mtools.faceGroup(f_iter)] = std::move(color);
-					std::cout << "r=" << rgb.at(id)[0] << " g=" << rgb.at(id)[1] << " b=" << rgb.at(id)[2] << std::endl;
+					//std::cout << "r=" << rgb.at(id)[0] << " g=" << rgb.at(id)[1] << " b=" << rgb.at(id)[2] << std::endl;
 				}
 			}
 			std::cout << "Found " << groups_found.size() << " groups." << std::endl;
