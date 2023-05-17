@@ -10,7 +10,7 @@ void MeshTools::extractRegions() {
 		ungrouped_faces.push_back(f_iter);
 	}
 
-	TopologyGraph graph{*mesh_, 1.0f};
+	TopologyGraph graph{*mesh_, 1.0f, 1.0f};
 	growRegions(ungrouped_faces, graph);
 	buildTopologyGraph(graph);
 }
@@ -59,6 +59,11 @@ void MeshTools::buildTopologyGraph(TopologyGraph& graph) {
 }
 
 
+MeshTools::TopologyGraph::TopologyGraph(Mesh& mesh_, float area_threshold, float fitting_threshold) 
+	: mesh_{ &mesh_ }, area_threshold{ area_threshold }, fitting_threshold{fitting_threshold}
+{}
+
+
 void MeshTools::TopologyGraph::insertEdge(int node_1, int node_2) {
 	std::set<int>& connected_nodes{ edges[node_1] };
 	connected_nodes.insert(node_2);
@@ -71,4 +76,23 @@ float MeshTools::TopologyGraph::Node::computeArea() const {
 		area += MeshUtils::computeFaceArea(*parent->mesh_, face);
 	}
 	return area;
+}
+
+
+void MeshTools::TopologyGraph::simplifyGraph() {
+	for (auto it{ regions.begin() }; it != regions.end(); ) {
+		Node& region{ it->second };
+		if (region.computeArea() > area_threshold) {	//Check whether region is very small
+			++it;
+			continue;
+		}
+		else {
+			//TODO
+		}
+	}
+}
+
+
+int MeshTools::TopologyGraph::findTargetRegion(int regionID) const {
+
 }

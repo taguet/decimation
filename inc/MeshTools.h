@@ -93,10 +93,13 @@ private:
 		std::map<int, Node> regions;
 		std::map<int, std::set<int>> edges;
 		Mesh* mesh_{ nullptr };
+
+		int findTargetRegion(int regionID) const;
 	public:
 		const float area_threshold;
+		const float fitting_threshold;
 
-		TopologyGraph(Mesh& mesh_, float area_threshold) : mesh_{ &mesh_ }, area_threshold{area_threshold} {};
+		TopologyGraph(Mesh& mesh_, float area_threshold, float fitting_threshold);
 		int size() {
 			return regions.size();
 		}
@@ -112,6 +115,8 @@ private:
 		const Node& getRegion(int regionID) { return regions.at(regionID); }
 
 		void insertEdge(int node_1, int node_2);
+
+		void simplifyGraph();
 	};
 
 	OpenMesh::FPropHandleT<int> f_group;
