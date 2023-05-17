@@ -14,6 +14,7 @@ public:
 	/// @param heh A halfedge handle belonging to the face.
 	/// @return The area.
 	static float computeFaceArea(Mesh& mesh, const OpenMesh::HalfedgeHandle heh);
+	static float computeFaceArea(Mesh& mesh, const OpenMesh::FaceHandle fh);
 
 	/// @brief Computes the vertex area of a given vertex.
 	/// 

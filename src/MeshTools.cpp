@@ -10,7 +10,7 @@ void MeshTools::extractRegions() {
 		ungrouped_faces.push_back(f_iter);
 	}
 
-	TopologyGraph graph{};
+	TopologyGraph graph{*mesh_, 1.0f};
 	growRegions(ungrouped_faces, graph);
 	buildTopologyGraph(graph);
 }
@@ -65,7 +65,10 @@ void MeshTools::TopologyGraph::insertEdge(int node_1, int node_2) {
 }
 
 
-float MeshTools::TopologyGraph::Node::computeArea() {
-	//TODO
-	return 0.0f;
+float MeshTools::TopologyGraph::Node::computeArea() const {
+	float area{ 0.0f };
+	for (auto face : faces) {
+		area += MeshUtils::computeFaceArea(*parent->mesh_, face);
+	}
+	return area;
 }

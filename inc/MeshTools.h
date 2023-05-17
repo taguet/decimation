@@ -81,17 +81,22 @@ private:
 		public:
 			const int id;
 
-			Node(int id) : id{ id } {}
+			Node(TopologyGraph& parent, int id) : id{ id }, parent{ &parent } {}
 			void add(Mesh::FaceHandle fh) { faces.insert(fh); }
-			bool empty() { return faces.empty(); }
-			float computeArea();
+			bool empty() const { return faces.empty(); }
+			float computeArea() const;
 		private:
+			TopologyGraph* parent{ nullptr };
 			std::set<Mesh::FaceHandle> faces;
 		};
 
 		std::map<int, Node> regions;
 		std::map<int, std::set<int>> edges;
+		Mesh* mesh_{ nullptr };
 	public:
+		const float area_threshold;
+
+		TopologyGraph(Mesh& mesh_, float area_threshold) : mesh_{ &mesh_ }, area_threshold{area_threshold} {};
 		int size() {
 			return regions.size();
 		}
@@ -99,10 +104,12 @@ private:
 		void addFaceToRegion(int regionID, Mesh::FaceHandle fh) {
 			auto it_region{ regions.find(regionID)};
 			if (it_region == regions.end()) {
-				regions.insert(std::make_pair(regionID, Node{ regionID }));
+				regions.insert(std::make_pair(regionID, Node{ *this, regionID }));
 			}
 			regions.at(regionID).add(fh);
 		}
+
+		const Node& getRegion(int regionID) { return regions.at(regionID); }
 
 		void insertEdge(int node_1, int node_2);
 	};

@@ -5,6 +5,11 @@ float MeshUtils::computeFaceArea(Mesh& mesh, const OpenMesh::HalfedgeHandle heh)
 	return mesh.calc_sector_area(heh);
 }
 
+float MeshUtils::computeFaceArea(Mesh& mesh, const OpenMesh::FaceHandle fh) {
+	Mesh::HalfedgeHandle heh{ mesh.halfedge_handle(fh) };
+	return computeFaceArea(mesh, heh);
+}
+
 // Computes the vertex area of a given vertex, which corresponds to one third of the sum of all surrounding faces' areas.
 float MeshUtils::computeVertexArea(Mesh& mesh, const OpenMesh::VertexHandle vh) {
 	float area{ 0.0f };
