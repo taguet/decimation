@@ -94,5 +94,24 @@ void MeshTools::TopologyGraph::simplifyGraph() {
 
 
 int MeshTools::TopologyGraph::findTargetRegion(int regionID) const {
+	return -1; //TODO
+}
 
+
+VectorXd MeshTools::fitPlaneToVertices(std::set<Mesh::VertexHandle>& vertices) const {
+	MatrixXd regressors{ vertices.size(), 3 };
+	VectorXd observed{ vertices.size() };
+	VectorXd parameters{ vertices.size() };
+
+	for (std::set<Mesh::VertexHandle>::iterator it{vertices.begin()}, int i{0}; 
+		i < regressors.rows(), it != vertices.end(); ++i, ++it) {
+		Mesh::Point p{ mesh_->point(*it)};
+		regressors(i, 0) = 1;
+		regressors(i, 1) = p[0];	//x
+		regressors(i, 2) = p[1];	//y
+		observed(i) = p[2];			//z
+	}
+	MatrixXd t_regressors{ regressors.transpose() };
+	parameters = (t_regressors * regressors).inverse() * t_regressors * observed;
+	return parameters;
 }

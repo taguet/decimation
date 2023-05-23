@@ -117,14 +117,14 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;_USE_MATH_DEFINES;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>false</ConformanceMode>
-      <AdditionalIncludeDirectories>C:\Users\benja\OneDrive\Documents\Decimation\Decimation\inc;C:\Users\benja\OneDrive\Documents\Decimation\Source_Code_Lib\lib\freeglut\include;C:\Users\benja\OneDrive\Documents\Decimation\Source_Code_Lib\lib\OpenMesh\src;C:\Users\benja\OneDrive\Documents\Decimation\Source_Code_Lib\lib\taucs-win32\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Users\benja\OneDrive\Documents\Decimation\Decimation\inc;C:\Users\benja\OneDrive\Documents\Decimation\Source_Code_Lib\lib\freeglut\include;C:\Users\benja\OneDrive\Documents\Decimation\Source_Code_Lib\lib\OpenMesh\src;C:\Users\benja\OneDrive\Documents\Decimation\Source_Code_Lib\lib\taucs-win32\include;C:\Users\benja\OneDrive\Documents\Libs\eigen-3.4.0\eigen-3.4.0;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalDependencies>freeglut.lib;libtaucs.lib;OpenMesh_d.lib;OpenMesh_r.lib;QuadratureLib_d.lib;QuadratureLib_r.lib;libatlas.lib;libcblas.lib;libf77blas.lib;liblapack.lib;libmetis.lib;vcf2c.lib;OptimizationLib_d.lib;OptimizationLib_r.lib;legacy_stdio_definitions.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>C:\Users\benja\OneDrive\Documents\Decimation\Source_Code_Lib\lib\;C:\Users\benja\OneDrive\Documents\Decimation\Source_Code_Lib\lib\freeglut\lib\;C:\Users\benja\OneDrive\Documents\Decimation\Source_Code_Lib\lib\taucs-win32\lib\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>C:\Users\benja\OneDrive\Documents\Decimation\Source_Code_Lib\lib\;C:\Users\benja\OneDrive\Documents\Decimation\Source_Code_Lib\lib\freeglut\lib\;C:\Users\benja\OneDrive\Documents\Decimation\Source_Code_Lib\lib\taucs-win32\lib\;C:\Users\benja\OneDrive\Documents\Libs\eigen-3.4.0\eigen-3.4.0;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">

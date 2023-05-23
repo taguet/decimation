@@ -5,9 +5,12 @@
 #include <map>
 #include <set>
 #include "Laplacian.h"
+#include <Eigen/Dense>
 
 
 typedef OpenMesh::TriMesh_ArrayKernelT<>  Mesh;
+using Eigen::MatrixXd;
+using Eigen::VectorXd;
 
 
 /// @brief Toolset class for modifying a mesh.
@@ -73,6 +76,10 @@ public:
 	int& faceGroup(Mesh::FaceHandle fh) {
 		return mesh_->property(f_group, fh);
 	}
+
+
+	VectorXd fitPlaneToVertices(std::set<Mesh::VertexHandle>& vertices) const;
+
 
 private:
 	class TopologyGraph {
