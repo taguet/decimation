@@ -91,6 +91,7 @@ private:
 
 			Node(TopologyGraph& parent, int id) : id{ id }, parent{ &parent } {}
 			void add(Mesh::FaceHandle fh);
+			void regroupIntoSelf(Node& region);
 			bool empty() const { return faces.empty(); }
 			float computeArea() const;
 			void fitPlane();
@@ -107,6 +108,8 @@ private:
 		MeshTools* parent{ nullptr };
 
 		int findTargetRegion(int regionID, float fitting_threshold) const;
+		void regroupRegionIntoTarget(int regionID, int targetID);
+		void ungroupRegion(int regionID);
 
 	public:
 		const float area_threshold;

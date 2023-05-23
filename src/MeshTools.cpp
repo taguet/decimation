@@ -112,8 +112,12 @@ bool MeshTools::TopologyGraph::simplifyGraph() {
 		}
 		else {
 			int targetID{ findTargetRegion(region.id, 100.0f) }; //arbitrary threshold
-			if (targetID != -1) {
-				//regroup faces of region into target
+			if (targetID == -1) {
+				ungroupRegion(region.id);
+				return false;
+			}
+			else {
+				regroupRegionIntoTarget(region.id, targetID);
 				return true;
 			}
 		}
@@ -148,6 +152,21 @@ void MeshTools::TopologyGraph::fitPlanes() {
 }
 
 
+void MeshTools::TopologyGraph::regroupRegionIntoTarget(int regionID, int targetID) {
+	Node region{ getRegion(regionID) };
+	Node target{ getRegion(targetID) };
+	target.regroupIntoSelf(region);
+	std::set<int>& neighborIDs{ edges.at(regionID) };
+	//Erase connections to removed region
+	for (int id : neighborIDs) {
+		edges.at(id).erase(regionID);
+	}
+	edges.erase(regionID);
+	//Erase region node
+	regions.erase(regionID);
+}
+
+
 void MeshTools::TopologyGraph::addFaceToRegion(int regionID, Mesh::FaceHandle fh) {
 	auto it_region{ regions.find(regionID) };
 	if (it_region == regions.end()) {
@@ -164,6 +183,13 @@ void MeshTools::TopologyGraph::Node::add(Mesh::FaceHandle fh) {
 	vertices.insert(mesh->from_vertex_handle(heh));
 	vertices.insert(mesh->to_vertex_handle(heh));
 	vertices.insert(mesh->to_vertex_handle(mesh->next_halfedge_handle(heh)));
+}
+
+
+void MeshTools::TopologyGraph::Node::regroupIntoSelf(Node& region) {
+	faces.insert(region.faces.begin(), region.faces.end());
+	vertices.insert(region.vertices.begin(), region.vertices.end());
+	fitPlane();
 }
 
 
