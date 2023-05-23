@@ -156,6 +156,11 @@ void MeshTools::TopologyGraph::regroupRegionIntoTarget(int regionID, int targetI
 	Node region{ getRegion(regionID) };
 	Node target{ getRegion(targetID) };
 	target.regroupIntoSelf(region);
+	ungroupRegion(regionID);
+}
+
+
+void MeshTools::TopologyGraph::ungroupRegion(int regionID) {
 	std::set<int>& neighborIDs{ edges.at(regionID) };
 	//Erase connections to removed region
 	for (int id : neighborIDs) {
