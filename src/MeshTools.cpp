@@ -1,5 +1,6 @@
 #include "MeshTools.h"
 #include <list>
+#include <limits>
 
 void MeshTools::extractRegions() {
 	//initialization
@@ -10,7 +11,7 @@ void MeshTools::extractRegions() {
 		ungrouped_faces.push_back(f_iter);
 	}
 
-	TopologyGraph graph{*mesh_, 1.0f, 1.0f};
+	TopologyGraph graph{ *this, 1.0f, 1.0f};
 	growRegions(ungrouped_faces, graph);
 	buildTopologyGraph(graph);
 }
@@ -56,11 +57,34 @@ void MeshTools::buildTopologyGraph(TopologyGraph& graph) {
 			}
 		}
 	}
+	graph.fitPlanes();
+	while (graph.simplifyGraph());	//simplify graph until no changes are made
 }
 
 
-MeshTools::TopologyGraph::TopologyGraph(Mesh& mesh_, float area_threshold, float fitting_threshold) 
-	: mesh_{ &mesh_ }, area_threshold{ area_threshold }, fitting_threshold{fitting_threshold}
+Vector3f MeshTools::fitPlaneToVertices(std::set<Mesh::VertexHandle>& vertices) const {
+	MatrixXf regressors{ vertices.size(), 3 };	// x & y
+	VectorXf observed{ vertices.size() };	// z
+	Vector3f parameters{ 0.0f, 0.0f, 0.0f };	//c, a & b
+
+	{
+		std::set<Mesh::VertexHandle>::iterator it{ vertices.begin() };
+		for (int i{ 0 };	i < regressors.rows(), it != vertices.end(); ++i, ++it) {
+			Mesh::Point p{ mesh_->point(*it) };
+			regressors(i, 0) = 1.0f;
+			regressors(i, 1) = p[0];
+			regressors(i, 2) = p[1];
+			observed(i) = p[2];
+		}
+	}
+	MatrixXf t_regressors{ regressors.transpose() };
+	parameters = (t_regressors * regressors).inverse() * t_regressors * observed;
+	return parameters;
+}
+
+
+MeshTools::TopologyGraph::TopologyGraph(MeshTools& parent, float area_threshold, float fitting_threshold) 
+	: parent{ &parent}, area_threshold{ area_threshold }, fitting_threshold{fitting_threshold}
 {}
 
 
@@ -73,13 +97,13 @@ void MeshTools::TopologyGraph::insertEdge(int node_1, int node_2) {
 float MeshTools::TopologyGraph::Node::computeArea() const {
 	float area{ 0.0f };
 	for (auto face : faces) {
-		area += MeshUtils::computeFaceArea(*parent->mesh_, face);
+		area += MeshUtils::computeFaceArea(*parent->parent->mesh_, face);
 	}
 	return area;
 }
 
 
-void MeshTools::TopologyGraph::simplifyGraph() {
+bool MeshTools::TopologyGraph::simplifyGraph() {
 	for (auto it{ regions.begin() }; it != regions.end(); ) {
 		Node& region{ it->second };
 		if (region.computeArea() > area_threshold) {	//Check whether region is very small
@@ -87,31 +111,78 @@ void MeshTools::TopologyGraph::simplifyGraph() {
 			continue;
 		}
 		else {
-			//TODO
+			int targetID{ findTargetRegion(region.id, 100.0f) }; //arbitrary threshold
+			if (targetID != -1) {
+				//regroup faces of region into target
+				return true;
+			}
 		}
 	}
+	return false;
 }
 
 
-int MeshTools::TopologyGraph::findTargetRegion(int regionID) const {
-	return -1; //TODO
-}
-
-
-VectorXd MeshTools::fitPlaneToVertices(std::set<Mesh::VertexHandle>& vertices) const {
-	MatrixXd regressors{ vertices.size(), 3 };
-	VectorXd observed{ vertices.size() };
-	VectorXd parameters{ vertices.size() };
-
-	for (std::set<Mesh::VertexHandle>::iterator it{vertices.begin()}, int i{0}; 
-		i < regressors.rows(), it != vertices.end(); ++i, ++it) {
-		Mesh::Point p{ mesh_->point(*it)};
-		regressors(i, 0) = 1;
-		regressors(i, 1) = p[0];	//x
-		regressors(i, 2) = p[1];	//y
-		observed(i) = p[2];			//z
+int MeshTools::TopologyGraph::findTargetRegion(int regionID, float fitting_threshold) const {
+	std::set<int> neighborIDs{ edges.at(regionID)};
+	int targetID{ -1 };
+	float min_sum{ numeric_limits<float>::max() };
+	for (int id : neighborIDs) {
+		Node neighbor{ getRegion(id)};
+		float sum{ neighbor.sumVertexProjectedDistances()};
+		if (sum < min_sum) {
+			min_sum = sum;
+			targetID = id;
+		}
 	}
-	MatrixXd t_regressors{ regressors.transpose() };
-	parameters = (t_regressors * regressors).inverse() * t_regressors * observed;
-	return parameters;
+	if (min_sum <= fitting_threshold)
+		return targetID;
+	else
+		return -1;
+}
+
+
+void MeshTools::TopologyGraph::fitPlanes() {
+	for (auto& region_pair : regions) {
+		region_pair.second.fitPlane();
+	}
+}
+
+
+void MeshTools::TopologyGraph::addFaceToRegion(int regionID, Mesh::FaceHandle fh) {
+	auto it_region{ regions.find(regionID) };
+	if (it_region == regions.end()) {
+		regions.insert(std::make_pair(regionID, Node{ *this, regionID }));
+	}
+	regions.at(regionID).add(fh);
+}
+
+
+void MeshTools::TopologyGraph::Node::add(Mesh::FaceHandle fh) {
+	Mesh* mesh{ parent->parent->mesh_ };
+	faces.insert(fh); 
+	Mesh::HalfedgeHandle heh{ mesh->halfedge_handle(fh) };
+	vertices.insert(mesh->from_vertex_handle(heh));
+	vertices.insert(mesh->to_vertex_handle(heh));
+	vertices.insert(mesh->to_vertex_handle(mesh->next_halfedge_handle(heh)));
+}
+
+
+void MeshTools::TopologyGraph::Node::fitPlane() {
+	std::set<Mesh::VertexHandle> vertices{};
+	plane_params = parent->parent->fitPlaneToVertices(vertices);
+}
+
+
+float MeshTools::TopologyGraph::Node::sumVertexProjectedDistances() {
+	Mesh* mesh{ parent->parent->mesh_ };
+	float sum{ 0.0f };
+	for (auto& vh : vertices) {
+		Mesh::Point p{ mesh->point(vh) };
+		float a{ plane_params[1] };
+		float b{ plane_params[2] };
+		float c{ 1.0f };
+		float d{ plane_params[0] };
+		sum += std::abs(a * p[0] + b * p[1] + c * p[2] + d) / std::sqrtf(a * a + b * b + c * c);
+	}
+	return sum;
 }
