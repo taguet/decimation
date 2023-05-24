@@ -14,6 +14,24 @@ void MeshTools::extractRegions() {
 	TopologyGraph graph{ *this, 1.0f, 1.0f};
 	growRegions(ungrouped_faces, graph);
 	buildTopologyGraph(graph);
+	//TODO delete following lines
+	for (auto f_iter{ mesh_->faces_begin() }; f_iter != mesh_->faces_end(); ++f_iter) {
+		faceGroup(f_iter) = -1;
+	}
+	graph.reclassFaces();
+}
+
+
+void MeshTools::TopologyGraph::reclassFaces() {
+	for (auto& id_region_pair : regions) {
+		id_region_pair.second.reclassFaces();
+	}
+}
+
+void MeshTools::TopologyGraph::Node::reclassFaces() {
+	for (auto& face : faces) {
+		parent->parent->faceGroup(face) = id;
+	}
 }
 
 
@@ -52,8 +70,7 @@ void MeshTools::buildTopologyGraph(TopologyGraph& graph) {
 	for (auto f_iter{ mesh_->faces_begin() }; f_iter != mesh_->faces_end(); ++f_iter) {
 		for (auto neighbor{ mesh_->ff_iter(f_iter) }; neighbor; ++neighbor) {
 			if (faceGroup(f_iter) != faceGroup(neighbor)) {
-				graph.insertEdge(faceGroup(f_iter), faceGroup(neighbor));
-				graph.insertEdge(faceGroup(neighbor), faceGroup(f_iter));
+				graph.connectRegions(faceGroup(f_iter), faceGroup(neighbor));
 			}
 		}
 	}
@@ -89,8 +106,16 @@ MeshTools::TopologyGraph::TopologyGraph(MeshTools& parent, float area_threshold,
 
 
 void MeshTools::TopologyGraph::insertEdge(int node_1, int node_2) {
+	if (node_1 == node_2)	return;
 	std::set<int>& connected_nodes{ edges[node_1] };
 	connected_nodes.insert(node_2);
+}
+
+
+void MeshTools::TopologyGraph::connectRegions(int regionID_1, int regionID_2) {
+	if (regionID_1 == regionID_2)	return;
+	insertEdge(regionID_1, regionID_2);
+	insertEdge(regionID_2, regionID_1);
 }
 
 
@@ -113,10 +138,12 @@ bool MeshTools::TopologyGraph::simplifyGraph() {
 		else {
 			int targetID{ findTargetRegion(region.id, 100.0f) }; //arbitrary threshold
 			if (targetID == -1) {
+				std::cout << "Deleted region " << region.id << std::endl;
 				ungroupRegion(region.id);
-				return false;
+				return true;
 			}
 			else {
+				std::cout << "Merged region " << region.id << " into " << targetID << std::endl;
 				regroupRegionIntoTarget(region.id, targetID);
 				return true;
 			}
@@ -126,12 +153,12 @@ bool MeshTools::TopologyGraph::simplifyGraph() {
 }
 
 
-int MeshTools::TopologyGraph::findTargetRegion(int regionID, float fitting_threshold) const {
+int MeshTools::TopologyGraph::findTargetRegion(int regionID, float fitting_threshold)  {
 	std::set<int> neighborIDs{ edges.at(regionID)};
 	int targetID{ -1 };
 	float min_sum{ numeric_limits<float>::max() };
 	for (int id : neighborIDs) {
-		Node neighbor{ getRegion(id)};
+		Node& neighbor{ getRegion(id)};
 		float sum{ neighbor.sumVertexProjectedDistances()};
 		if (sum < min_sum) {
 			min_sum = sum;
@@ -153,22 +180,31 @@ void MeshTools::TopologyGraph::fitPlanes() {
 
 
 void MeshTools::TopologyGraph::regroupRegionIntoTarget(int regionID, int targetID) {
-	Node region{ getRegion(regionID) };
-	Node target{ getRegion(targetID) };
+	Node& region{ getRegion(regionID) };
+	Node& target{ getRegion(targetID) };
 	target.regroupIntoSelf(region);
+	std::set<int> neighborIDs{ edges.at(regionID) };
+	for (int id : neighborIDs) {
+		connectRegions(targetID, id);	//Target region inherits deleted region's edges
+	}
 	ungroupRegion(regionID);
 }
 
 
 void MeshTools::TopologyGraph::ungroupRegion(int regionID) {
-	std::set<int>& neighborIDs{ edges.at(regionID) };
 	//Erase connections to removed region
-	for (int id : neighborIDs) {
-		edges.at(id).erase(regionID);
-	}
+	removeEdges(regionID);
 	edges.erase(regionID);
 	//Erase region node
 	regions.erase(regionID);
+}
+
+void MeshTools::TopologyGraph::removeEdges(int regionID) {
+	std::set<int> neighborIDs{ edges.at(regionID) };
+	for (int id : neighborIDs) {
+		edges.at(id).erase(regionID);
+		edges.at(regionID).erase(id);
+	}
 }
 
 

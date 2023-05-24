@@ -96,6 +96,7 @@ private:
 			float computeArea() const;
 			void fitPlane();
 			float sumVertexProjectedDistances();
+			void reclassFaces();	//TODO delete
 		private:
 			TopologyGraph* parent{ nullptr };
 			std::set<Mesh::FaceHandle> faces;
@@ -107,7 +108,7 @@ private:
 		std::map<int, std::set<int>> edges;
 		MeshTools* parent{ nullptr };
 
-		int findTargetRegion(int regionID, float fitting_threshold) const;
+		int findTargetRegion(int regionID, float fitting_threshold);
 		void regroupRegionIntoTarget(int regionID, int targetID);
 		void ungroupRegion(int regionID);
 
@@ -122,12 +123,23 @@ private:
 
 		void addFaceToRegion(int regionID, Mesh::FaceHandle fh);
 
-		const Node& getRegion(int regionID) const { return regions.at(regionID); }
+		Node& getRegion(int regionID) { return regions.at(regionID); }
 
+		/// @brief Insert an edge from node_1 to node_2.
+		/// @param node_1 Start node.
+		/// @param node_2 End node.
 		void insertEdge(int node_1, int node_2);
+
+		/// @brief Connect two region nodes with an edge, going both ways.
+		/// @param regionID_1 
+		/// @param regionID_2 
+		void connectRegions(int regionID_1, int regionID_2);
+
+		void removeEdges(int regionID);
 
 		bool simplifyGraph();
 		void fitPlanes();
+		void reclassFaces();	//TODO delete
 	};
 
 	OpenMesh::FPropHandleT<int> f_group;

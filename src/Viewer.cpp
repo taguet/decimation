@@ -537,8 +537,15 @@ void Viewer::draw(const std::string& _draw_mode) {
 				if (groups_found.find(mtools.faceGroup(f_iter)) == groups_found.end()) {
 					int id{ mtools.faceGroup(f_iter) };
 					groups_found.emplace(id);
-					std::unique_ptr<int[]> color{ new int[3] {rand() % 256, rand() % 256, rand() % 256} };
-					rgb[mtools.faceGroup(f_iter)] = std::move(color);
+					if (id != -1) {
+						std::unique_ptr<int[]> color{ new int[3] {rand() % 256, rand() % 256, rand() % 256} };
+						rgb[mtools.faceGroup(f_iter)] = std::move(color);
+					}
+					else {
+						const Mesh::Color* c{ mesh.vertex_colors() };
+						std::unique_ptr<int[]> color{ new int[3] { c->data()[0], c->data()[1], c->data()[2]} };
+						rgb[mtools.faceGroup(f_iter)] = std::move(color);
+					}
 					//std::cout << "r=" << rgb.at(id)[0] << " g=" << rgb.at(id)[1] << " b=" << rgb.at(id)[2] << std::endl;
 				}
 			}
