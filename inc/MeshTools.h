@@ -96,7 +96,7 @@ private:
 			float computeArea() const;
 			void fitPlane();
 			float sumVertexProjectedDistances();
-			void reclassFaces();	//TODO delete
+			void updateIndices();	//TODO delete
 		private:
 			TopologyGraph* parent{ nullptr };
 			std::set<Mesh::FaceHandle> faces;
@@ -139,7 +139,7 @@ private:
 
 		bool simplifyGraph();
 		void fitPlanes();
-		void reclassFaces();	//TODO delete
+		void updateIndices();	//TODO delete
 	};
 
 	OpenMesh::FPropHandleT<int> f_group;

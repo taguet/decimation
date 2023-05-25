@@ -18,17 +18,17 @@ void MeshTools::extractRegions() {
 	for (auto f_iter{ mesh_->faces_begin() }; f_iter != mesh_->faces_end(); ++f_iter) {
 		faceGroup(f_iter) = -1;
 	}
-	graph.reclassFaces();
+	graph.updateIndices();
 }
 
 
-void MeshTools::TopologyGraph::reclassFaces() {
+void MeshTools::TopologyGraph::updateIndices() {
 	for (auto& id_region_pair : regions) {
-		id_region_pair.second.reclassFaces();
+		id_region_pair.second.updateIndices();
 	}
 }
 
-void MeshTools::TopologyGraph::Node::reclassFaces() {
+void MeshTools::TopologyGraph::Node::updateIndices() {
 	for (auto& face : faces) {
 		parent->parent->faceGroup(face) = id;
 	}
