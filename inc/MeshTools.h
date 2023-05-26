@@ -5,13 +5,10 @@
 #include <map>
 #include <set>
 #include "Laplacian.h"
-#include <Eigen/Dense>
+#include "TopologyGraph.h""
 
 
 typedef OpenMesh::TriMesh_ArrayKernelT<>  Mesh;
-using Eigen::MatrixXf;
-using Eigen::VectorXf;
-using Eigen::Vector3f;
 
 
 /// @brief Toolset class for modifying a mesh.
@@ -71,78 +68,14 @@ public:
 	}
 
 
-	void extractRegions();
+	void extractRegions(TopologyGraph& graph);
 
+private:
+	OpenMesh::FPropHandleT<int> f_group;
 
 	int& faceGroup(Mesh::FaceHandle fh) {
 		return mesh_->property(f_group, fh);
 	}
-
-
-	Vector3f fitPlaneToVertices(std::set<Mesh::VertexHandle>& vertices) const;
-
-
-private:
-	class TopologyGraph {
-	private:
-		class Node {
-		public:
-			const int id;
-
-			Node(TopologyGraph& parent, int id) : id{ id }, parent{ &parent } {}
-			void add(Mesh::FaceHandle fh);
-			void regroupIntoSelf(Node& region);
-			bool empty() const { return faces.empty(); }
-			float computeArea() const;
-			void fitPlane();
-			float sumVertexProjectedDistances();
-			void updateIndices();	//TODO delete
-		private:
-			TopologyGraph* parent{ nullptr };
-			std::set<Mesh::FaceHandle> faces;
-			std::set<Mesh::VertexHandle> vertices;
-			Vector3f plane_params;
-		};
-
-		std::map<int, Node> regions;
-		std::map<int, std::set<int>> edges;
-		MeshTools* parent{ nullptr };
-
-		int findTargetRegion(int regionID, float fitting_threshold);
-		void regroupRegionIntoTarget(int regionID, int targetID);
-		void ungroupRegion(int regionID);
-
-	public:
-		const float area_threshold;
-		const float fitting_threshold;
-
-		TopologyGraph(MeshTools& parent, float area_threshold, float fitting_threshold);
-		int size() {
-			return regions.size();
-		}
-
-		void addFaceToRegion(int regionID, Mesh::FaceHandle fh);
-
-		Node& getRegion(int regionID) { return regions.at(regionID); }
-
-		/// @brief Insert an edge from node_1 to node_2.
-		/// @param node_1 Start node.
-		/// @param node_2 End node.
-		void insertEdge(int node_1, int node_2);
-
-		/// @brief Connect two region nodes with an edge, going both ways.
-		/// @param regionID_1 
-		/// @param regionID_2 
-		void connectRegions(int regionID_1, int regionID_2);
-
-		void removeEdges(int regionID);
-
-		bool simplifyGraph();
-		void fitPlanes();
-		void updateIndices();	//TODO delete
-	};
-
-	OpenMesh::FPropHandleT<int> f_group;
 
 	/// @brief Region growing algorithm to detect and separate all planar regions.
 	/// @param ungrouped_faces Every faces in the mesh that haven't been sorted in a group yet.

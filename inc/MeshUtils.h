@@ -2,8 +2,13 @@
 
 #include <OpenMesh/Core/Mesh/Types/TriMesh_ArrayKernelT.hh>
 #include <list>
+#include <set>
+#include <Eigen/Dense>
 
 typedef OpenMesh::TriMesh_ArrayKernelT<>  Mesh;
+using Eigen::Vector3f;
+using Eigen::MatrixXf;
+using Eigen::VectorXf;
 
 /// @brief Utility class with basic operations to use in algorithms on a mesh.
 class MeshUtils
@@ -59,5 +64,8 @@ public:
 
 
 	static void getFaceNeighbors(Mesh& mesh, const Mesh::FaceHandle, std::list<Mesh::FaceHandle>& neighbors);
+
+
+	static Vector3f fitPlaneToVertices(Mesh& mesh, std::set<Mesh::VertexHandle>& vertices);
 };
 

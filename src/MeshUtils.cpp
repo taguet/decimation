@@ -78,3 +78,24 @@ void MeshUtils::getFaceNeighbors(Mesh& mesh, Mesh::FaceHandle fh, std::list<Mesh
 		neighbors.push_back(f_iter);
 	}
 }
+
+
+Vector3f fitPlaneToVertices(Mesh& mesh, std::set<Mesh::VertexHandle>& vertices) {
+	MatrixXf regressors{ vertices.size(), 3 };	// x & y
+	VectorXf observed{ vertices.size() };	// z
+	Vector3f parameters{ 0.0f, 0.0f, 0.0f };	//c, a & b
+
+	{
+		std::set<Mesh::VertexHandle>::iterator it{ vertices.begin() };
+		for (int i{ 0 }; i < regressors.rows(), it != vertices.end(); ++i, ++it) {
+			Mesh::Point p{ mesh.point(*it) };
+			regressors(i, 0) = 1.0f;
+			regressors(i, 1) = p[0];
+			regressors(i, 2) = p[1];
+			observed(i) = p[2];
+		}
+	}
+	MatrixXf t_regressors{ regressors.transpose() };
+	parameters = (t_regressors * regressors).inverse() * t_regressors * observed;
+	return parameters;
+}
