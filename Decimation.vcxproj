@@ -29,6 +29,7 @@
     <ClCompile Include="src\MeshViewer.cpp" />
     <ClCompile Include="src\ProgressiveBar.cpp" />
     <ClCompile Include="src\TaucsSolver.cpp" />
+    <ClCompile Include="src\TopologyGraph.cpp" />
     <ClCompile Include="src\Tree.cpp" />
     <ClCompile Include="src\Viewer.cpp" />
   </ItemGroup>
@@ -45,6 +46,7 @@
     <ClInclude Include="inc\OpenMeshUtils.h" />
     <ClInclude Include="inc\ProgressiveBar.h" />
     <ClInclude Include="inc\TaucsSolver.hpp" />
+    <ClInclude Include="inc\TopologyGraph.h" />
     <ClInclude Include="inc\Tree.hpp" />
     <ClInclude Include="inc\Viewer.hpp" />
   </ItemGroup>
