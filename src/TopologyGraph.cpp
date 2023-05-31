@@ -117,6 +117,25 @@ void TopologyGraph::addFaceToRegion(int regionID, Mesh::FaceHandle fh) {
 }
 
 
+int TopologyGraph::getFaceRegion(Mesh::FaceHandle fh) {
+	for (auto& p : regions) {
+		Node& region{ p.second };
+		if (region.contains(fh))
+			return region.id;
+	}
+	return -1;
+}
+
+
+std::set<int> TopologyGraph::getRegionIDs() {
+	std::set<int> ids{};
+	for (auto& p : regions) {
+		ids.insert(p.first);
+	}
+	return ids;
+}
+
+
 void TopologyGraph::Node::add(Mesh::FaceHandle fh) {
 	Mesh& mesh{ parent->mesh };
 	faces.insert(fh);

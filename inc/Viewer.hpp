@@ -113,6 +113,8 @@ private:
   int v_id{ 0 };
   int neighbour_offset{ 0 };
 
+  TopologyGraph* graph{ nullptr };
+
   void draw_1_ring(const VertexHandle vh, Vec3f color);
 };
 

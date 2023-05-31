@@ -80,7 +80,7 @@ void MeshUtils::getFaceNeighbors(Mesh& mesh, Mesh::FaceHandle fh, std::list<Mesh
 }
 
 
-Vector3f fitPlaneToVertices(Mesh& mesh, std::set<Mesh::VertexHandle>& vertices) {
+Vector3f MeshUtils::fitPlaneToVertices(Mesh& mesh, std::set<Mesh::VertexHandle>& vertices) {
 	MatrixXf regressors{ vertices.size(), 3 };	// x & y
 	VectorXf observed{ vertices.size() };	// z
 	Vector3f parameters{ 0.0f, 0.0f, 0.0f };	//c, a & b

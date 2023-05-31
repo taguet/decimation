@@ -530,30 +530,23 @@ void Viewer::draw(const std::string& _draw_mode) {
 		if (!isModified) {
 			isModified = true;
 			rgb.clear();
-			mtools.extractRegions();
+			this->graph = new TopologyGraph{ mesh, 1.0f, 1.0f };
+			mtools.extractRegions(*graph);
 			srand(0);
-			std::set<int> groups_found{};
-			for (auto f_iter{ mesh.faces_begin() }; f_iter != mesh.faces_end(); ++f_iter) {
-				if (groups_found.find(mtools.faceGroup(f_iter)) == groups_found.end()) {
-					int id{ mtools.faceGroup(f_iter) };
-					groups_found.emplace(id);
-					if (id != -1) {
-						std::unique_ptr<int[]> color{ new int[3] {rand() % 256, rand() % 256, rand() % 256} };
-						rgb[mtools.faceGroup(f_iter)] = std::move(color);
-					}
-					else {
-						const Mesh::Color* c{ mesh.vertex_colors() };
-						std::unique_ptr<int[]> color{ new int[3] { c->data()[0], c->data()[1], c->data()[2]} };
-						rgb[mtools.faceGroup(f_iter)] = std::move(color);
-					}
-					//std::cout << "r=" << rgb.at(id)[0] << " g=" << rgb.at(id)[1] << " b=" << rgb.at(id)[2] << std::endl;
-				}
+			std::set<int> groups_found{graph->getRegionIDs()};
+			for (int groupID : groups_found) {
+				//Generate color
+				std::unique_ptr<int[]> color{ new int[3] {rand() % 256, rand() % 256, rand() % 256} };
+				rgb[groupID] = std::move(color);
 			}
+			const Mesh::Color* c{ mesh.vertex_colors() };
+			std::unique_ptr<int[]> color{ new int[3] { c->data()[0], c->data()[1], c->data()[2]} };
+			rgb[-1] = std::move(color);
 			std::cout << "Found " << groups_found.size() << " groups." << std::endl;
 		}
 		glDisable(GL_LIGHTING);
 		for (auto f_iter{ mesh.faces_begin() }; f_iter != mesh.faces_end(); ++f_iter) {
-			int id{ mtools.faceGroup(f_iter) };
+			int id{ graph->getFaceRegion(f_iter)};
 			glColor3ub(rgb.at(id)[0], rgb.at(id)[1], rgb.at(id)[2]);
 			glBegin(GL_TRIANGLES);
 			Mesh::HalfedgeHandle heh{ mesh.halfedge_handle(f_iter) };

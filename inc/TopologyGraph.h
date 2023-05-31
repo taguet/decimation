@@ -3,11 +3,8 @@
 #include <OpenMesh/Core/Mesh/Types/TriMesh_ArrayKernelT.hh>
 #include <set>
 #include <map>
-#include <Eigen/Dense>
 #include <limits>
 #include "MeshUtils.h"
-
-using Eigen::Vector3f;
 
 typedef OpenMesh::TriMesh_ArrayKernelT<>  Mesh;
 
@@ -20,19 +17,22 @@ private:
 		Node(TopologyGraph& parent, int id) : id{ id }, parent{ &parent } {}
 		void add(Mesh::FaceHandle fh);
 		void regroupIntoSelf(Node& region);
+		const std::set<Mesh::FaceHandle>& getFaceHandles() { return faces; }
+		const std::set<Mesh::VertexHandle>& getVertexHandles() { return vertices; }
 		bool empty() const { return faces.empty(); }
+		bool contains(Mesh::FaceHandle& fh) { return faces.find(fh) != faces.end(); }
 		float computeArea() const;
 		void fitPlane();
 		float sumVertexProjectedDistances();
 	private:
 		TopologyGraph* parent{ nullptr };
-		std::set<Mesh::FaceHandle> faces;
-		std::set<Mesh::VertexHandle> vertices;
+		std::set<Mesh::FaceHandle> faces{};
+		std::set<Mesh::VertexHandle> vertices{};
 		Vector3f plane_params;
 	};
 
-	std::map<int, Node> regions;
-	std::map<int, std::set<int>> edges;
+	std::map<int, Node> regions{};
+	std::map<int, std::set<int>> edges{};
 	Mesh& mesh;
 
 	int findTargetRegion(int regionID, float fitting_threshold);
@@ -51,6 +51,9 @@ public:
 	void addFaceToRegion(int regionID, Mesh::FaceHandle fh);
 
 	Node& getRegion(int regionID) { return regions.at(regionID); }
+	int getFaceRegion(Mesh::FaceHandle fh);
+	std::set<int> getNeighbors(int regionID) { return edges.at(regionID); }
+	std::set<int> getRegionIDs();
 
 	/// @brief Insert an edge from node_1 to node_2.
 	/// @param node_1 Start node.
