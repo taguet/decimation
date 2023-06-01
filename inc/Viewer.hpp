@@ -116,6 +116,7 @@ private:
   TopologyGraph* graph{ nullptr };
 
   void draw_1_ring(const VertexHandle vh, Vec3f color);
+  Vector3f computePlanePoint(const Vector3f& plane_params, const float x, const float y);
 };
 
 

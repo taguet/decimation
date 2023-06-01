@@ -880,4 +880,14 @@ void Viewer::keyboard(int key, int x, int y) {
 }
 
 
+Vector3f Viewer::computePlanePoint(const Vector3f& plane_params, const float x, const float y) {
+	float a{ plane_params[1] };
+	float b{ plane_params[2] };
+	float d{ plane_params[0] };
+
+	float z{ a * x + b * y + d };
+	return { x, y, z };
+}
+
+
 //=============================================================================
