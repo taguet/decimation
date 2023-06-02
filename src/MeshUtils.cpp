@@ -89,9 +89,7 @@ Vector3f MeshUtils::fitPlaneToVertices(Mesh& mesh, std::set<Mesh::VertexHandle>&
 		std::set<Mesh::VertexHandle>::iterator it{ vertices.begin() };
 		for (int i{ 0 }; i < regressors.rows(), it != vertices.end(); ++i, ++it) {
 			Mesh::Point p{ mesh.point(*it) };
-			regressors(i, 0) = 1.0f;
-			regressors(i, 1) = p[0];
-			regressors(i, 2) = p[1];
+			regressors.row(i) = Vector3f{ 1.0f, p[0], p[1] };
 			observed(i) = p[2];
 		}
 	}
