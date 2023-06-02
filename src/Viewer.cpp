@@ -38,6 +38,7 @@ Viewer::Viewer(const char* _title, int _width, int _height): MeshViewer(_title, 
   add_draw_mode("Anisotropic Laplacian");
   add_draw_mode("Planar Region Extraction");
 
+  add_draw_mode("Debug plane-region fitting");
   add_draw_mode("Debug opposite angles");
   add_draw_mode("Debug laplacien cotangente");
   add_draw_mode("Debug lissage");
@@ -561,6 +562,46 @@ void Viewer::draw(const std::string& _draw_mode) {
 		prev_draw_mode = current_draw_mode;
 		prev_id_draw_mode = get_draw_mode();
 	}
+	else if (_draw_mode == "Debug plane-region fitting") {
+		if (!isModified) {
+			isModified = true;
+			this->graph = new TopologyGraph(mesh, 1.0f, 1.0f);
+			mtools.extractRegions(*graph);
+		}
+
+		//draw("Solid Smooth");
+		set<int> ids{ graph->getRegionIDs() };
+		auto it{ ids.begin() }; 
+		std::advance(it, region_id% graph->size());
+		int regionID{ *it };
+		glEnable(GL_POLYGON_OFFSET_FILL);
+		glPolygonOffset(1.0, 1.0);
+		for (auto fh : graph->getRegion(regionID).getFaceHandles()) {
+			glColor3f(0.0f, 0.0f, 1.0f);
+			glBegin(GL_TRIANGLES);
+			Mesh::HalfedgeHandle heh{ mesh.halfedge_handle(fh) };
+			GL::glVertex(mesh.point(mesh.from_vertex_handle(heh)));
+			GL::glVertex(mesh.point(mesh.to_vertex_handle(heh)));
+			GL::glVertex(mesh.point(mesh.to_vertex_handle(mesh.next_halfedge_handle(heh))));
+			glEnd();
+		}
+		glDisable(GL_POLYGON_OFFSET_FILL);
+
+		Vector3f& params{ graph->getRegion(regionID).plane_params };
+		Matrix3f plane{ computePlane(params) };
+		glColor3f(1.0f, 0.0f, 0.0f);
+		Vector3f p0{ plane.col(0) };
+		Vector3f p1{ plane.col(1) };
+		Vector3f p2{ plane.col(2) };
+		glBegin(GL_TRIANGLES);
+			GL::glVertex(OpenMesh::Vec3f{ p0[0], p0[1], p0[2] });
+			GL::glVertex(OpenMesh::Vec3f{ p1[0], p1[1], p1[2] });
+			GL::glVertex(OpenMesh::Vec3f{ p2[0], p2[1], p2[2] });
+		glEnd();
+
+		prev_draw_mode = current_draw_mode;
+		prev_id_draw_mode = get_draw_mode();
+	}
 	else if (_draw_mode == "Debug opposite angles") {
 		static int cur_v_id = -1;
 		static std::vector<HalfedgeHandle> ohs{};
@@ -835,6 +876,12 @@ void Viewer::keyboard(int key, int x, int y) {
 			browse_meshes();
 			break;
 		}
+		case 'p':
+		{
+			++region_id;
+			glutPostRedisplay();
+			break;
+		}
 		case GLUT_KEY_LEFT:
 		{
 			v_id = (v_id - 1) % mesh.n_vertices();
@@ -889,6 +936,18 @@ Vector3f Viewer::computePlanePoint(const Vector3f& plane_params, const float x, 
 
 	float z{ a * x + b * y + d };
 	return { x, y, z };
+}
+
+
+Matrix3f Viewer::computePlane(const Vector3f& plane_params) {
+	float a{ plane_params[1] };
+	float b{ plane_params[2] };
+	float d{ plane_params[0] };
+	Matrix3f plane(3, 3);	//each column is a point
+	plane.col(0) = Vector3f{0, 0, d};	//x=0 and y=0
+	plane.col(1) = Vector3f{0, -d/b, 0};	//x=0 and z=0
+	plane.col(2) = Vector3f{-d/a, 0, 0};	//y=0 and z=0
+	return plane;
 }
 
 

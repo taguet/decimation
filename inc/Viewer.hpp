@@ -20,6 +20,9 @@
 #include <commdlg.h>
 
 
+using Eigen::Matrix3f;
+
+
 //== CLASS DEFINITION =========================================================
 
 	      
@@ -112,11 +115,13 @@ private:
   bool calledSmoothing{ false };
   int v_id{ 0 };
   int neighbour_offset{ 0 };
+  int region_id{ 0 };
 
   TopologyGraph* graph{ nullptr };
 
   void draw_1_ring(const VertexHandle vh, Vec3f color);
   Vector3f computePlanePoint(const Vector3f& plane_params, const float x, const float y);
+  Matrix3f computePlane(const Vector3f& plane_params);
 };
 
 
