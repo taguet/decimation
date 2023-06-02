@@ -538,6 +538,8 @@ void Viewer::draw(const std::string& _draw_mode) {
 				//Generate color
 				std::unique_ptr<int[]> color{ new int[3] {rand() % 256, rand() % 256, rand() % 256} };
 				rgb[groupID] = std::move(color);
+				Vector3f params{ graph->getRegion(groupID).plane_params};
+				std::cout << "z = " << params[1] << "x + " << params[2] << "y + " << params[0] << std::endl;
 			}
 			const Mesh::Color* c{ mesh.vertex_colors() };
 			std::unique_ptr<int[]> color{ new int[3] { c->data()[0], c->data()[1], c->data()[2]} };

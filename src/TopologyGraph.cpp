@@ -154,7 +154,6 @@ void TopologyGraph::Node::regroupIntoSelf(Node& region) {
 
 
 void TopologyGraph::Node::fitPlane() {
-	std::set<Mesh::VertexHandle> vertices{};
 	plane_params = MeshUtils::fitPlaneToVertices(parent->mesh, vertices);
 }
 

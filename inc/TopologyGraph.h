@@ -13,6 +13,7 @@ private:
 	class Node {
 	public:
 		const int id;
+		Vector3f plane_params;
 
 		Node(TopologyGraph& parent, int id) : id{ id }, parent{ &parent } {}
 		void add(Mesh::FaceHandle fh);
@@ -28,7 +29,6 @@ private:
 		TopologyGraph* parent{ nullptr };
 		std::set<Mesh::FaceHandle> faces{};
 		std::set<Mesh::VertexHandle> vertices{};
-		Vector3f plane_params;
 	};
 
 	std::map<int, Node> regions{};
