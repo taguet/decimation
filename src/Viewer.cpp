@@ -588,6 +588,7 @@ void Viewer::draw(const std::string& _draw_mode) {
 		glDisable(GL_POLYGON_OFFSET_FILL);
 
 		Vector3f& params{ graph->getRegion(regionID).plane_params };
+		std::cout << "Viewing region " << regionID << "\nEquation: "<< params[1] << "x + " << params[2] << "y - z + " << params[0] << " = 0" << std::endl;
 		Matrix3f plane{ computePlane(params) };
 		glColor3f(1.0f, 0.0f, 0.0f);
 		Vector3f p0{ plane.col(0) };
