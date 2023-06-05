@@ -147,6 +147,25 @@ std::set<int> TopologyGraph::getRegionIDs() {
 }
 
 
+bool TopologyGraph::areFacesInSameRegion(Mesh::FaceHandle fh_1, Mesh::FaceHandle fh_2) {
+	return faceGroup(fh_1) == faceGroup(fh_2);
+}
+
+
+std::set<Mesh::EdgeHandle> TopologyGraph::extractContour() {
+	std::set<Mesh::EdgeHandle> contour_edges{};
+	for (auto f_it{ mesh.faces_begin() }; f_it != mesh.faces_end(); ++f_it) {
+		for (auto fh_it{ mesh.fh_iter(f_it)}; fh_it; ++fh_it) {
+			Mesh::FaceHandle neighbor_face{ mesh.face_handle(mesh.opposite_halfedge_handle(fh_it)) };
+			if (!areFacesInSameRegion(f_it, neighbor_face)) {
+				contour_edges.insert(mesh.edge_handle(fh_it));
+			}
+		}
+	}
+	return contour_edges;
+}
+
+
 void TopologyGraph::Node::add(Mesh::FaceHandle fh) {
 	Mesh& mesh{ parent->mesh };
 	faces.insert(fh);

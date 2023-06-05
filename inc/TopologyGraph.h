@@ -70,7 +70,10 @@ public:
 	void removeEdges(int regionID);
 
 	bool simplifyGraph();
+	bool areFacesInSameRegion(Mesh::FaceHandle fh_1, Mesh::FaceHandle fh_2);
 	void fitPlanes();
+
+	std::set<Mesh::EdgeHandle> extractContour();
 
 	int& faceGroup(Mesh::FaceHandle fh) {
 		return mesh.property(f_group, fh);
