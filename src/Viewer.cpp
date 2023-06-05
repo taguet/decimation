@@ -621,21 +621,22 @@ void Viewer::draw(const std::string& _draw_mode) {
 		}
 		glEnable(GL_LIGHTING);
 
-		glBegin(GL_TRIANGLES);
-		for (auto f_it{ mesh.faces_begin()}; f_it != mesh.faces_end(); ++f_it)
-		{
-			GL::glNormal(mesh.normal(f_it));
-			for (auto fv_it{ mesh.cfv_iter(f_it.handle()) }; fv_it; ++fv_it) {
-				if (contour_vertices.find(fv_it) != contour_vertices.end()) {
-					glColor3f(1.0f, 0.0f, 0.0f);
-				}
-				else {
-					glColor3f(0.3f, 0.3f, 0.3f);
-				}
-				GL::glVertex(mesh.point(fv_it));
+		draw("Solid Smooth");
+
+		glEnable(GL_DEPTH_TEST);
+		glEnable(GL_POLYGON_OFFSET_LINE);
+		glPolygonOffset(-1.0, 1.0);
+		glLineWidth(3.0f);
+		glBegin(GL_LINES);
+			glColor3f(1.0f, 0.0f, 0.0f);
+			for (auto edge : contour_edges) {
+				Mesh::HalfedgeHandle heh{ mesh.halfedge_handle(edge, 0) };
+				GL::glVertex(mesh.point(mesh.from_vertex_handle(heh)));
+				GL::glVertex(mesh.point(mesh.to_vertex_handle(heh)));
 			}
-		}
 		glEnd();
+		glLineWidth(1.0f);
+		glDisable(GL_POLYGON_OFFSET_LINE);
 
 		prev_draw_mode = current_draw_mode;
 		prev_id_draw_mode = get_draw_mode();
