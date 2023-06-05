@@ -71,12 +71,6 @@ public:
 	void extractRegions(TopologyGraph& graph);
 
 private:
-	OpenMesh::FPropHandleT<int> f_group;
-
-	int& faceGroup(Mesh::FaceHandle fh) {
-		return mesh_->property(f_group, fh);
-	}
-
 	/// @brief Region growing algorithm to detect and separate all planar regions.
 	/// @param ungrouped_faces Every faces in the mesh that haven't been sorted in a group yet.
 	/// @param graph The topology graph to update throughout the process.

@@ -35,9 +35,11 @@ private:
 	std::map<int, std::set<int>> edges{};
 	Mesh& mesh;
 
+	OpenMesh::FPropHandleT<int> f_group;
+
 	int findTargetRegion(int regionID, float fitting_threshold);
 	void regroupRegionIntoTarget(int regionID, int targetID);
-	void ungroupRegion(int regionID);
+	void ungroupRegion(int regionID, bool removeGroup);
 
 public:
 	const float area_threshold;
@@ -69,4 +71,8 @@ public:
 
 	bool simplifyGraph();
 	void fitPlanes();
+
+	int& faceGroup(Mesh::FaceHandle fh) {
+		return mesh.property(f_group, fh);
+	}
 };

@@ -2,7 +2,12 @@
 
 TopologyGraph::TopologyGraph(Mesh& mesh, float area_threshold, float fitting_threshold)
 	: mesh{ mesh }, area_threshold{ area_threshold }, fitting_threshold{ fitting_threshold }
-{}
+{
+	this->mesh.add_property(f_group);
+	for (auto f_it{ mesh.faces_begin() }; f_it != mesh.faces_end(); ++f_it) {
+		faceGroup(f_it) = -1;
+	}
+}
 
 
 void TopologyGraph::insertEdge(int node_1, int node_2) {
@@ -39,7 +44,7 @@ bool TopologyGraph::simplifyGraph() {
 			int targetID{ findTargetRegion(region.id, 100.0f) }; //arbitrary threshold
 			if (targetID == -1) {
 				std::cout << "Deleted region " << region.id << std::endl;
-				ungroupRegion(region.id);
+				ungroupRegion(region.id, true);
 				return true;
 			}
 			else {
@@ -85,13 +90,19 @@ void TopologyGraph::regroupRegionIntoTarget(int regionID, int targetID) {
 	target.regroupIntoSelf(region);
 	std::set<int> neighborIDs{ edges.at(regionID) };
 	for (int id : neighborIDs) {
-		connectRegions(targetID, id);	//Target region inherits deleted region's edges
+		connectRegions(targetID, id);	//Target region inherits deleted region's neighbors
 	}
-	ungroupRegion(regionID);
+	ungroupRegion(regionID, false);
 }
 
 
-void TopologyGraph::ungroupRegion(int regionID) {
+void TopologyGraph::ungroupRegion(int regionID, bool removeGroup) {
+	if (removeGroup) {
+		Node& region{ regions.find(regionID)->second };
+		for (auto fh : region.getFaceHandles()) {
+			faceGroup(fh) = -1;
+		}
+	}
 	//Erase connections to removed region
 	removeEdges(regionID);
 	edges.erase(regionID);
@@ -149,6 +160,9 @@ void TopologyGraph::Node::add(Mesh::FaceHandle fh) {
 void TopologyGraph::Node::regroupIntoSelf(Node& region) {
 	faces.insert(region.faces.begin(), region.faces.end());
 	vertices.insert(region.vertices.begin(), region.vertices.end());
+	for (auto fh : region.getFaceHandles()) {
+		parent->faceGroup(fh) = id;
+	}
 	fitPlane();
 }
 
