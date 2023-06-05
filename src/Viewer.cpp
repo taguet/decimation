@@ -39,6 +39,7 @@ Viewer::Viewer(const char* _title, int _width, int _height): MeshViewer(_title, 
   add_draw_mode("Planar Region Extraction");
 
   add_draw_mode("Debug plane-region fitting");
+  add_draw_mode("Debug contour");
   add_draw_mode("Debug opposite angles");
   add_draw_mode("Debug laplacien cotangente");
   add_draw_mode("Debug lissage");
@@ -598,6 +599,42 @@ void Viewer::draw(const std::string& _draw_mode) {
 			GL::glVertex(OpenMesh::Vec3f{ p0[0], p0[1], p0[2] });
 			GL::glVertex(OpenMesh::Vec3f{ p1[0], p1[1], p1[2] });
 			GL::glVertex(OpenMesh::Vec3f{ p2[0], p2[1], p2[2] });
+		glEnd();
+
+		prev_draw_mode = current_draw_mode;
+		prev_id_draw_mode = get_draw_mode();
+	}
+	else if (_draw_mode == "Debug contour") {
+		static std::set<Mesh::EdgeHandle> contour_edges{};
+		static std::set<Mesh::VertexHandle> contour_vertices{};
+		if (!isModified) {
+			contour_edges.clear();
+			isModified = true;
+			this->graph = new TopologyGraph(mesh, 1.0f, 1.0f);
+			mtools.extractRegions(*graph);
+			contour_edges = graph->extractContour();
+			for (auto edge : contour_edges) {
+				Mesh::HalfedgeHandle heh{ mesh.halfedge_handle(edge, 0) };
+				contour_vertices.insert(mesh.from_vertex_handle(heh));
+				contour_vertices.insert(mesh.to_vertex_handle(heh));
+			}
+		}
+		glEnable(GL_LIGHTING);
+
+		glBegin(GL_TRIANGLES);
+		for (auto f_it{ mesh.faces_begin()}; f_it != mesh.faces_end(); ++f_it)
+		{
+			GL::glNormal(mesh.normal(f_it));
+			for (auto fv_it{ mesh.cfv_iter(f_it.handle()) }; fv_it; ++fv_it) {
+				if (contour_vertices.find(fv_it) != contour_vertices.end()) {
+					glColor3f(1.0f, 0.0f, 0.0f);
+				}
+				else {
+					glColor3f(0.3f, 0.3f, 0.3f);
+				}
+				GL::glVertex(mesh.point(fv_it));
+			}
+		}
 		glEnd();
 
 		prev_draw_mode = current_draw_mode;
