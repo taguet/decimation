@@ -968,24 +968,19 @@ void Viewer::keyboard(int key, int x, int y) {
 }
 
 
-Vector3f Viewer::computePlanePoint(const Vector3f& plane_params, const float x, const float y) {
-	float a{ plane_params[1] };
-	float b{ plane_params[2] };
-	float d{ plane_params[0] };
-
-	float z{ a * x + b * y + d };
-	return { x, y, z };
-}
-
-
+/// @brief Compute 3 points of a plane
+/// @param plane_params A vector (c, a, b)
+/// @return A 3x3 matrix with each column representing a point.
 Matrix3f Viewer::computePlane(const Vector3f& plane_params) {
+	//ax + by + c - z = 0
+	//On trouve 3 points sur le plan
 	float a{ plane_params[1] };
 	float b{ plane_params[2] };
-	float d{ plane_params[0] };
+	float c{ plane_params[0] };
 	Matrix3f plane(3, 3);	//each column is a point
-	plane.col(0) = Vector3f{0, 0, d};	//x=0 and y=0
-	plane.col(1) = Vector3f{0, -d/b, 0};	//x=0 and z=0
-	plane.col(2) = Vector3f{-d/a, 0, 0};	//y=0 and z=0
+	plane.col(0) = Vector3f{0, 0, c};	//x=0 and y=0
+	plane.col(1) = Vector3f{0, -c/b, 0};	//x=0 and z=0
+	plane.col(2) = Vector3f{-c/a, 0, 0};	//y=0 and z=0
 	return plane;
 }
 
