@@ -575,18 +575,17 @@ void Viewer::draw(const std::string& _draw_mode) {
 		auto it{ ids.begin() }; 
 		std::advance(it, region_id% graph->size());
 		int regionID{ *it };
-		glEnable(GL_POLYGON_OFFSET_FILL);
-		glPolygonOffset(1.0, 1.0);
+		glEnable(GL_LIGHTING);
 		for (auto fh : graph->getRegion(regionID).getFaceHandles()) {
 			glColor3f(0.0f, 0.0f, 1.0f);
 			glBegin(GL_TRIANGLES);
 			Mesh::HalfedgeHandle heh{ mesh.halfedge_handle(fh) };
+			GL::glNormal(mesh.normal(fh));
 			GL::glVertex(mesh.point(mesh.from_vertex_handle(heh)));
 			GL::glVertex(mesh.point(mesh.to_vertex_handle(heh)));
-			GL::glVertex(mesh.point(mesh.to_vertex_handle(mesh.next_halfedge_handle(heh))));
+			GL::glVertex(mesh.point(mesh.opposite_vh(heh)));
 			glEnd();
 		}
-		glDisable(GL_POLYGON_OFFSET_FILL);
 
 		Vector3f& params{ graph->getRegion(regionID).plane_params };
 		std::cout << "Viewing region " << regionID << "\nEquation: "<< params[1] << "x + " << params[2] << "y - z + " << params[0] << " = 0" << std::endl;
