@@ -187,7 +187,7 @@ void TopologyGraph::Node::regroupIntoSelf(Node& region) {
 
 
 void TopologyGraph::Node::fitPlane() {
-	plane_params = MeshUtils::fitPlaneToVerticesTLS(parent->mesh, vertices);
+	plane_params = MeshUtils::fitPlaneToVerticesOrth(parent->mesh, vertices);
 }
 
 

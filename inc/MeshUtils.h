@@ -68,6 +68,6 @@ public:
 
 
 	static Vector3f fitPlaneToVertices(Mesh& mesh, std::set<Mesh::VertexHandle>& vertices);
-	static Vector4f fitPlaneToVerticesTLS(Mesh& mesh, std::set<Mesh::VertexHandle>& vertices);
+	static Vector4f fitPlaneToVerticesOrth(Mesh& mesh, std::set<Mesh::VertexHandle>& vertices);
 };
 

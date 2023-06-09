@@ -98,7 +98,7 @@ Vector3f MeshUtils::fitPlaneToVertices(Mesh& mesh, std::set<Mesh::VertexHandle>&
 	return parameters;
 }
 
-Vector4f MeshUtils::fitPlaneToVerticesTLS(Mesh& mesh, std::set<Mesh::VertexHandle>& vertices) {
+Vector4f MeshUtils::fitPlaneToVerticesOrth(Mesh& mesh, std::set<Mesh::VertexHandle>& vertices) {
 	MatrixXf points{ vertices.size(), 3 }; // point coordinates
 	{
 		std::set<Mesh::VertexHandle>::iterator it{ vertices.begin() };
@@ -115,26 +115,11 @@ Vector4f MeshUtils::fitPlaneToVerticesTLS(Mesh& mesh, std::set<Mesh::VertexHandl
 		float x{ points(i, 0) };
 		float y{ points(i, 1) };
 		float z{ points(i, 2) };
-		XY(0, 0) += 2*x * x;
-		XY(0, 1) += x * y;
-		XY(0, 2) += x * z;
-		XY(0, 3) += 2 * x;
-		XY(1, 0) += x * y;
-		XY(1, 1) += 2*y * y;
-		XY(1, 2) += y*z;
-		XY(1, 3) += 2 * y;
-		XY(2, 0) += x*z;
-		XY(2, 1) += y*z;
-		XY(2, 2) += 2 * z * z;
-		XY(2, 3) += 2 * z;
-		XY(3, 0) += 2 * x;
-		XY(3, 1) += 2 * y;
-		XY(3, 2) += 2 * z;
-		Z(0) += x * y + x * z;
-		Z(1) += x * y + y * z;
-		Z(2) += x * z + y * z;
-		Z(3) += x + y + z;
+		XY.row(0) += Vector4f{ 2*x*x, x*y, x*z, 2*x };
+		XY.row(1) += Vector4f{ x*y, 2*y*y, y*z, 2*y };
+		XY.row(2) += Vector4f{ x*z, y*z, 2*z*z, 2*z };
+		XY.row(3) += Vector4f{ 2*x, 2*y, 2*z, 3 };
+		Z += Vector4f{ x*y+x*z, x*y+y*z, x*z+y*z, x+y+z };
 	}
-	XY(3, 3) = 3*points.rows();
 	return  XY.inverse() * Z;
 }
