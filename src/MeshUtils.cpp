@@ -97,3 +97,44 @@ Vector3f MeshUtils::fitPlaneToVertices(Mesh& mesh, std::set<Mesh::VertexHandle>&
 	parameters = (t_regressors * regressors).inverse() * t_regressors * observed;
 	return parameters;
 }
+
+Vector4f MeshUtils::fitPlaneToVerticesTLS(Mesh& mesh, std::set<Mesh::VertexHandle>& vertices) {
+	MatrixXf points{ vertices.size(), 3 }; // point coordinates
+	{
+		std::set<Mesh::VertexHandle>::iterator it{ vertices.begin() };
+		for (int i{ 0 }; i < points.rows(), it != vertices.end(); ++i, ++it) {
+			Mesh::Point p{ mesh.point(*it) };
+			points.row(i) = Vector3f{ p[0], p[1], p[2] };
+		}
+	}
+	MatrixXf XY{ 4,4 };
+	Vector4f Z{ 0, 0, 0, 0 };
+	XY.fill(0);
+
+	for (int i{ 0 }; i < points.rows(); ++i) {
+		float x{ points(i, 0) };
+		float y{ points(i, 1) };
+		float z{ points(i, 2) };
+		XY(0, 0) += 2*x * x;
+		XY(0, 1) += x * y;
+		XY(0, 2) += x * z;
+		XY(0, 3) += 2 * x;
+		XY(1, 0) += x * y;
+		XY(1, 1) += 2*y * y;
+		XY(1, 2) += y*z;
+		XY(1, 3) += 2 * y;
+		XY(2, 0) += x*z;
+		XY(2, 1) += y*z;
+		XY(2, 2) += 2 * z * z;
+		XY(2, 3) += 2 * z;
+		XY(3, 0) += 2 * x;
+		XY(3, 1) += 2 * y;
+		XY(3, 2) += 2 * z;
+		Z(0) += x * y + x * z;
+		Z(1) += x * y + y * z;
+		Z(2) += x * z + y * z;
+		Z(3) += x + y + z;
+	}
+	XY(3, 3) = 3*points.rows();
+	return  XY.inverse() * Z;
+}

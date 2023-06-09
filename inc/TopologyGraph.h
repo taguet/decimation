@@ -13,7 +13,7 @@ private:
 	class Node {
 	public:
 		const int id;
-		Vector3f plane_params;
+		Vector4f plane_params;
 
 		Node(TopologyGraph& parent, int id) : id{ id }, parent{ &parent } {}
 		void add(Mesh::FaceHandle fh);

@@ -7,6 +7,7 @@
 
 typedef OpenMesh::TriMesh_ArrayKernelT<>  Mesh;
 using Eigen::Vector3f;
+using Eigen::Vector4f;
 using Eigen::MatrixXf;
 using Eigen::VectorXf;
 
@@ -67,5 +68,6 @@ public:
 
 
 	static Vector3f fitPlaneToVertices(Mesh& mesh, std::set<Mesh::VertexHandle>& vertices);
+	static Vector4f fitPlaneToVerticesTLS(Mesh& mesh, std::set<Mesh::VertexHandle>& vertices);
 };
 

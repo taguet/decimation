@@ -540,8 +540,8 @@ void Viewer::draw(const std::string& _draw_mode) {
 				//Generate color
 				std::unique_ptr<int[]> color{ new int[3] {rand() % 256, rand() % 256, rand() % 256} };
 				rgb[groupID] = std::move(color);
-				Vector3f params{ graph->getRegion(groupID).plane_params};
-				std::cout << "z = " << params[1] << "x + " << params[2] << "y + " << params[0] << std::endl;
+				Vector4f params{ graph->getRegion(groupID).plane_params};
+				//std::cout << "z = " << params[1] << "x + " << params[2] << "y + " << params[0] << std::endl;
 			}
 			const Mesh::Color* c{ mesh.vertex_colors() };
 			std::unique_ptr<int[]> color{ new int[3] { c->data()[0], c->data()[1], c->data()[2]} };
@@ -587,8 +587,8 @@ void Viewer::draw(const std::string& _draw_mode) {
 			glEnd();
 		}
 
-		Vector3f& params{ graph->getRegion(regionID).plane_params };
-		std::cout << "Viewing region " << regionID << "\nEquation: "<< params[1] << "x + " << params[2] << "y - z + " << params[0] << " = 0" << std::endl;
+		Vector4f& params{ graph->getRegion(regionID).plane_params };
+		std::cout << "Viewing region " << regionID << "\nEquation: "<< params[0] << "x + " << params[1] << "y + " << params[2] << " z + " << params[3] << " = 0" << std::endl;
 		Matrix3f plane{ computePlane(params) };
 		glColor3f(1.0f, 0.0f, 0.0f);
 		Vector3f p0{ plane.col(0) };
@@ -970,16 +970,17 @@ void Viewer::keyboard(int key, int x, int y) {
 /// @brief Compute 3 points of a plane
 /// @param plane_params A vector (c, a, b)
 /// @return A 3x3 matrix with each column representing a point.
-Matrix3f Viewer::computePlane(const Vector3f& plane_params) {
+Matrix3f Viewer::computePlane(const Vector4f& plane_params) {
 	//ax + by + c - z = 0
 	//On trouve 3 points sur le plan
-	float a{ plane_params[1] };
-	float b{ plane_params[2] };
-	float c{ plane_params[0] };
+	float a{ plane_params[0] };
+	float b{ plane_params[1] };
+	float c{ plane_params[2] };
+	float d{ plane_params[3] };
 	Matrix3f plane(3, 3);	//each column is a point
-	plane.col(0) = Vector3f{0, 0, c};	//x=0 and y=0
-	plane.col(1) = Vector3f{0, -c/b, 0};	//x=0 and z=0
-	plane.col(2) = Vector3f{-c/a, 0, 0};	//y=0 and z=0
+	plane.col(0) = Vector3f{0, 0, -d/c};	//x=0 and y=0
+	plane.col(1) = Vector3f{0, -d/b, 0};	//x=0 and z=0
+	plane.col(2) = Vector3f{-d/a, 0, 0};	//y=0 and z=0
 	return plane;
 }
 

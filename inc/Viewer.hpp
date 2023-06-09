@@ -120,7 +120,7 @@ private:
   TopologyGraph* graph{ nullptr };
 
   void draw_1_ring(const VertexHandle vh, Vec3f color);
-  Matrix3f computePlane(const Vector3f& plane_params);
+  Matrix3f computePlane(const Vector4f& plane_params);
 };
 
 
