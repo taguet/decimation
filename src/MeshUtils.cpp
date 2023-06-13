@@ -123,3 +123,40 @@ Vector4f MeshUtils::fitPlaneToVerticesOrth(Mesh& mesh, std::set<Mesh::VertexHand
 	}
 	return  XY.inverse() * Z;
 }
+
+
+/// @brief Finds the intersection between two planes.
+/// @param mesh 
+/// @param plane_1 
+/// @param plane_2 
+/// @return 
+MatrixXf MeshUtils::findPlanePlaneintersection(Mesh& mesh, const Vector4f& plane_1, const Vector4f& plane_2) {
+	Vector3f n1{getPlaneNormal(plane_1)};
+	Vector3f n2{ getPlaneNormal(plane_2) };
+	MatrixXf m{ 3,3 };
+	m.col(0) = n1;
+	m.col(1) = n2;
+	m = m.transpose();
+	VectorXf b{ 2 };
+	b << -distFromOrigin(plane_1), -distFromOrigin(plane_2);
+
+	MatrixXf line{ 2,3};
+	line.row(0) = m.inverse() * b;
+	line.row(1) = m.colPivHouseholderQr().solve(Vector3f::Zero());
+	return line;
+}
+
+
+Vector3f MeshUtils::getPlaneNormal(const Vector4f& plane) {
+	Vector3f normal{ plane[0], plane[1], plane[2] };
+	return normal.normalized();
+}
+
+
+/// @brief Computes the distance from the origin
+/// @param plane 
+/// @return 
+float MeshUtils::distFromOrigin(const Vector4f& plane) {
+	Vector3f normal{ plane[0], plane[1], plane[2] };
+	return plane[3] / normal.norm();
+}

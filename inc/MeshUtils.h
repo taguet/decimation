@@ -9,6 +9,7 @@ typedef OpenMesh::TriMesh_ArrayKernelT<>  Mesh;
 using Eigen::Vector3f;
 using Eigen::Vector4f;
 using Eigen::MatrixXf;
+using Eigen::Matrix2f;
 using Eigen::VectorXf;
 
 /// @brief Utility class with basic operations to use in algorithms on a mesh.
@@ -69,5 +70,8 @@ public:
 
 	static Vector3f fitPlaneToVertices(Mesh& mesh, std::set<Mesh::VertexHandle>& vertices);
 	static Vector4f fitPlaneToVerticesOrth(Mesh& mesh, std::set<Mesh::VertexHandle>& vertices);
+	static MatrixXf findPlanePlaneintersection(Mesh& mesh, const Vector4f& plane_1, const Vector4f& plane_2);
+	static Vector3f getPlaneNormal(const Vector4f& plane);
+	static float distFromOrigin(const Vector4f& plane);
 };
 
