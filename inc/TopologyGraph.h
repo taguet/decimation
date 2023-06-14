@@ -7,13 +7,15 @@
 #include "MeshUtils.h"
 
 typedef OpenMesh::TriMesh_ArrayKernelT<>  Mesh;
+using Plane = Vector4f;
+using Line = MatrixXf;
 
 class TopologyGraph {
 private:
 	class Node {
 	public:
 		const int id;
-		Vector4f plane_params;
+		Plane plane_params;
 
 		Node(TopologyGraph& parent, int id) : id{ id }, parent{ &parent } {}
 		void add(Mesh::FaceHandle fh);
@@ -72,6 +74,8 @@ public:
 	bool simplifyGraph();
 	bool areFacesInSameRegion(Mesh::FaceHandle fh_1, Mesh::FaceHandle fh_2);
 	void fitPlanes();
+	std::set<Line> findPlanePlaneIntersections();
+	std::set<std::pair<Plane&, Plane&>> getNeighborPairs();
 
 	std::set<Mesh::EdgeHandle> extractContour();
 

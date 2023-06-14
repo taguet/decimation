@@ -166,6 +166,38 @@ std::set<Mesh::EdgeHandle> TopologyGraph::extractContour() {
 }
 
 
+/// @brief Finds all intersections between each neighboring regions' planes
+/// @return 
+std::set<Line> TopologyGraph::findPlanePlaneIntersections() {
+	std::set<Line> lines{};
+	for (auto& plane_pair : getNeighborPairs()) {
+		lines.insert(MeshUtils::findPlanePlaneintersection(plane_pair.first, plane_pair.second));
+	}
+	return lines;
+}
+
+
+/// @brief Finds all pairs of neighboring planes
+/// @return 
+std::set<std::pair<Plane&, Plane&>> TopologyGraph::getNeighborPairs() {
+	std::set<std::pair<Plane&, Plane&>> plane_pairs{};
+	for (auto p : edges) {
+		auto neighbors{ p.second };
+		for (int neighbor : neighbors) {
+			Node& region_1{ getRegion(p.first) };
+			Node& region_2{ getRegion(neighbor) };
+			std::pair<Plane&, Plane&> plane_pair{ region_1.plane_params, region_2.plane_params };
+			std::pair<Plane&, Plane&> rev{ plane_pair.second, plane_pair.first };
+			bool setContainsPair{ plane_pairs.find(plane_pair) != plane_pairs.end() || plane_pairs.find(rev) != plane_pairs.end() };
+			if (!setContainsPair) {
+				plane_pairs.insert(plane_pair);
+			}
+		}
+	}
+	return plane_pairs;
+}
+
+
 void TopologyGraph::Node::add(Mesh::FaceHandle fh) {
 	Mesh& mesh{ parent->mesh };
 	faces.insert(fh);

@@ -130,7 +130,7 @@ Vector4f MeshUtils::fitPlaneToVerticesOrth(Mesh& mesh, std::set<Mesh::VertexHand
 /// @param plane_1 
 /// @param plane_2 
 /// @return 
-MatrixXf MeshUtils::findPlanePlaneintersection(Mesh& mesh, const Vector4f& plane_1, const Vector4f& plane_2) {
+MatrixXf MeshUtils::findPlanePlaneintersection(const Vector4f& plane_1, const Vector4f& plane_2) {
 	Vector3f n1{getPlaneNormal(plane_1)};
 	Vector3f n2{ getPlaneNormal(plane_2) };
 	MatrixXf m{ 3,3 };

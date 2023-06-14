@@ -70,8 +70,8 @@ public:
 
 	static Vector3f fitPlaneToVertices(Mesh& mesh, std::set<Mesh::VertexHandle>& vertices);
 	static Vector4f fitPlaneToVerticesOrth(Mesh& mesh, std::set<Mesh::VertexHandle>& vertices);
-	static MatrixXf findPlanePlaneintersection(Mesh& mesh, const Vector4f& plane_1, const Vector4f& plane_2);
-	static Vector3f getPlaneNormal(const Vector4f& plane);
-	static float distFromOrigin(const Vector4f& plane);
+	static MatrixXf findPlanePlaneintersection(const Vector4f& plane_1, const Vector4f& plane_2); //TODO put in Plane class
+	static Vector3f getPlaneNormal(const Vector4f& plane); //TODO put in Plane class
+	static float distFromOrigin(const Vector4f& plane); // TODO put in Plane class
 };
 
