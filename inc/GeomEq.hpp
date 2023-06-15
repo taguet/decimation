@@ -10,7 +10,7 @@ namespace Equation {
 	/// @brief Represents the parametric equation of a line.
 	class Line {
 	public:
-		Line(Vector3f position, Vector3f direction) : position{ position }, direction{ direction } {}
+		Line(Vector3f& position, Vector3f& direction) : position{ position }, direction{ direction } {}
 
 		Vector3f position;	/// The position point
 		Vector3f direction;	/// The direction vector
