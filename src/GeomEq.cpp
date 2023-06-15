@@ -1,6 +1,8 @@
 #include "GeomEq.hpp"
 
 namespace Equation {
+	//------------------- PLANE --------------------//
+
 	/// Uses an approach from Gellert et al. 1989, p.542 to find a parametric equation of the line.
 	Line Plane::findPlanePlaneintersection(const Plane& plane) {
 		Vector3f n1{ getNormal() };
@@ -27,5 +29,23 @@ namespace Equation {
 	float Plane::distFromOrigin() const {
 		Vector3f normal{ getNormal() };
 		return d() / normal.norm();
+	}
+
+
+	float Plane::evaluate(float x, float y, float z) const {
+		Eigen::Vector<float, 1> result{ parameters * Vector4f{ x,y,z,1 }.transpose() };
+		return result.value();
+	}
+	
+	
+	float Plane::evaluate(Vector3f& point) const {
+		Eigen::Vector<float, 1> result{ parameters * Vector4f{ point, 1 }.transpose() };
+		return result.value();
+	}
+
+//------------------- LINE --------------------//
+
+	Vector3f Line::evaluate(float t) const {
+		return position + t * direction;
 	}
 }

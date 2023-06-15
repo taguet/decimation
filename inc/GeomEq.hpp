@@ -12,6 +12,8 @@ namespace Equation {
 	public:
 		Line(Vector3f& position, Vector3f& direction) : position{ position }, direction{ direction } {}
 
+		Vector3f evaluate(float t) const;
+
 		Vector3f position;	/// The position point
 		Vector3f direction;	/// The direction vector
 	};
@@ -26,6 +28,12 @@ namespace Equation {
 		float b() const { return parameters[0]; }
 		float c() const { return parameters[0]; }
 		float d() const { return parameters[0]; }
+
+
+		/// @brief Evaluate the expression ax+by+cz+d
+		/// @return A point.
+		float evaluate(float x, float y, float z) const;
+		float evaluate(Vector3f& point) const;
 
 		/// @brief Computes the intersection between this plane and another given plane.
 		/// @param plane The plane intersecting this object.
