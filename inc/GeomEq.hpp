@@ -32,6 +32,8 @@ namespace Equation {
 		/// @return A line.
 		Line findPlanePlaneintersection(const Plane& plane);
 
+		float distFromOrigin() const;
+
 		Vector3f getNormal() const;
 
 		Vector4f parameters;	/// The parameters a, b, c and d
