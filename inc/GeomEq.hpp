@@ -14,6 +14,7 @@ namespace Equation {
 
 		Vector3f evaluate(float t) const;
 
+
 		Vector3f position;	/// The position point
 		Vector3f direction;	/// The direction vector
 	};
@@ -41,8 +42,8 @@ namespace Equation {
 		Line findPlanePlaneintersection(const Plane& plane);
 
 		float distFromOrigin() const;
-
 		Vector3f getNormal() const;
+
 
 		Vector4f parameters;	/// The parameters a, b, c and d
 	};

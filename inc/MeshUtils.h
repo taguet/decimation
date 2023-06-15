@@ -3,14 +3,14 @@
 #include <OpenMesh/Core/Mesh/Types/TriMesh_ArrayKernelT.hh>
 #include <list>
 #include <set>
-#include <Eigen/Dense>
+#include "GeomEq.hpp"
 
 typedef OpenMesh::TriMesh_ArrayKernelT<>  Mesh;
-using Eigen::Vector3f;
-using Eigen::Vector4f;
-using Eigen::MatrixXf;
-using Eigen::Matrix2f;
-using Eigen::VectorXf;
+using Vector3f = Eigen::Vector3f;
+using Vector4f = Eigen::Vector4f;
+using VectorXf = Eigen::VectorXf;
+using MatrixXf = Eigen::MatrixXf;
+using Matrix2f = Eigen::Matrix2f;
 
 /// @brief Utility class with basic operations to use in algorithms on a mesh.
 class MeshUtils
@@ -68,10 +68,10 @@ public:
 	static void getFaceNeighbors(Mesh& mesh, const Mesh::FaceHandle, std::list<Mesh::FaceHandle>& neighbors);
 
 
-	static Vector3f fitPlaneToVertices(Mesh& mesh, std::set<Mesh::VertexHandle>& vertices);
-	static Vector4f fitPlaneToVerticesOrth(Mesh& mesh, std::set<Mesh::VertexHandle>& vertices);
-	static MatrixXf findPlanePlaneintersection(const Vector4f& plane_1, const Vector4f& plane_2); //TODO put in Plane class
-	static Vector3f getPlaneNormal(const Vector4f& plane); //TODO put in Plane class
-	static float distFromOrigin(const Vector4f& plane); // TODO put in Plane class
+	/// @brief Fits plane to a set of vertices by minimizing the orthogonal distance by least squares.
+	/// @param mesh 
+	/// @param vertices 
+	/// @return The cartesian equation of the fitted plane.
+	static Equation::Plane fitPlaneToVertices(Mesh& mesh, std::set<Mesh::VertexHandle>& vertices); 
 };
 

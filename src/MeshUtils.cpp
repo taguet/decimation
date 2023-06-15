@@ -80,25 +80,7 @@ void MeshUtils::getFaceNeighbors(Mesh& mesh, Mesh::FaceHandle fh, std::list<Mesh
 }
 
 
-Vector3f MeshUtils::fitPlaneToVertices(Mesh& mesh, std::set<Mesh::VertexHandle>& vertices) {
-	MatrixXf regressors( vertices.size(), 3 );	// x & y
-	VectorXf observed( vertices.size() );	// z
-	Vector3f parameters( 0.0f, 0.0f, 0.0f );	//c, a & b
-
-	{
-		std::set<Mesh::VertexHandle>::iterator it{ vertices.begin() };
-		for (int i{ 0 }; i < regressors.rows(), it != vertices.end(); ++i, ++it) {
-			Mesh::Point p{ mesh.point(*it) };
-			regressors.row(i) = Vector3f{ 1.0f, p[0], p[1] };
-			observed(i) = p[2];
-		}
-	}
-	MatrixXf t_regressors{ regressors.transpose() };
-	parameters = (t_regressors * regressors).inverse() * t_regressors * observed;
-	return parameters;
-}
-
-Vector4f MeshUtils::fitPlaneToVerticesOrth(Mesh& mesh, std::set<Mesh::VertexHandle>& vertices) {
+Equation::Plane MeshUtils::fitPlaneToVertices(Mesh& mesh, std::set<Mesh::VertexHandle>& vertices) {
 	MatrixXf points{ vertices.size(), 3 }; // point coordinates
 	{
 		std::set<Mesh::VertexHandle>::iterator it{ vertices.begin() };
@@ -121,42 +103,5 @@ Vector4f MeshUtils::fitPlaneToVerticesOrth(Mesh& mesh, std::set<Mesh::VertexHand
 		XY.row(3) += Vector4f{ 2*x, 2*y, 2*z, 3 };
 		Z += Vector4f{ x*y+x*z, x*y+y*z, x*z+y*z, x+y+z };
 	}
-	return  XY.inverse() * Z;
-}
-
-
-/// @brief Finds the intersection between two planes.
-/// @param mesh 
-/// @param plane_1 
-/// @param plane_2 
-/// @return 
-MatrixXf MeshUtils::findPlanePlaneintersection(const Vector4f& plane_1, const Vector4f& plane_2) {
-	Vector3f n1{getPlaneNormal(plane_1)};
-	Vector3f n2{ getPlaneNormal(plane_2) };
-	MatrixXf m{ 3,3 };
-	m.col(0) = n1;
-	m.col(1) = n2;
-	m = m.transpose();
-	VectorXf b{ 2 };
-	b << -distFromOrigin(plane_1), -distFromOrigin(plane_2);
-
-	MatrixXf line{ 2,3};
-	line.row(0) = m.inverse() * b;
-	line.row(1) = m.colPivHouseholderQr().solve(Vector3f::Zero());
-	return line;
-}
-
-
-Vector3f MeshUtils::getPlaneNormal(const Vector4f& plane) {
-	Vector3f normal{ plane[0], plane[1], plane[2] };
-	return normal.normalized();
-}
-
-
-/// @brief Computes the distance from the origin
-/// @param plane 
-/// @return 
-float MeshUtils::distFromOrigin(const Vector4f& plane) {
-	Vector3f normal{ plane[0], plane[1], plane[2] };
-	return plane[3] / normal.norm();
+	return  { XY.inverse() * Z };
 }
