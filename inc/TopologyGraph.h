@@ -7,15 +7,15 @@
 #include "MeshUtils.h"
 
 typedef OpenMesh::TriMesh_ArrayKernelT<>  Mesh;
-using Plane = Vector4f;
-using Line = MatrixXf;
+using Plane = Equation::Plane;
+using Line = Equation::Line;
 
 class TopologyGraph {
 private:
 	class Node {
 	public:
 		const int id;
-		Plane plane_params;
+		Plane plane;
 
 		Node(TopologyGraph& parent, int id) : id{ id }, parent{ &parent } {}
 		void add(Mesh::FaceHandle fh);

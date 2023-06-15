@@ -540,7 +540,7 @@ void Viewer::draw(const std::string& _draw_mode) {
 				//Generate color
 				std::unique_ptr<int[]> color{ new int[3] {rand() % 256, rand() % 256, rand() % 256} };
 				rgb[groupID] = std::move(color);
-				Vector4f params{ graph->getRegion(groupID).plane_params};
+				Equation::Plane plane{ graph->getRegion(groupID).plane};
 				//std::cout << "z = " << params[1] << "x + " << params[2] << "y + " << params[0] << std::endl;
 			}
 			const Mesh::Color* c{ mesh.vertex_colors() };
@@ -587,13 +587,13 @@ void Viewer::draw(const std::string& _draw_mode) {
 			glEnd();
 		}
 
-		Vector4f& params{ graph->getRegion(regionID).plane_params };
-		std::cout << "Viewing region " << regionID << "\nEquation: "<< params[0] << "x + " << params[1] << "y + " << params[2] << " z + " << params[3] << " = 0" << std::endl;
-		Matrix3f plane{ computePlane(params) };
+		Equation::Plane& plane{ graph->getRegion(regionID).plane };
+		std::cout << "Viewing region " << regionID << "\nEquation: "<< plane.a() << "x + " << plane.b() << "y + " << plane.c() << " z + " << plane.d() << " = 0" << std::endl;
 		glColor3f(1.0f, 0.0f, 0.0f);
-		Vector3f p0{ plane.col(0) };
-		Vector3f p1{ plane.col(1) };
-		Vector3f p2{ plane.col(2) };
+		std::vector<Eigen::Vector3f> points{ computePlane(plane) };
+		Vector3f& p0{ points[0]};
+		Vector3f& p1{ points[1] };
+		Vector3f& p2{ points[2] };
 		glBegin(GL_TRIANGLES);
 			GL::glVertex(OpenMesh::Vec3f{ p0[0], p0[1], p0[2] });
 			GL::glVertex(OpenMesh::Vec3f{ p1[0], p1[1], p1[2] });
@@ -970,18 +970,18 @@ void Viewer::keyboard(int key, int x, int y) {
 /// @brief Compute 3 points of a plane
 /// @param plane_params A vector (c, a, b)
 /// @return A 3x3 matrix with each column representing a point.
-Matrix3f Viewer::computePlane(const Vector4f& plane_params) {
+std::vector<Eigen::Vector3f> Viewer::computePlane(const Equation::Plane& plane) const {
 	//ax + by + c - z = 0
 	//On trouve 3 points sur le plan
-	float a{ plane_params[0] };
-	float b{ plane_params[1] };
-	float c{ plane_params[2] };
-	float d{ plane_params[3] };
-	Matrix3f plane(3, 3);	//each column is a point
-	plane.col(0) = Vector3f{0, 0, -d/c};	//x=0 and y=0
-	plane.col(1) = Vector3f{0, -d/b, 0};	//x=0 and z=0
-	plane.col(2) = Vector3f{-d/a, 0, 0};	//y=0 and z=0
-	return plane;
+	float a{ plane.a()};
+	float b{ plane.b()};
+	float c{ plane.c() };
+	float d{ plane.d() };
+	std::vector<Eigen::Vector3f> points{ 3 };
+	points.at(0) = Vector3f{0, 0, -d / c};	//x=0 and y=0
+	points.at(1) = Vector3f{0, -d/b, 0};	//x=0 and z=0
+	points.at(2) = Vector3f{-d/a, 0, 0};	//y=0 and z=0
+	return points;
 }
 
 

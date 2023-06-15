@@ -10,7 +10,8 @@ namespace Equation {
 	/// @brief Represents the parametric equation of a line.
 	class Line {
 	public:
-		Line(Vector3f& position, Vector3f& direction) : position{ position }, direction{ direction } {}
+		Line() = default;
+		Line(Vector3f position, Vector3f direction) : position{ position }, direction{ direction } {}
 
 		Vector3f evaluate(float t) const;
 
@@ -22,7 +23,8 @@ namespace Equation {
 	/// @brief Represents the cartesian equation of a plane.
 	class Plane {
 	public:
-		Plane(Vector3f parameters) : parameters{parameters} {}
+		Plane() = default;
+		Plane(Vector4f parameters) : parameters{parameters} {}
 		Plane(float a, float b, float c, float d) : parameters{a,b,c,d} {}
 
 		float a() const { return parameters[0]; }
@@ -34,12 +36,12 @@ namespace Equation {
 		/// @brief Evaluate the expression ax+by+cz+d
 		/// @return A point.
 		float evaluate(float x, float y, float z) const;
-		float evaluate(Vector3f& point) const;
+		float evaluate(Vector3f point) const;
 
 		/// @brief Computes the intersection between this plane and another given plane.
 		/// @param plane The plane intersecting this object.
 		/// @return A line.
-		Line findPlanePlaneintersection(const Plane& plane);
+		Line findPlanePlaneIntersection(const Plane& plane);
 
 		float distFromOrigin() const;
 		Vector3f getNormal() const;

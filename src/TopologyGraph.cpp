@@ -171,7 +171,9 @@ std::set<Mesh::EdgeHandle> TopologyGraph::extractContour() {
 std::set<Line> TopologyGraph::findPlanePlaneIntersections() {
 	std::set<Line> lines{};
 	for (auto& plane_pair : getNeighborPairs()) {
-		lines.insert(MeshUtils::findPlanePlaneintersection(plane_pair.first, plane_pair.second));
+		Plane& plane_1{ plane_pair.first };
+		Plane& plane_2{ plane_pair.second };
+		lines.insert(plane_1.findPlanePlaneIntersection(plane_2));
 	}
 	return lines;
 }
@@ -186,7 +188,7 @@ std::set<std::pair<Plane&, Plane&>> TopologyGraph::getNeighborPairs() {
 		for (int neighbor : neighbors) {
 			Node& region_1{ getRegion(p.first) };
 			Node& region_2{ getRegion(neighbor) };
-			std::pair<Plane&, Plane&> plane_pair{ region_1.plane_params, region_2.plane_params };
+			std::pair<Plane&, Plane&> plane_pair{ region_1.plane, region_2.plane };
 			std::pair<Plane&, Plane&> rev{ plane_pair.second, plane_pair.first };
 			bool setContainsPair{ plane_pairs.find(plane_pair) != plane_pairs.end() || plane_pairs.find(rev) != plane_pairs.end() };
 			if (!setContainsPair) {
@@ -219,7 +221,7 @@ void TopologyGraph::Node::regroupIntoSelf(Node& region) {
 
 
 void TopologyGraph::Node::fitPlane() {
-	plane_params = MeshUtils::fitPlaneToVerticesOrth(parent->mesh, vertices);
+	plane = MeshUtils::fitPlaneToVertices(parent->mesh, vertices);
 }
 
 
@@ -228,10 +230,10 @@ float TopologyGraph::Node::sumVertexProjectedDistances() {
 	float sum{ 0.0f };
 	for (auto& vh : vertices) {
 		Mesh::Point p{ mesh.point(vh) };
-		float a{ plane_params[0] };
-		float b{ plane_params[1] };
-		float c{ plane_params[2] };
-		float d{ plane_params[3] };
+		float a{ plane.a()};
+		float b{ plane.b()};
+		float c{ plane.c()};
+		float d{ plane.d()};
 		sum += std::abs(a * p[0] + b * p[1] + c * p[2] + d) / std::sqrtf(a * a + b * b + c * c);
 	}
 	return sum;
