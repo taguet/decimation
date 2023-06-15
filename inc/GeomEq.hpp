@@ -22,10 +22,17 @@ namespace Equation {
 		Plane(Vector3f parameters) : parameters{parameters} {}
 		Plane(float a, float b, float c, float d) : parameters{a,b,c,d} {}
 
+		float a() const { return parameters[0]; }
+		float b() const { return parameters[0]; }
+		float c() const { return parameters[0]; }
+		float d() const { return parameters[0]; }
+
 		/// @brief Computes the intersection between this plane and another given plane.
 		/// @param plane The plane intersecting this object.
 		/// @return A line.
 		Line findPlanePlaneintersection(const Plane& plane);
+
+		Vector3f getNormal() const;
 
 		Vector4f parameters;	/// The parameters a, b, c and d
 	};
