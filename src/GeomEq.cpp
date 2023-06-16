@@ -16,7 +16,9 @@ namespace Equation {
 		b << -distFromOrigin(), -plane.distFromOrigin();
 
 		Vector3f point{ m.colPivHouseholderQr().solve(b)};	// mx = b
-		Vector3f direction{ m.colPivHouseholderQr().solve(Eigen::Vector2f::Zero()) };	//mx = 0 to find a vector given by the nullspace of m
+		Eigen::FullPivLU<Eigen::MatrixXf> lu{ m };
+		Eigen::MatrixXf m_null_space{ lu.kernel() };
+		Vector3f direction{ m_null_space.col(0)};	//mx = 0 to find a vector given by the nullspace of m
 		return { point, direction };
 	}
 
