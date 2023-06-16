@@ -168,12 +168,14 @@ std::set<Mesh::EdgeHandle> TopologyGraph::extractContour() {
 
 /// @brief Finds all intersections between each neighboring regions' planes
 /// @return 
-std::set<Line> TopologyGraph::findPlanePlaneIntersections() {
-	std::set<Line> lines{};
-	for (auto& plane_pair : getNeighborPairs()) {
-		Plane& plane_1{ plane_pair.first };
-		Plane& plane_2{ plane_pair.second };
-		lines.insert(plane_1.findPlanePlaneIntersection(plane_2));
+std::vector<Line> TopologyGraph::findPlanePlaneIntersections() {
+	std::vector<std::pair<Plane*, Plane*>>& neighbor_pairs{ getNeighborPairs() };
+	std::vector<Line> lines;
+	lines.reserve(neighbor_pairs.size());
+	for (auto& plane_pair : neighbor_pairs) {
+		Plane* plane_1{ plane_pair.first };
+		Plane* plane_2{ plane_pair.second };
+		lines.push_back(plane_1->findPlanePlaneIntersection(*plane_2));
 	}
 	return lines;
 }
@@ -181,18 +183,19 @@ std::set<Line> TopologyGraph::findPlanePlaneIntersections() {
 
 /// @brief Finds all pairs of neighboring planes
 /// @return 
-std::set<std::pair<Plane&, Plane&>> TopologyGraph::getNeighborPairs() {
-	std::set<std::pair<Plane&, Plane&>> plane_pairs{};
+std::vector<std::pair<Plane*, Plane*>> TopologyGraph::getNeighborPairs() {
+	std::vector<std::pair<Plane*, Plane*>> plane_pairs{};
 	for (auto p : edges) {
 		auto neighbors{ p.second };
 		for (int neighbor : neighbors) {
 			Node& region_1{ getRegion(p.first) };
 			Node& region_2{ getRegion(neighbor) };
-			std::pair<Plane&, Plane&> plane_pair{ region_1.plane, region_2.plane };
-			std::pair<Plane&, Plane&> rev{ plane_pair.second, plane_pair.first };
-			bool setContainsPair{ plane_pairs.find(plane_pair) != plane_pairs.end() || plane_pairs.find(rev) != plane_pairs.end() };
+			std::pair<Plane*, Plane*> plane_pair{ &region_1.plane, &region_2.plane };
+			std::pair<Plane*, Plane*> rev{ plane_pair.second, plane_pair.first };
+			bool setContainsPair{ std::find(plane_pairs.begin(), plane_pairs.end(), plane_pair) != plane_pairs.end()
+				|| std::find(plane_pairs.begin(), plane_pairs.end(), rev) != plane_pairs.end() };
 			if (!setContainsPair) {
-				plane_pairs.insert(plane_pair);
+				plane_pairs.push_back(plane_pair);
 			}
 		}
 	}

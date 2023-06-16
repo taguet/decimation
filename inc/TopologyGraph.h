@@ -74,8 +74,8 @@ public:
 	bool simplifyGraph();
 	bool areFacesInSameRegion(Mesh::FaceHandle fh_1, Mesh::FaceHandle fh_2);
 	void fitPlanes();
-	std::set<Line> findPlanePlaneIntersections();
-	std::set<std::pair<Plane&, Plane&>> getNeighborPairs();
+	std::vector<Line> findPlanePlaneIntersections();
+	std::vector<std::pair<Plane*, Plane*>> getNeighborPairs();
 
 	std::set<Mesh::EdgeHandle> extractContour();
 

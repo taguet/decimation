@@ -13,6 +13,7 @@ namespace Equation {
 		m.transposeInPlace();
 		Eigen::VectorXf b{ 2 };		// Vector b = -[p1 p2]^T
 		b << -distFromOrigin(), -plane.distFromOrigin();
+		b.transposeInPlace();
 
 		Vector3f point{ m.colPivHouseholderQr().solve(b)};	// mx = b
 		Vector3f direction{ m.colPivHouseholderQr().solve(Vector3f::Zero()) };	//mx = 0 to find a vector given by the nullspace of m
