@@ -1,4 +1,5 @@
 #include "GeomEq.hpp"
+#include <iostream>
 
 namespace Equation {
 	//------------------- PLANE --------------------//
@@ -7,16 +8,15 @@ namespace Equation {
 	Line Plane::findPlanePlaneIntersection(const Plane& plane) {
 		Vector3f n1{ getNormal() };
 		Vector3f n2{ plane.getNormal() };
-		Eigen::MatrixXf m{ 3,3 };	// Matrix m = [n1 n2]^T
+		Eigen::MatrixXf m{ 3,2 };	// Matrix m = [n1 n2]^T
 		m.col(0) = n1;
 		m.col(1) = n2;
 		m.transposeInPlace();
 		Eigen::VectorXf b{ 2 };		// Vector b = -[p1 p2]^T
 		b << -distFromOrigin(), -plane.distFromOrigin();
-		b.transposeInPlace();
 
 		Vector3f point{ m.colPivHouseholderQr().solve(b)};	// mx = b
-		Vector3f direction{ m.colPivHouseholderQr().solve(Vector3f::Zero()) };	//mx = 0 to find a vector given by the nullspace of m
+		Vector3f direction{ m.colPivHouseholderQr().solve(Eigen::Vector2f::Zero()) };	//mx = 0 to find a vector given by the nullspace of m
 		return { point, direction };
 	}
 

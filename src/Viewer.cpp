@@ -606,6 +606,7 @@ void Viewer::draw(const std::string& _draw_mode) {
 	else if (_draw_mode == "Debug contour") {
 		static std::set<Mesh::EdgeHandle> contour_edges{};
 		static std::set<Mesh::VertexHandle> contour_vertices{};
+		static std::vector<Equation::Line> lines;
 		if (!isModified) {
 			contour_edges.clear();
 			isModified = true;
@@ -617,6 +618,7 @@ void Viewer::draw(const std::string& _draw_mode) {
 				contour_vertices.insert(mesh.from_vertex_handle(heh));
 				contour_vertices.insert(mesh.to_vertex_handle(heh));
 			}
+			lines = this->graph->findPlanePlaneIntersections();
 		}
 		glEnable(GL_LIGHTING);
 
@@ -627,11 +629,19 @@ void Viewer::draw(const std::string& _draw_mode) {
 		glPolygonOffset(-1.0, 1.0);
 		glLineWidth(3.0f);
 		glBegin(GL_LINES);
-			glColor3f(1.0f, 0.0f, 0.0f);
+			glColor3f(0.0f, 0.0f, 1.0f);
 			for (auto edge : contour_edges) {
 				Mesh::HalfedgeHandle heh{ mesh.halfedge_handle(edge, 0) };
 				GL::glVertex(mesh.point(mesh.from_vertex_handle(heh)));
 				GL::glVertex(mesh.point(mesh.to_vertex_handle(heh)));
+			}
+			glColor3f(1.0f, 0.0f, 0.0f);
+			for (auto& line : lines) {
+				Vector3f p0{ line.evaluate(0.0f) };
+				auto t = p0[0];
+				Vector3f p1{ line.evaluate(1.0f) };
+				GL::glVertex(OpenMesh::Vec3f{ p0(0), p0(1), p0(2) });
+				GL::glVertex(OpenMesh::Vec3f{ p1(0), p1(1), p1(2) });
 			}
 		glEnd();
 		glLineWidth(1.0f);
