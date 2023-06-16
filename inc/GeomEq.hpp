@@ -28,9 +28,9 @@ namespace Equation {
 		Plane(float a, float b, float c, float d) : parameters{a,b,c,d} {}
 
 		float a() const { return parameters[0]; }
-		float b() const { return parameters[0]; }
-		float c() const { return parameters[0]; }
-		float d() const { return parameters[0]; }
+		float b() const { return parameters[1]; }
+		float c() const { return parameters[2]; }
+		float d() const { return parameters[3]; }
 
 
 		/// @brief Evaluate the expression ax+by+cz+d
