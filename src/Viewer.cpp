@@ -628,18 +628,18 @@ void Viewer::draw(const std::string& _draw_mode) {
 		glEnable(GL_POLYGON_OFFSET_LINE);
 		glPolygonOffset(-1.0, 1.0);
 		glLineWidth(3.0f);
-		glBegin(GL_LINES);/*
-			glColor3f(0.0f, 0.0f, 1.0f);
+		glBegin(GL_LINES);
+			glColor3f(0.0f, 0.0f, 1.0f);	// draw contour on mesh
 			for (auto edge : contour_edges) {
 				Mesh::HalfedgeHandle heh{ mesh.halfedge_handle(edge, 0) };
 				GL::glVertex(mesh.point(mesh.from_vertex_handle(heh)));
 				GL::glVertex(mesh.point(mesh.to_vertex_handle(heh)));
-			}*/
-			glColor3f(1.0f, 0.0f, 0.0f);
+			}
+			glColor3f(1.0f, 0.0f, 0.0f);	// draw plane plane intersections
 			for (auto& line : lines) {
-				Vector3f p0{ line.evaluate(0.0f) };
+				Vector3f p0{ line.evaluate(-2.0f) };
 				auto t = p0[0];
-				Vector3f p1{ line.evaluate(10.0f) };
+				Vector3f p1{ line.evaluate(2.0f) };
 				std::cout << "Line: (" << line.position.transpose() << ") + t*(" << line.direction.transpose() << ")" << std::endl;
 				std::cout << "p0=" << p0.transpose() << "\tp1=" << p1.transpose() << std::endl;
 				GL::glVertex(OpenMesh::Vec3f{ p0(0), p0(1), p0(2) });
