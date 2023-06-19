@@ -77,9 +77,14 @@ public:
 	std::vector<Line> findPlanePlaneIntersections();
 	std::vector<std::pair<Plane*, Plane*>> getNeighborPairs();
 
+	/// @brief Finds the edges that belong to two different regions.
+	/// @return A set of edges.
 	std::set<Mesh::EdgeHandle> extractContour();
 
-	int& faceGroup(Mesh::FaceHandle fh) {
+	int faceGroup(Mesh::FaceHandle fh) {
 		return mesh.property(f_group, fh);
+	}
+	int faceGroup(Mesh::HalfedgeHandle heh) {
+		return mesh.property(f_group, mesh.face_handle(heh));
 	}
 };
