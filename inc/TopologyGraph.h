@@ -74,17 +74,25 @@ public:
 	bool simplifyGraph();
 	bool areFacesInSameRegion(Mesh::FaceHandle fh_1, Mesh::FaceHandle fh_2);
 	void fitPlanes();
+
+	/// @brief Finds all intersections between each neighboring regions' planes
+	/// @return The equation of a line.
 	std::vector<Line> findPlanePlaneIntersections();
+	/// @brief Find all intersections between region planes.
+	/// @return An association between pairs of regions and lines.
+	std::map<std::pair<int, int>, Line> findContourLines();
+	/// @brief Finds all pairs of neighboring planes
+	/// @return A container of region pairs.
 	std::vector<std::pair<Plane*, Plane*>> getNeighborPairs();
 
 	/// @brief Finds the edges that belong to two different regions.
 	/// @return A set of edges.
 	std::set<Mesh::EdgeHandle> extractContour();
 
-	int faceGroup(Mesh::FaceHandle fh) {
+	int& faceGroup(Mesh::FaceHandle fh) {
 		return mesh.property(f_group, fh);
 	}
-	int faceGroup(Mesh::HalfedgeHandle heh) {
+	int& faceGroup(Mesh::HalfedgeHandle heh) {
 		return mesh.property(f_group, mesh.face_handle(heh));
 	}
 };

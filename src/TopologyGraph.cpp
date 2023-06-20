@@ -166,8 +166,6 @@ std::set<Mesh::EdgeHandle> TopologyGraph::extractContour() {
 }
 
 
-/// @brief Finds all intersections between each neighboring regions' planes
-/// @return 
 std::vector<Line> TopologyGraph::findPlanePlaneIntersections() {
 	std::vector<std::pair<Plane*, Plane*>>& neighbor_pairs{ getNeighborPairs() };
 	std::vector<Line> lines;
@@ -181,8 +179,20 @@ std::vector<Line> TopologyGraph::findPlanePlaneIntersections() {
 }
 
 
-/// @brief Finds all pairs of neighboring planes
-/// @return 
+std::map<std::pair<int, int>, Line> TopologyGraph::findContourLines() {
+	/*
+	std::vector<std::pair<Plane*, Plane*>>& neighbor_pairs{ getNeighborPairs() };
+	std::map<std::pair<int, int>, Line> lines;
+	for (auto& plane_pair : neighbor_pairs) {
+		Plane* plane_1{ plane_pair.first };
+		Plane* plane_2{ plane_pair.second };
+		Line& line{ plane_1->findPlanePlaneIntersection(*plane_2) };
+		lines.insert({ {plane_1.id, plane_2.id}, line });
+	}*/
+	return {};
+}
+
+
 std::vector<std::pair<Plane*, Plane*>> TopologyGraph::getNeighborPairs() {
 	std::vector<std::pair<Plane*, Plane*>> plane_pairs{};
 	for (auto p : edges) {
