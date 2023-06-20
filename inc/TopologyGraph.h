@@ -84,6 +84,9 @@ public:
 	/// @brief Finds all pairs of neighboring planes
 	/// @return A container of region pairs.
 	std::vector<std::pair<Plane*, Plane*>> getNeighborPairs();
+	/// @brief Finds all pairs of neighboring planes and the region IDs.
+	/// @return An association between pairs of region IDs and pairs of planes.
+	std::map<std::pair<int, int>, std::pair<Plane*, Plane*>> getNeighborPairsAndIDs();
 
 	/// @brief Finds the edges that belong to two different regions.
 	/// @return A set of edges.
