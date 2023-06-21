@@ -167,12 +167,10 @@ std::set<Mesh::EdgeHandle> TopologyGraph::extractContour() {
 
 
 std::vector<Line> TopologyGraph::findPlanePlaneIntersections() {
-	std::vector<std::pair<Plane*, Plane*>>& neighbor_pairs{ getNeighborPairs() };
+	std::set<std::pair<Plane*, Plane*>>& neighbor_pairs{ getNeighborPairs() };
 	std::vector<Line> lines;
 	lines.reserve(neighbor_pairs.size());
-	for (auto& plane_pair : neighbor_pairs) {
-		Plane* plane_1{ plane_pair.first };
-		Plane* plane_2{ plane_pair.second };
+	for (auto const & [plane_1, plane_2] : neighbor_pairs) {
 		lines.push_back(plane_1->findPlanePlaneIntersection(*plane_2));
 	}
 	return lines;
@@ -209,19 +207,16 @@ std::set<std::pair<int, int>> TopologyGraph::getRegionPairs() {
 }
 
 
-std::vector<std::pair<Plane*, Plane*>> TopologyGraph::getNeighborPairs() {
-	std::vector<std::pair<Plane*, Plane*>> plane_pairs{};
-	for (auto p : edges) {
-		auto neighbors{ p.second };
-		for (int neighbor : neighbors) {
-			Node& region_1{ getRegion(p.first) };
-			Node& region_2{ getRegion(neighbor) };
+std::set<std::pair<Plane*, Plane*>> TopologyGraph::getNeighborPairs() {
+	std::set<std::pair<Plane*, Plane*>> plane_pairs{};
+	for (auto const & [id, neighbors] : edges) {
+		for (int neighbor_id : neighbors) {
+			Node& region_1{ getRegion(id) };
+			Node& region_2{ getRegion(neighbor_id) };
 			std::pair<Plane*, Plane*> plane_pair{ &region_1.plane, &region_2.plane };
 			std::pair<Plane*, Plane*> rev{ plane_pair.second, plane_pair.first };
-			bool setContainsPair{ std::find(plane_pairs.begin(), plane_pairs.end(), plane_pair) != plane_pairs.end()
-				|| std::find(plane_pairs.begin(), plane_pairs.end(), rev) != plane_pairs.end() };
-			if (!setContainsPair) {
-				plane_pairs.push_back(plane_pair);
+			if (!plane_pairs.contains(rev)) {
+				plane_pairs.insert(plane_pair);
 			}
 		}
 	}

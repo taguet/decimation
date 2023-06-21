@@ -86,7 +86,7 @@ public:
 	std::map<std::pair<int, int>, Line> findContourLines();
 	/// @brief Finds all pairs of neighboring planes
 	/// @return A container of region pairs.
-	std::vector<std::pair<Plane*, Plane*>> getNeighborPairs();
+	std::set<std::pair<Plane*, Plane*>> getNeighborPairs();
 	/// @brief Finds all pairs of neighboring regions.
 	/// @return A set of node pairs.
 	std::set<std::pair<int, int>> getRegionPairs();
