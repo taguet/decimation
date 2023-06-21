@@ -138,7 +138,7 @@ int TopologyGraph::getFaceRegion(Mesh::FaceHandle fh) {
 }
 
 
-std::set<int> TopologyGraph::getRegionIDs() {
+std::set<int> TopologyGraph::getRegionIDs() const {
 	std::set<int> ids{};
 	for (auto& p : regions) {
 		ids.insert(p.first);
@@ -180,16 +180,17 @@ std::vector<Line> TopologyGraph::findPlanePlaneIntersections() {
 
 
 std::map<std::pair<int, int>, Line> TopologyGraph::findContourLines() {
-	/*
-	std::vector<std::pair<Plane*, Plane*>>& neighbor_pairs{ getNeighborPairs() };
 	std::map<std::pair<int, int>, Line> lines;
-	for (auto& plane_pair : neighbor_pairs) {
-		Plane* plane_1{ plane_pair.first };
-		Plane* plane_2{ plane_pair.second };
-		Line& line{ plane_1->findPlanePlaneIntersection(*plane_2) };
-		lines.insert({ {plane_1.id, plane_2.id}, line });
-	}*/
-	return {};
+	std::set<std::pair<int, int>> region_pairs{ getRegionPairs() };
+	for (auto const & [id_1, id_2] : region_pairs) {
+		if (!lines.contains({ id_1, id_2 })) {
+			Plane* plane_1{ &getRegion(id_1).plane };
+			Plane* plane_2{ &getRegion(id_2).plane };
+			Line line{ plane_1->findPlanePlaneIntersection(*plane_2) };
+			lines.insert({ {id_1, id_2}, line });
+		}
+	}
+	return lines;
 }
 
 

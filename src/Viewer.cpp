@@ -587,7 +587,7 @@ void Viewer::draw(const std::string& _draw_mode) {
 			glEnd();
 		}
 
-		Equation::Plane& plane{ graph->getRegion(regionID).plane };
+		const Equation::Plane& plane{ graph->getRegion(regionID).plane };
 		std::cout << "Viewing region " << regionID << "\nEquation: "<< plane.a() << "x + " << plane.b() << "y + " << plane.c() << " z + " << plane.d() << " = 0" << std::endl;
 		glColor3f(1.0f, 0.0f, 0.0f);
 		std::vector<Eigen::Vector3f> points{ computePlane(plane) };

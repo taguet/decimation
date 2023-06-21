@@ -55,9 +55,12 @@ public:
 	void addFaceToRegion(int regionID, Mesh::FaceHandle fh);
 
 	Node& getRegion(int regionID) { return regions.at(regionID); }
+	const Node& getRegion(int regionID) const { return getRegion(regionID); }
 	int getFaceRegion(Mesh::FaceHandle fh);
-	std::set<int> getNeighbors(int regionID) { return edges.at(regionID); }
-	std::set<int> getRegionIDs();
+	Plane& getPlane(int regionID) { return getRegion(regionID).plane; }
+	const Plane& getPlane(int regionID) const { return getPlane(regionID); }
+	std::set<int> getNeighbors(int regionID) const { return edges.at(regionID); }
+	std::set<int> getRegionIDs() const;
 
 	/// @brief Insert an edge from node_1 to node_2.
 	/// @param node_1 Start node.
