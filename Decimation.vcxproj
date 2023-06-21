@@ -123,6 +123,7 @@
       <ConformanceMode>false</ConformanceMode>
       <AdditionalIncludeDirectories>C:\Users\benja\OneDrive\Documents\Decimation\Decimation\inc;C:\Users\benja\OneDrive\Documents\Decimation\Source_Code_Lib\lib\freeglut\include;C:\Users\benja\OneDrive\Documents\Decimation\Source_Code_Lib\lib\OpenMesh\src;C:\Users\benja\OneDrive\Documents\Decimation\Source_Code_Lib\lib\taucs-win32\include;C:\Users\benja\OneDrive\Documents\Libs\eigen-3.4.0\eigen-3.4.0;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <LanguageStandard>stdcpp20</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
