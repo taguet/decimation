@@ -11,12 +11,12 @@ namespace Equation {
 	class Line {
 	public:
 		Line() = default;
-		Line(Vector3f position, Vector3f direction) : position{ position }, direction{ direction } {}
+		Line(Vector3f& position, Vector3f& direction) : position{ position }, direction{ direction } {}
 
 		Vector3f evaluate(float t) const;
 
-		Vector3f projectPoint(Vector3f p) const;
-		float distToPoint(Vector3f p) const;
+		Vector3f projectPoint(Vector3f& p) const;
+		float distToPoint(Vector3f& p) const;
 
 
 		Vector3f position;	/// The position point
@@ -27,7 +27,7 @@ namespace Equation {
 	class Plane {
 	public:
 		Plane() = default;
-		Plane(Vector4f parameters) : parameters{parameters} {}
+		Plane(Vector4f& parameters) : parameters{parameters} {}
 		Plane(float a, float b, float c, float d) : parameters{a,b,c,d} {}
 
 		float a() const { return parameters[0]; }
@@ -47,8 +47,8 @@ namespace Equation {
 		Line findPlanePlaneIntersection(const Plane& plane);
 
 		float distFromOrigin() const;
-		float distToPoint(Vector3f p) const;
-		float signedDistToPoint(Vector3f p) const;
+		float distToPoint(Vector3f& p) const;
+		float signedDistToPoint(Vector3f& p) const;
 		Vector3f getNormal() const;
 
 

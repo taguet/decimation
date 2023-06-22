@@ -35,12 +35,12 @@ namespace Equation {
 	}
 
 
-	float Plane::distToPoint(Vector3f p) const {
+	float Plane::distToPoint(Vector3f& p) const {
 		return std::abs(signedDistToPoint(p));
 	}
 
 
-	float Plane::signedDistToPoint(Vector3f p) const {
+	float Plane::signedDistToPoint(Vector3f& p) const {
 		return (a() * p[0] + b() * p[1] + c() * p[2] + d()) / std::sqrtf(a() * a() + b() * b() + c() * c());
 	}
 
@@ -66,12 +66,12 @@ namespace Equation {
 	}
 
 
-	Vector3f Line::projectPoint(Vector3f p) const {
+	Vector3f Line::projectPoint(Vector3f& p) const {
 		return (direction.dot(p) / direction.dot(direction)) * direction;
 	}
 
 
-	float Line::distToPoint(Vector3f p) const {
+	float Line::distToPoint(Vector3f& p) const {
 		Vector3f proj{ projectPoint(p) };
 		return p.norm();
 	}

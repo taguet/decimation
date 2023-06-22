@@ -103,5 +103,5 @@ Equation::Plane MeshUtils::fitPlaneToVertices(Mesh& mesh, std::set<Mesh::VertexH
 		XY.row(3) += Vector4f{ 2*x, 2*y, 2*z, 3 };
 		Z += Vector4f{ x*y+x*z, x*y+y*z, x*z+y*z, x+y+z };
 	}
-	return  { XY.inverse() * Z };
+	return  { Vector4f{XY.inverse() * Z} };
 }
