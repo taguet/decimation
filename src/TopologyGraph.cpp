@@ -273,11 +273,11 @@ void TopologyGraph::projectContourVertices(bool handleUngroupedFaces) {
 	const std::set<Mesh::EdgeHandle> contour_edges{ extractContour() };
 	for (auto const& edge : contour_edges) {
 		const std::pair<int, int> region_ids{ getNeighborIDs(edge) };
-		const Line& line{ contour_lines.at(region_ids) };
+		const Mesh::HalfedgeHandle heh{ mesh.halfedge_handle(edge, 0) };
+		const Mesh::VertexHandle vh_0{ mesh.from_vertex_handle(heh) };
+		const Mesh::VertexHandle vh_1{ mesh.to_vertex_handle(heh) };
 		if (contour_lines.contains(region_ids)) {
-			const Mesh::HalfedgeHandle heh{ mesh.halfedge_handle(edge, 0) };
-			const Mesh::VertexHandle vh_0{ mesh.from_vertex_handle(heh) };
-			const Mesh::VertexHandle vh_1{ mesh.to_vertex_handle(heh) };
+			const Line& line{ contour_lines.at(region_ids) };
 			MeshUtils::projectVertexToLine(mesh, vh_0, line);
 		}
 		else if (handleUngroupedFaces) {
@@ -285,9 +285,32 @@ void TopologyGraph::projectContourVertices(bool handleUngroupedFaces) {
 			const int id{ std::max(region_ids.first, region_ids.second)};	//Tries to get the id of grouped region
 			if (id == -1) {
 				//TODO project onto nearest line
+				float minimum_dist{ std::numeric_limits<float>::max() };
+				const Line* closest_line{ nullptr };
+				for (auto const& [region_ids, line] : contour_lines) {
+					Mesh::Point middle{ mesh.point(vh_0) + (mesh.point(vh_1) - mesh.point(vh_0)) / 2 };
+					const float dist{ line.distToPoint(Eigen::Vector3f{ middle[0], middle[1], middle[2] }) };
+					if (dist < minimum_dist) {
+						minimum_dist = dist;
+						closest_line = &line;
+					}
+				}
+				MeshUtils::projectVertexToLine(mesh, vh_0, *closest_line);
 			}
 			else {
 				//TODO project onto nearest line of corresponding region
+				const std::map<std::pair<int, int>, Line> filtered_lines{ filterLinesByRegion(id, contour_lines) };
+				float minimum_dist{ std::numeric_limits<float>::max() };
+				const Line* closest_line{ nullptr };
+				for (auto const& [region_ids, line] : filtered_lines) {
+					Mesh::Point middle{ mesh.point(vh_0) + (mesh.point(vh_1) - mesh.point(vh_0)) / 2 };
+					const float dist{ line.distToPoint(Eigen::Vector3f{ middle[0], middle[1], middle[2] }) };
+					if (dist < minimum_dist) {
+						minimum_dist = dist;
+						closest_line = &line;
+					}
+				}
+				MeshUtils::projectVertexToLine(mesh, vh_0, *closest_line);
 			}
 		}
 	}
