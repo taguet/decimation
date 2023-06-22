@@ -61,6 +61,7 @@ public:
 	const Plane& getPlane(int regionID) const { return getPlane(regionID); }
 	std::set<int> getNeighbors(int regionID) const { return edges.at(regionID); }
 	std::set<int> getRegionIDs() const;
+	std::pair<int, int> getNeighborIDs(Mesh::EdgeHandle eh);
 
 	/// @brief Insert an edge from node_1 to node_2.
 	/// @param node_1 Start node.

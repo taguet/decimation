@@ -147,6 +147,14 @@ std::set<int> TopologyGraph::getRegionIDs() const {
 }
 
 
+std::pair<int, int> TopologyGraph::getNeighborIDs(Mesh::EdgeHandle eh) {
+	const Mesh::HalfedgeHandle heh_0{ mesh.halfedge_handle(eh, 0) };
+	const Mesh::HalfedgeHandle heh_1{ mesh.halfedge_handle(eh, 1) };
+	return { faceGroup(heh_0), faceGroup(heh_1) };
+}
+
+
+
 bool TopologyGraph::areFacesInSameRegion(Mesh::FaceHandle fh_1, Mesh::FaceHandle fh_2) {
 	return faceGroup(fh_1) == faceGroup(fh_2);
 }
