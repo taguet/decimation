@@ -44,7 +44,7 @@ namespace Equation {
 		Line findPlanePlaneIntersection(const Plane& plane);
 
 		float distFromOrigin() const;
-		float distToPlane(Vector3f p) const;
+		float distToPoint(Vector3f p) const;
 		Vector3f getNormal() const;
 
 

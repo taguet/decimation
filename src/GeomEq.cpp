@@ -35,7 +35,7 @@ namespace Equation {
 	}
 
 
-	float Plane::distToPlane(Vector3f p) const {
+	float Plane::distToPoint(Vector3f p) const {
 		return std::abs(a() * p[0] + b() * p[1] + c() * p[2] + d()) / std::sqrtf(a() * a() + b() * b() + c() * c());
 	}
 
