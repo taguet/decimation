@@ -44,7 +44,7 @@ namespace Equation {
 		/// @brief Computes the intersection between this plane and another given plane.
 		/// @param plane The plane intersecting this object.
 		/// @return A line.
-		Line findPlanePlaneIntersection(const Plane& plane);
+		Line findPlanePlaneIntersection(const Plane& plane) const;
 
 		float distFromOrigin() const;
 		float distToPoint(const Vector3f& p) const;
