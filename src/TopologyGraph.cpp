@@ -281,36 +281,17 @@ void TopologyGraph::projectContourVertices(bool handleUngroupedFaces) {
 			MeshUtils::projectVertexToLine(mesh, vh_0, line);
 		}
 		else if (handleUngroupedFaces) {
-			//TODO case of one neighbor being ungrouped
 			const int id{ std::max(region_ids.first, region_ids.second)};	//Tries to get the id of grouped region
 			if (id == -1) {
-				//TODO project onto nearest line
-				float minimum_dist{ std::numeric_limits<float>::max() };
-				const Line* closest_line{ nullptr };
-				for (auto const& [region_ids, line] : contour_lines) {
-					Mesh::Point middle{ mesh.point(vh_0) + (mesh.point(vh_1) - mesh.point(vh_0)) / 2 };
-					const float dist{ line.distToPoint(Eigen::Vector3f{ middle[0], middle[1], middle[2] }) };
-					if (dist < minimum_dist) {
-						minimum_dist = dist;
-						closest_line = &line;
-					}
-				}
-				MeshUtils::projectVertexToLine(mesh, vh_0, *closest_line);
+				//Project onto nearest line
+				const Line& closest_line{ findClosestLine(edge, contour_lines) };
+				MeshUtils::projectVertexToLine(mesh, vh_0, closest_line);
 			}
 			else {
-				//TODO project onto nearest line of corresponding region
+				//Project onto nearest line of corresponding region
 				const std::map<std::pair<int, int>, Line> filtered_lines{ filterLinesByRegion(id, contour_lines) };
-				float minimum_dist{ std::numeric_limits<float>::max() };
-				const Line* closest_line{ nullptr };
-				for (auto const& [region_ids, line] : filtered_lines) {
-					Mesh::Point middle{ mesh.point(vh_0) + (mesh.point(vh_1) - mesh.point(vh_0)) / 2 };
-					const float dist{ line.distToPoint(Eigen::Vector3f{ middle[0], middle[1], middle[2] }) };
-					if (dist < minimum_dist) {
-						minimum_dist = dist;
-						closest_line = &line;
-					}
-				}
-				MeshUtils::projectVertexToLine(mesh, vh_0, *closest_line);
+				const Line& closest_line{ findClosestLine(edge, filtered_lines) };
+				MeshUtils::projectVertexToLine(mesh, vh_0, closest_line);
 			}
 		}
 	}
@@ -324,4 +305,23 @@ std::map<std::pair<int, int>, Line> TopologyGraph::filterLinesByRegion(const int
 		}
 	}
 	return filtered_lines;
+}
+
+
+const Line& TopologyGraph::findClosestLine(const Mesh::EdgeHandle eh, const std::map<std::pair<int, int>, Line>& contour_lines) const {
+	float minimum_dist{ std::numeric_limits<float>::max() };
+	const Line* closest_line{ nullptr };
+	const Mesh::HalfedgeHandle heh{ mesh.halfedge_handle(eh, 0) };
+	const Mesh::VertexHandle vh_0{ mesh.from_vertex_handle(heh) };
+	const Mesh::VertexHandle vh_1{ mesh.to_vertex_handle(heh) };
+
+	for (auto const& [region_ids, line] : contour_lines) {
+		Mesh::Point middle{ mesh.point(vh_0) + (mesh.point(vh_1) - mesh.point(vh_0)) / 2 };
+		const float dist{ line.distToPoint(Eigen::Vector3f{ middle[0], middle[1], middle[2] }) };
+		if (dist < minimum_dist) {
+			minimum_dist = dist;
+			closest_line = &line;
+		}
+	}
+	return *closest_line;
 }
