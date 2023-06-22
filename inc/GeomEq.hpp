@@ -11,7 +11,7 @@ namespace Equation {
 	class Line {
 	public:
 		Line() = default;
-		Line(Vector3f& position, Vector3f& direction) : position{ position }, direction{ direction } {}
+		Line(const Vector3f& position, const Vector3f& direction) : position{ position }, direction{ direction } {}
 
 		Vector3f evaluate(const float t) const;
 
@@ -27,8 +27,8 @@ namespace Equation {
 	class Plane {
 	public:
 		Plane() = default;
-		Plane(Vector4f& parameters) : parameters{parameters} {}
-		Plane(float a, float b, float c, float d) : parameters{a,b,c,d} {}
+		Plane(const Vector4f& parameters) : parameters{parameters} {}
+		Plane(const float a, const float b, const float c, const float d) : parameters{a,b,c,d} {}
 
 		float a() const { return parameters[0]; }
 		float b() const { return parameters[1]; }

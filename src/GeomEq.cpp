@@ -5,7 +5,7 @@ namespace Equation {
 	//------------------- PLANE --------------------//
 
 	/// Uses an approach from Gellert et al. 1989, p.542 to find a parametric equation of the line.
-	Line Plane::findPlanePlaneIntersection(const Plane& plane) {
+	Line Plane::findPlanePlaneIntersection(const Plane& plane) const {
 		Vector3f n1{ getNormal() };
 		Vector3f n2{ plane.getNormal() };
 		Eigen::MatrixXf m{ 3,2 };	// Matrix m = [n1 n2]^T
