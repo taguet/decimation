@@ -40,6 +40,7 @@ Viewer::Viewer(const char* _title, int _width, int _height): MeshViewer(_title, 
 
   add_draw_mode("Debug plane-region fitting");
   add_draw_mode("Debug contour");
+  add_draw_mode("Debug contour projection");
   add_draw_mode("Debug opposite angles");
   add_draw_mode("Debug laplacien cotangente");
   add_draw_mode("Debug lissage");
@@ -604,11 +605,10 @@ void Viewer::draw(const std::string& _draw_mode) {
 		prev_id_draw_mode = get_draw_mode();
 	}
 	else if (_draw_mode == "Debug contour") {
-		static std::set<Mesh::EdgeHandle> contour_edges{};
-		static std::set<Mesh::VertexHandle> contour_vertices{};
-		static std::vector<Equation::Line> lines;
 		if (!isModified) {
-			contour_edges.clear();
+			contour_edges = {};
+			contour_vertices = {};
+			lines = {};
 			isModified = true;
 			this->graph = new TopologyGraph(mesh, 1.0f, 1.0f);
 			mtools.extractRegions(*graph);
@@ -645,6 +645,54 @@ void Viewer::draw(const std::string& _draw_mode) {
 				GL::glVertex(OpenMesh::Vec3f{ p0(0), p0(1), p0(2) });
 				GL::glVertex(OpenMesh::Vec3f{ p1(0), p1(1), p1(2) });
 			}
+		glEnd();
+		glLineWidth(1.0f);
+		glDisable(GL_POLYGON_OFFSET_LINE);
+
+		prev_draw_mode = current_draw_mode;
+		prev_id_draw_mode = get_draw_mode();
+	}
+	else if (_draw_mode == "Debug contour projection") {
+		if (!isModified) {
+			contour_edges = {};
+			contour_vertices = {};
+			lines = {};
+			isModified = true;
+			this->graph = new TopologyGraph(mesh, 1.0f, 1.0f);
+			mtools.extractRegions(*graph);
+			contour_edges = graph->extractContour();
+			for (auto edge : contour_edges) {
+				Mesh::HalfedgeHandle heh{ mesh.halfedge_handle(edge, 0) };
+				contour_vertices.insert(mesh.from_vertex_handle(heh));
+				contour_vertices.insert(mesh.to_vertex_handle(heh));
+			}
+			this->graph->projectContourVertices();
+		}
+		glEnable(GL_LIGHTING);
+
+		draw("Solid Smooth");
+
+		glEnable(GL_DEPTH_TEST);
+		glEnable(GL_POLYGON_OFFSET_LINE);
+		glPolygonOffset(-1.0, 1.0);
+		glLineWidth(3.0f);
+		glBegin(GL_LINES);
+		glColor3f(0.0f, 0.0f, 1.0f);	// draw contour on mesh
+		for (auto edge : contour_edges) {
+			Mesh::HalfedgeHandle heh{ mesh.halfedge_handle(edge, 0) };
+			GL::glVertex(mesh.point(mesh.from_vertex_handle(heh)));
+			GL::glVertex(mesh.point(mesh.to_vertex_handle(heh)));
+		}
+		glColor3f(1.0f, 0.0f, 0.0f);	// draw plane plane intersections
+		for (auto& line : lines) {
+			Vector3f p0{ line.evaluate(-2.0f) };
+			auto t = p0[0];
+			Vector3f p1{ line.evaluate(2.0f) };
+			std::cout << "Line: (" << line.position.transpose() << ") + t*(" << line.direction.transpose() << ")" << std::endl;
+			std::cout << "p0=" << p0.transpose() << "\tp1=" << p1.transpose() << std::endl;
+			GL::glVertex(OpenMesh::Vec3f{ p0(0), p0(1), p0(2) });
+			GL::glVertex(OpenMesh::Vec3f{ p1(0), p1(1), p1(2) });
+		}
 		glEnd();
 		glLineWidth(1.0f);
 		glDisable(GL_POLYGON_OFFSET_LINE);

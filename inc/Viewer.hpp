@@ -118,6 +118,9 @@ private:
   int region_id{ 0 };
 
   TopologyGraph* graph{ nullptr };
+  std::set<Mesh::EdgeHandle> contour_edges;
+  std::set<Mesh::VertexHandle> contour_vertices;
+  std::vector<Equation::Line> lines;
 
   void draw_1_ring(const VertexHandle vh, Vec3f color);
   std::vector<Eigen::Vector3f> computePlane(const Equation::Plane& plane) const;

@@ -194,6 +194,7 @@ std::map<std::pair<int, int>, Line> TopologyGraph::findContourLines() {
 			Plane* plane_2{ &getRegion(id_2).plane };
 			Line line{ plane_1->findPlanePlaneIntersection(*plane_2) };
 			lines.insert({ {id_1, id_2}, line });
+			lines.insert({ {id_2, id_1}, line });
 		}
 	}
 	return lines;
@@ -206,9 +207,8 @@ std::set<std::pair<int, int>> TopologyGraph::getRegionPairs() {
 		for (auto const& neighbor_id : neighbors) {
 			std::pair<int, int> region_pair{ id, neighbor_id };
 			std::pair<int, int> reverse{ neighbor_id, id };
-			if (!region_pairs.contains(reverse)) {
-				region_pairs.insert(region_pair);
-			}
+			region_pairs.insert(region_pair);
+			region_pairs.insert(reverse);
 		}
 	}
 	return region_pairs;
