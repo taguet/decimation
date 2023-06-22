@@ -80,6 +80,13 @@ void MeshUtils::getFaceNeighbors(Mesh& mesh, Mesh::FaceHandle fh, std::list<Mesh
 }
 
 
+void MeshUtils::projectVertexToLine(Mesh& mesh, const Mesh::VertexHandle vh, const Equation::Line& line) {
+	const Mesh::Point p{ mesh.point(vh) };
+	const Eigen::Vector3f projected{ line.projectPoint(Eigen::Vector3f{p[0], p[1], p[2]}) };
+	mesh.set_point(vh, Mesh::Point{ projected[0], projected[1], projected[2] });
+}
+
+
 Equation::Plane MeshUtils::fitPlaneToVertices(Mesh& mesh, std::set<Mesh::VertexHandle>& vertices) {
 	MatrixXf points{ vertices.size(), 3 }; // point coordinates
 	{

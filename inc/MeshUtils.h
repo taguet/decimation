@@ -68,6 +68,13 @@ public:
 	static void getFaceNeighbors(Mesh& mesh, const Mesh::FaceHandle, std::list<Mesh::FaceHandle>& neighbors);
 
 
+	/// @brief Projected a given vertex onto a line.
+	/// @param mesh 
+	/// @param vh 
+	/// @param line A parametric equation of a line.
+	static void projectVertexToLine(Mesh& mesh, const Mesh::VertexHandle vh, const Equation::Line& line);
+
+
 	/// @brief Fits plane to a set of vertices by minimizing the orthogonal distance by least squares.
 	/// @param mesh 
 	/// @param vertices 
