@@ -292,3 +292,13 @@ void TopologyGraph::projectContourVertices(bool handleUngroupedFaces) {
 		}
 	}
 }
+
+std::map<std::pair<int, int>, Line> TopologyGraph::filterLinesByRegion(const int region_id, const std::map<std::pair<int, int>, Line>& contour_lines) const {
+	std::map<std::pair<int, int>, Line> filtered_lines;
+	for (auto const& [region_ids, line] : contour_lines) {
+		if (region_ids.first == region_id || region_ids.second == region_id) {
+			filtered_lines.insert({ region_ids, line });
+		}
+	}
+	return filtered_lines;
+}

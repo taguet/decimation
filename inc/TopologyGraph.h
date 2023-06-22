@@ -42,6 +42,7 @@ private:
 	int findTargetRegion(int regionID, float fitting_threshold);
 	void regroupRegionIntoTarget(int regionID, int targetID);
 	void ungroupRegion(int regionID, bool removeGroup);
+	std::map<std::pair<int, int>, Line> filterLinesByRegion(const int region_id, const std::map<std::pair<int, int>, Line> &contour_lines) const;
 
 public:
 	const float area_threshold;
