@@ -35,6 +35,11 @@ namespace Equation {
 	}
 
 
+	float Plane::distToPlane(Vector3f p) const {
+		return std::abs(a() * p[0] + b() * p[1] + c() * p[2] + d()) / std::sqrtf(a() * a() + b() * b() + c() * c());
+	}
+
+
 	float Plane::evaluate(float x, float y, float z) const {
 		Eigen::Vector4f X{ x,y,z,1 };
 		auto result{ parameters.transpose() * X };

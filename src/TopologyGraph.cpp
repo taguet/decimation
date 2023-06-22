@@ -254,11 +254,7 @@ float TopologyGraph::Node::sumVertexProjectedDistances() {
 	float sum{ 0.0f };
 	for (auto& vh : vertices) {
 		Mesh::Point p{ mesh.point(vh) };
-		float a{ plane.a()};
-		float b{ plane.b()};
-		float c{ plane.c()};
-		float d{ plane.d()};
-		sum += std::abs(a * p[0] + b * p[1] + c * p[2] + d) / std::sqrtf(a * a + b * b + c * c);
+		sum += plane.distToPlane(Vector3f{ p[0], p[1], p[2]});
 	}
 	return sum;
 }
