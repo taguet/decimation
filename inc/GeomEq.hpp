@@ -15,6 +15,8 @@ namespace Equation {
 
 		Vector3f evaluate(float t) const;
 
+		Vector3f projectPoint(Vector3f p) const;
+
 
 		Vector3f position;	/// The position point
 		Vector3f direction;	/// The direction vector

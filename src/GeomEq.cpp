@@ -59,4 +59,9 @@ namespace Equation {
 	Vector3f Line::evaluate(float t) const {
 		return position + t * direction;
 	}
+
+
+	Vector3f Line::projectPoint(Vector3f p) const {
+		return (direction.dot(p) / direction.dot(direction)) * direction;
+	}
 }
