@@ -64,4 +64,10 @@ namespace Equation {
 	Vector3f Line::projectPoint(Vector3f p) const {
 		return (direction.dot(p) / direction.dot(direction)) * direction;
 	}
+
+
+	float Line::distToPoint(Vector3f p) const {
+		Vector3f proj{ projectPoint(p) };
+		return p.norm();
+	}
 }
