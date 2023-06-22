@@ -36,7 +36,12 @@ namespace Equation {
 
 
 	float Plane::distToPoint(Vector3f p) const {
-		return std::abs(a() * p[0] + b() * p[1] + c() * p[2] + d()) / std::sqrtf(a() * a() + b() * b() + c() * c());
+		return std::abs(signedDistToPoint(p));
+	}
+
+
+	float Plane::signedDistToPoint(Vector3f p) const {
+		return (a() * p[0] + b() * p[1] + c() * p[2] + d()) / std::sqrtf(a() * a() + b() * b() + c() * c());
 	}
 
 

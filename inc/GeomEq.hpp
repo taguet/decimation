@@ -48,6 +48,7 @@ namespace Equation {
 
 		float distFromOrigin() const;
 		float distToPoint(Vector3f p) const;
+		float signedDistToPoint(Vector3f p) const;
 		Vector3f getNormal() const;
 
 
