@@ -266,3 +266,22 @@ float TopologyGraph::Node::sumVertexProjectedDistances() {
 	}
 	return sum;
 }
+
+
+void TopologyGraph::projectContourVertices() {
+	const std::map<std::pair<int, int>, Line> contour_lines{ findContourLines() };
+	const std::set<Mesh::EdgeHandle> contour_edges{ extractContour() };
+	for (auto const& edge : contour_edges) {
+		const std::pair<int, int> region_ids{ getNeighborIDs(edge) };
+		const Line& line{ contour_lines.at(region_ids) };
+		if (contour_lines.contains(region_ids)) {
+			const Mesh::HalfedgeHandle heh{ mesh.halfedge_handle(edge, 0) };
+			const Mesh::VertexHandle vh_0{ mesh.from_vertex_handle(heh) };
+			const Mesh::VertexHandle vh_1{ mesh.to_vertex_handle(heh) };
+			MeshUtils::projectVertexToLine(mesh, vh_0, line);
+		}
+		else {
+			//TODO case of one neighbor being ungrouped
+		}
+	}
+}
