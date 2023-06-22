@@ -29,30 +29,37 @@ namespace Equation {
 	}
 
 
+	Vector3f Plane::projectPoint(const Vector3f& p) const {
+		float dist{ signedDistToPoint(p) };
+		Vector3f normal{ getNormal() };
+		return p - dist * normal;
+	}
+
+
 	float Plane::distFromOrigin() const {
 		Vector3f normal{ getNormal() };
 		return d() / normal.norm();
 	}
 
 
-	float Plane::distToPoint(Vector3f& p) const {
+	float Plane::distToPoint(const Vector3f& p) const {
 		return std::abs(signedDistToPoint(p));
 	}
 
 
-	float Plane::signedDistToPoint(Vector3f& p) const {
+	float Plane::signedDistToPoint(const Vector3f& p) const {
 		return (a() * p[0] + b() * p[1] + c() * p[2] + d()) / std::sqrtf(a() * a() + b() * b() + c() * c());
 	}
 
 
-	float Plane::evaluate(float x, float y, float z) const {
+	float Plane::evaluate(const float x, const float y, const float z) const {
 		Eigen::Vector4f X{ x,y,z,1 };
 		auto result{ parameters.transpose() * X };
 		return result.eval()(0,0);
 	}
 	
 	
-	float Plane::evaluate(Vector3f point) const {
+	float Plane::evaluate(const Vector3f point) const {
 		Eigen::Vector4f X{ point(0), point(1), point(2), 1};
 		auto result{ parameters.transpose() * X };
 		return result.eval()(0,0);
@@ -61,17 +68,17 @@ namespace Equation {
 
 //------------------- LINE --------------------//
 
-	Vector3f Line::evaluate(float t) const {
+	Vector3f Line::evaluate(const float t) const {
 		return position + t * direction;
 	}
 
 
-	Vector3f Line::projectPoint(Vector3f& p) const {
+	Vector3f Line::projectPoint(const Vector3f& p) const {
 		return (direction.dot(p) / direction.dot(direction)) * direction;
 	}
 
 
-	float Line::distToPoint(Vector3f& p) const {
+	float Line::distToPoint(const Vector3f& p) const {
 		Vector3f proj{ projectPoint(p) };
 		return p.norm();
 	}

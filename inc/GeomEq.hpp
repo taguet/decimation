@@ -13,10 +13,10 @@ namespace Equation {
 		Line() = default;
 		Line(Vector3f& position, Vector3f& direction) : position{ position }, direction{ direction } {}
 
-		Vector3f evaluate(float t) const;
+		Vector3f evaluate(const float t) const;
 
-		Vector3f projectPoint(Vector3f& p) const;
-		float distToPoint(Vector3f& p) const;
+		Vector3f projectPoint(const Vector3f& p) const;
+		float distToPoint(const Vector3f& p) const;
 
 
 		Vector3f position;	/// The position point
@@ -38,8 +38,8 @@ namespace Equation {
 
 		/// @brief Evaluate the expression ax+by+cz+d
 		/// @return A point.
-		float evaluate(float x, float y, float z) const;
-		float evaluate(Vector3f point) const;
+		float evaluate(const float x, const float y, const float z) const;
+		float evaluate(const Vector3f point) const;
 
 		/// @brief Computes the intersection between this plane and another given plane.
 		/// @param plane The plane intersecting this object.
@@ -47,9 +47,10 @@ namespace Equation {
 		Line findPlanePlaneIntersection(const Plane& plane);
 
 		float distFromOrigin() const;
-		float distToPoint(Vector3f& p) const;
-		float signedDistToPoint(Vector3f& p) const;
+		float distToPoint(const Vector3f& p) const;
+		float signedDistToPoint(const Vector3f& p) const;
 		Vector3f getNormal() const;
+		Vector3f projectPoint(const Vector3f& p) const;
 
 
 		Vector4f parameters;	/// The parameters a, b, c and d
