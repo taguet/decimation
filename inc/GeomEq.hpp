@@ -11,7 +11,7 @@ namespace Equation {
 	class Line {
 	public:
 		Line() = default;
-		Line(const Vector3f& position, const Vector3f& direction) : position{ position }, direction{ direction } {}
+		Line(const Vector3f& position, const Vector3f& direction) : origin{ position }, direction{ direction } {}
 
 		Vector3f evaluate(const float t) const;
 
@@ -19,7 +19,7 @@ namespace Equation {
 		float distToPoint(const Vector3f& p) const;
 
 
-		Vector3f position;	/// The position point
+		Vector3f origin;	/// The position point
 		Vector3f direction;	/// The direction vector
 	};
 

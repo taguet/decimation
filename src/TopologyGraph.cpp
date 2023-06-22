@@ -268,7 +268,7 @@ float TopologyGraph::Node::sumVertexProjectedDistances() {
 }
 
 
-void TopologyGraph::projectContourVertices() {
+void TopologyGraph::projectContourVertices(bool handleUngroupedFaces) {
 	const std::map<std::pair<int, int>, Line> contour_lines{ findContourLines() };
 	const std::set<Mesh::EdgeHandle> contour_edges{ extractContour() };
 	for (auto const& edge : contour_edges) {
@@ -280,8 +280,15 @@ void TopologyGraph::projectContourVertices() {
 			const Mesh::VertexHandle vh_1{ mesh.to_vertex_handle(heh) };
 			MeshUtils::projectVertexToLine(mesh, vh_0, line);
 		}
-		else {
+		else if (handleUngroupedFaces) {
 			//TODO case of one neighbor being ungrouped
+			const int id{ std::max(region_ids.first, region_ids.second)};	//Tries to get the id of grouped region
+			if (id == -1) {
+				//TODO project onto nearest line
+			}
+			else {
+				//TODO project onto nearest line of corresponding region
+			}
 		}
 	}
 }

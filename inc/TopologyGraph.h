@@ -96,7 +96,7 @@ public:
 	/// @return A set of edges.
 	std::set<Mesh::EdgeHandle> extractContour();
 
-	void projectContourVertices();
+	void projectContourVertices(bool handleUngroupedFaces = true);
 
 	int& faceGroup(Mesh::FaceHandle fh) {
 		return mesh.property(f_group, fh);

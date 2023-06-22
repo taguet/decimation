@@ -640,7 +640,7 @@ void Viewer::draw(const std::string& _draw_mode) {
 				Vector3f p0{ line.evaluate(-2.0f) };
 				auto t = p0[0];
 				Vector3f p1{ line.evaluate(2.0f) };
-				std::cout << "Line: (" << line.position.transpose() << ") + t*(" << line.direction.transpose() << ")" << std::endl;
+				std::cout << "Line: (" << line.origin.transpose() << ") + t*(" << line.direction.transpose() << ")" << std::endl;
 				std::cout << "p0=" << p0.transpose() << "\tp1=" << p1.transpose() << std::endl;
 				GL::glVertex(OpenMesh::Vec3f{ p0(0), p0(1), p0(2) });
 				GL::glVertex(OpenMesh::Vec3f{ p1(0), p1(1), p1(2) });
@@ -688,7 +688,7 @@ void Viewer::draw(const std::string& _draw_mode) {
 			Vector3f p0{ line.evaluate(-2.0f) };
 			auto t = p0[0];
 			Vector3f p1{ line.evaluate(2.0f) };
-			std::cout << "Line: (" << line.position.transpose() << ") + t*(" << line.direction.transpose() << ")" << std::endl;
+			std::cout << "Line: (" << line.origin.transpose() << ") + t*(" << line.direction.transpose() << ")" << std::endl;
 			std::cout << "p0=" << p0.transpose() << "\tp1=" << p1.transpose() << std::endl;
 			GL::glVertex(OpenMesh::Vec3f{ p0(0), p0(1), p0(2) });
 			GL::glVertex(OpenMesh::Vec3f{ p1(0), p1(1), p1(2) });
