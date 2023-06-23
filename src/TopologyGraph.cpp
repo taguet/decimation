@@ -278,6 +278,7 @@ void TopologyGraph::projectContourVertices(bool handleUngroupedFaces) {
 		if (contour_lines.contains(region_ids)) {
 			const Line& line{ contour_lines.at(region_ids) };
 			MeshUtils::projectVertexToLine(mesh, vh_0, line);
+			MeshUtils::projectVertexToLine(mesh, vh_1, line);
 		}
 		else if (handleUngroupedFaces) {
 			const int id{ std::max(region_ids.first, region_ids.second)};	//Tries to get the id of grouped region
@@ -285,12 +286,14 @@ void TopologyGraph::projectContourVertices(bool handleUngroupedFaces) {
 				//Project onto nearest line
 				const Line& closest_line{ findClosestLine(edge, contour_lines) };
 				MeshUtils::projectVertexToLine(mesh, vh_0, closest_line);
+				MeshUtils::projectVertexToLine(mesh, vh_1, closest_line);
 			}
 			else {
 				//Project onto nearest line of corresponding region
 				const std::map<std::pair<int, int>, Line> filtered_lines{ filterLinesByRegion(id, contour_lines) };
 				const Line& closest_line{ findClosestLine(edge, filtered_lines) };
 				MeshUtils::projectVertexToLine(mesh, vh_0, closest_line);
+				MeshUtils::projectVertexToLine(mesh, vh_1, closest_line);
 			}
 		}
 	}
