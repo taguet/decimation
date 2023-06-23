@@ -20,13 +20,13 @@ private:
 		Node(TopologyGraph& parent, int id) : id{ id }, parent{ &parent } {}
 		void add(Mesh::FaceHandle fh);
 		void regroupIntoSelf(Node& region);
-		const std::set<Mesh::FaceHandle>& getFaceHandles() { return faces; }
-		const std::set<Mesh::VertexHandle>& getVertexHandles() { return vertices; }
+		const std::set<Mesh::FaceHandle>& getFaceHandles() const { return faces; }
+		const std::set<Mesh::VertexHandle>& getVertexHandles() const { return vertices; }
 		bool empty() const { return faces.empty(); }
-		bool contains(Mesh::FaceHandle& fh) { return faces.find(fh) != faces.end(); }
+		bool contains(Mesh::FaceHandle& fh) const { return faces.find(fh) != faces.end(); }
 		float computeArea() const;
 		void fitPlane();
-		float sumVertexProjectedDistances();
+		float sumVertexProjectedDistances() const;
 	private:
 		TopologyGraph* parent{ nullptr };
 		std::set<Mesh::FaceHandle> faces{};
@@ -39,7 +39,7 @@ private:
 
 	OpenMesh::FPropHandleT<int> f_group;
 
-	int findTargetRegion(int regionID, float fitting_threshold);
+	int findTargetRegion(int regionID, float fitting_threshold) const;
 	void regroupRegionIntoTarget(int regionID, int targetID);
 	void ungroupRegion(int regionID, bool removeGroup);
 	std::map<std::pair<int, int>, Line> filterLinesByRegion(const int region_id, const std::map<std::pair<int, int>, Line> &contour_lines) const;
@@ -57,13 +57,13 @@ public:
 	void addFaceToRegion(int regionID, Mesh::FaceHandle fh);
 
 	Node& getRegion(int regionID) { return regions.at(regionID); }
-	const Node& getRegion(int regionID) const { return getRegion(regionID); }
-	int getFaceRegion(Mesh::FaceHandle fh);
+	const Node& getRegion(int regionID) const { return regions.at(regionID); }
+	int getFaceRegion(Mesh::FaceHandle fh) const;
 	Plane& getPlane(int regionID) { return getRegion(regionID).plane; }
-	const Plane& getPlane(int regionID) const { return getPlane(regionID); }
+	const Plane& getPlane(int regionID) const { return getRegion(regionID).plane; }
 	std::set<int> getNeighbors(int regionID) const { return edges.at(regionID); }
 	std::set<int> getRegionIDs() const;
-	std::pair<int, int> getNeighborIDs(Mesh::EdgeHandle eh);
+	std::pair<int, int> getNeighborIDs(Mesh::EdgeHandle eh) const;
 
 	/// @brief Insert an edge from node_1 to node_2.
 	/// @param node_1 Start node.
@@ -78,21 +78,21 @@ public:
 	void removeEdges(int regionID);
 
 	bool simplifyGraph();
-	bool areFacesInSameRegion(Mesh::FaceHandle fh_1, Mesh::FaceHandle fh_2);
+	bool areFacesInSameRegion(Mesh::FaceHandle fh_1, Mesh::FaceHandle fh_2) const;
 	void fitPlanes();
 
 	/// @brief Finds all intersections between each neighboring regions' planes
 	/// @return The equation of a line.
-	std::vector<Line> findPlanePlaneIntersections();
+	std::vector<Line> findPlanePlaneIntersections() const;
 	/// @brief Find all intersections between region planes.
 	/// @return An association between pairs of regions and lines.
-	std::map<std::pair<int, int>, Line> findContourLines();
+	std::map<std::pair<int, int>, Line> findContourLines() const;
 	/// @brief Finds all pairs of neighboring planes
 	/// @return A container of region pairs.
-	std::set<std::pair<Plane*, Plane*>> getNeighborPairs();
+	std::set<std::pair<const Plane*, const Plane*>> getNeighborPairs() const;
 	/// @brief Finds all pairs of neighboring regions.
 	/// @return A set of node pairs.
-	std::set<std::pair<int, int>> getRegionPairs();
+	std::set<std::pair<int, int>> getRegionPairs() const;
 
 	/// @brief Finds the edges that belong to two different regions.
 	/// @return A set of edges.
@@ -104,6 +104,12 @@ public:
 		return mesh.property(f_group, fh);
 	}
 	int& faceGroup(Mesh::HalfedgeHandle heh) {
+		return mesh.property(f_group, mesh.face_handle(heh));
+	}
+	int faceGroup(Mesh::FaceHandle fh) const {
+		return mesh.property(f_group, fh);
+	}
+	int faceGroup(Mesh::HalfedgeHandle heh) const {
 		return mesh.property(f_group, mesh.face_handle(heh));
 	}
 };

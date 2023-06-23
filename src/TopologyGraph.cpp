@@ -58,12 +58,12 @@ bool TopologyGraph::simplifyGraph() {
 }
 
 
-int TopologyGraph::findTargetRegion(int regionID, float fitting_threshold) {
+int TopologyGraph::findTargetRegion(int regionID, float fitting_threshold) const {
 	std::set<int> neighborIDs{ edges.at(regionID) };
 	int targetID{ -1 };
 	float min_sum{ std::numeric_limits<float>::max() };
 	for (int id : neighborIDs) {
-		Node& neighbor{ getRegion(id) };
+		const Node& neighbor{ getRegion(id) };
 		float sum{ neighbor.sumVertexProjectedDistances() };
 		if (sum < min_sum) {
 			min_sum = sum;
@@ -128,9 +128,8 @@ void TopologyGraph::addFaceToRegion(int regionID, Mesh::FaceHandle fh) {
 }
 
 
-int TopologyGraph::getFaceRegion(Mesh::FaceHandle fh) {
-	for (auto& p : regions) {
-		Node& region{ p.second };
+int TopologyGraph::getFaceRegion(Mesh::FaceHandle fh) const {
+	for (auto const & [id, region] : regions) {
 		if (region.contains(fh))
 			return region.id;
 	}
@@ -147,7 +146,7 @@ std::set<int> TopologyGraph::getRegionIDs() const {
 }
 
 
-std::pair<int, int> TopologyGraph::getNeighborIDs(Mesh::EdgeHandle eh) {
+std::pair<int, int> TopologyGraph::getNeighborIDs(Mesh::EdgeHandle eh) const {
 	const Mesh::HalfedgeHandle heh_0{ mesh.halfedge_handle(eh, 0) };
 	const Mesh::HalfedgeHandle heh_1{ mesh.halfedge_handle(eh, 1) };
 	return { faceGroup(heh_0), faceGroup(heh_1) };
@@ -155,7 +154,7 @@ std::pair<int, int> TopologyGraph::getNeighborIDs(Mesh::EdgeHandle eh) {
 
 
 
-bool TopologyGraph::areFacesInSameRegion(Mesh::FaceHandle fh_1, Mesh::FaceHandle fh_2) {
+bool TopologyGraph::areFacesInSameRegion(Mesh::FaceHandle fh_1, Mesh::FaceHandle fh_2) const {
 	return faceGroup(fh_1) == faceGroup(fh_2);
 }
 
@@ -174,8 +173,8 @@ std::set<Mesh::EdgeHandle> TopologyGraph::extractContour() {
 }
 
 
-std::vector<Line> TopologyGraph::findPlanePlaneIntersections() {
-	std::set<std::pair<Plane*, Plane*>>& neighbor_pairs{ getNeighborPairs() };
+std::vector<Line> TopologyGraph::findPlanePlaneIntersections() const {
+	const std::set<std::pair<const Plane*, const Plane*>>& neighbor_pairs{ getNeighborPairs() };
 	std::vector<Line> lines;
 	lines.reserve(neighbor_pairs.size());
 	for (auto const & [plane_1, plane_2] : neighbor_pairs) {
@@ -185,13 +184,13 @@ std::vector<Line> TopologyGraph::findPlanePlaneIntersections() {
 }
 
 
-std::map<std::pair<int, int>, Line> TopologyGraph::findContourLines() {
+std::map<std::pair<int, int>, Line> TopologyGraph::findContourLines() const {
 	std::map<std::pair<int, int>, Line> lines;
 	std::set<std::pair<int, int>> region_pairs{ getRegionPairs() };
 	for (auto const & [id_1, id_2] : region_pairs) {
 		if (!lines.contains({ id_1, id_2 })) {
-			Plane* plane_1{ &getRegion(id_1).plane };
-			Plane* plane_2{ &getRegion(id_2).plane };
+			const Plane* plane_1{ &getRegion(id_1).plane };
+			const Plane* plane_2{ &getRegion(id_2).plane };
 			Line line{ plane_1->findPlanePlaneIntersection(*plane_2) };
 			lines.insert({ {id_1, id_2}, line });
 			lines.insert({ {id_2, id_1}, line });
@@ -201,7 +200,7 @@ std::map<std::pair<int, int>, Line> TopologyGraph::findContourLines() {
 }
 
 
-std::set<std::pair<int, int>> TopologyGraph::getRegionPairs() {
+std::set<std::pair<int, int>> TopologyGraph::getRegionPairs() const {
 	std::set<std::pair<int, int>> region_pairs;
 	for (auto const & [id, neighbors] : edges) {
 		for (auto const& neighbor_id : neighbors) {
@@ -215,14 +214,14 @@ std::set<std::pair<int, int>> TopologyGraph::getRegionPairs() {
 }
 
 
-std::set<std::pair<Plane*, Plane*>> TopologyGraph::getNeighborPairs() {
-	std::set<std::pair<Plane*, Plane*>> plane_pairs{};
+std::set<std::pair<const Plane*, const Plane*>> TopologyGraph::getNeighborPairs() const {
+	std::set<std::pair<const Plane*, const Plane*>> plane_pairs{};
 	for (auto const & [id, neighbors] : edges) {
 		for (int neighbor_id : neighbors) {
-			Node& region_1{ getRegion(id) };
-			Node& region_2{ getRegion(neighbor_id) };
-			std::pair<Plane*, Plane*> plane_pair{ &region_1.plane, &region_2.plane };
-			std::pair<Plane*, Plane*> rev{ plane_pair.second, plane_pair.first };
+			const Node& region_1{ getRegion(id) };
+			const Node& region_2{ getRegion(neighbor_id) };
+			const std::pair<const Plane*, const Plane*> plane_pair{ &region_1.plane, &region_2.plane };
+			const std::pair<const Plane*, const Plane*> rev{ plane_pair.second, plane_pair.first };
 			if (!plane_pairs.contains(rev)) {
 				plane_pairs.insert(plane_pair);
 			}
@@ -257,7 +256,7 @@ void TopologyGraph::Node::fitPlane() {
 }
 
 
-float TopologyGraph::Node::sumVertexProjectedDistances() {
+float TopologyGraph::Node::sumVertexProjectedDistances() const {
 	Mesh& mesh{ parent->mesh };
 	float sum{ 0.0f };
 	for (auto& vh : vertices) {
