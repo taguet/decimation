@@ -36,6 +36,11 @@ namespace Equation {
 	}
 
 
+	Vector3f Plane::projectPoint(const Mesh::Point& p) const {
+		return projectPoint(Vector3f{ p[0], p[1], p[2] });
+	}
+
+
 	float Plane::distFromOrigin() const {
 		Vector3f normal{ getNormal() };
 		return d() / normal.norm();
@@ -47,8 +52,18 @@ namespace Equation {
 	}
 
 
+	float Plane::distToPoint(const Mesh::Point& p) const {
+		return distToPoint(Vector3f{p[0], p[1], p[2]});
+	}
+
+
 	float Plane::signedDistToPoint(const Vector3f& p) const {
 		return (a() * p[0] + b() * p[1] + c() * p[2] + d()) / std::sqrtf(a() * a() + b() * b() + c() * c());
+	}
+
+
+	float Plane::signedDistToPoint(const Mesh::Point& p) const {
+		return signedDistToPoint(Vector3f{ p[0], p[1], p[2] });
 	}
 
 
@@ -59,12 +74,16 @@ namespace Equation {
 	}
 	
 	
-	float Plane::evaluate(const Vector3f point) const {
+	float Plane::evaluate(const Vector3f& point) const {
 		Eigen::Vector4f X{ point(0), point(1), point(2), 1};
 		auto result{ parameters.transpose() * X };
 		return result.eval()(0,0);
 	}
 
+
+	float Plane::evaluate(const Mesh::Point& point) const {
+		return evaluate(point[0], point[1], point[2]);
+	}
 
 //------------------- LINE --------------------//
 

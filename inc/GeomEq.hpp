@@ -2,10 +2,13 @@
 #define GEOMEQ_HPP
 
 #include <Eigen/Dense>
+#include <OpenMesh/Core/Mesh/Types/TriMesh_ArrayKernelT.hh>
 
 namespace Equation {
 	using Vector3f = Eigen::Vector3f;
 	using Vector4f = Eigen::Vector4f;
+
+	typedef OpenMesh::TriMesh_ArrayKernelT<>  Mesh;
 
 	/// @brief Represents the parametric equation of a line.
 	class Line {
@@ -39,7 +42,8 @@ namespace Equation {
 		/// @brief Evaluate the expression ax+by+cz+d
 		/// @return A point.
 		float evaluate(const float x, const float y, const float z) const;
-		float evaluate(const Vector3f point) const;
+		float evaluate(const Vector3f& point) const;
+		float evaluate(const Mesh::Point& point) const;
 
 		/// @brief Computes the intersection between this plane and another given plane.
 		/// @param plane The plane intersecting this object.
@@ -48,9 +52,12 @@ namespace Equation {
 
 		float distFromOrigin() const;
 		float distToPoint(const Vector3f& p) const;
+		float distToPoint(const Mesh::Point& p) const;
 		float signedDistToPoint(const Vector3f& p) const;
+		float signedDistToPoint(const Mesh::Point& p) const;
 		Vector3f getNormal() const;
 		Vector3f projectPoint(const Vector3f& p) const;
+		Vector3f projectPoint(const Mesh::Point& p) const;
 
 
 		Vector4f parameters;	/// The parameters a, b, c and d
