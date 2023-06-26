@@ -97,8 +97,18 @@ namespace Equation {
 	}
 
 
+	Vector3f Line::projectPoint(const Mesh::Point& p) const {
+		return projectPoint(Vector3f{ p[0], p[1], p[2] });
+	}
+
+
 	float Line::distToPoint(const Vector3f& p) const {
 		Vector3f proj{ projectPoint(p) };
 		return p.norm();
+	}
+
+
+	float Line::distToPoint(const Mesh::Point& p) const {
+		return distToPoint(Vector3f{ p[0], p[1], p[2] });
 	}
 }

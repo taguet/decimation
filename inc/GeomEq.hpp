@@ -19,7 +19,9 @@ namespace Equation {
 		Vector3f evaluate(const float t) const;
 
 		Vector3f projectPoint(const Vector3f& p) const;
+		Vector3f projectPoint(const Mesh::Point& p) const;
 		float distToPoint(const Vector3f& p) const;
+		float distToPoint(const Mesh::Point& p) const;
 
 
 		Vector3f origin;	/// The position point
