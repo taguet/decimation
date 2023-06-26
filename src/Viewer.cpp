@@ -39,6 +39,7 @@ Viewer::Viewer(const char* _title, int _width, int _height): MeshViewer(_title, 
   add_draw_mode("Planar Region Extraction");
   add_draw_mode("Erreur plan");
 
+  add_draw_mode("Debug Planar Region Extraction");
   add_draw_mode("Debug plane-region fitting");
   add_draw_mode("Debug contour");
   add_draw_mode("Debug contour projection");
@@ -530,6 +531,17 @@ void Viewer::draw(const std::string& _draw_mode) {
 		draw("Solid Smooth");
 	}
 	else if (_draw_mode == "Planar Region Extraction") {
+		if (!isModified) {
+			isModified = true;
+			this->graph = new TopologyGraph(mesh, 1.0f, 1.0f);
+			mtools.extractRegions(*graph);
+			this->graph->projectContourVertices();
+		}
+		draw("Solid Smooth"); 
+		prev_draw_mode = current_draw_mode;
+		prev_id_draw_mode = get_draw_mode();
+	}
+	else if (_draw_mode == "Debug Planar Region Extraction") {
 		static std::map<int, std::unique_ptr<int[]>> rgb{};
 		if (!isModified) {
 			isModified = true;
@@ -988,7 +1000,7 @@ void Viewer::browse_meshes() {
 	ZeroMemory(&ofn, sizeof(ofn));
 
 	ofn.lStructSize = sizeof(ofn);
-	ofn.lpstrFilter = L"Mesh\0*.off;*.stl\0\0";
+	ofn.lpstrFilter = L"Mesh\0*.off;*.stl;*.obj\0\0";
 	ofn.lpstrFile = szPath;
 	ofn.lpstrFile[0] = '\0';
 	ofn.nMaxFile = 100;
