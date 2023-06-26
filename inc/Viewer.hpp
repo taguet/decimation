@@ -107,6 +107,8 @@ private:
   OpenMesh::EPropHandleT<Mesh::Scalar>  eweight_;
   OpenMesh::VPropHandleT<Vec3f> initial_coords;
 
+  OpenMesh::VPropHandleT<float> fit_error;
+
   GLuint  textureID_;
   ComputingTools ctools;
   MeshTools mtools;
@@ -124,6 +126,7 @@ private:
 
   void draw_1_ring(const VertexHandle vh, Vec3f color);
   std::vector<Eigen::Vector3f> computePlane(const Equation::Plane& plane) const;
+  void computeFittingError();
 };
 
 

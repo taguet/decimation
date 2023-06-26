@@ -37,6 +37,7 @@ Viewer::Viewer(const char* _title, int _width, int _height): MeshViewer(_title, 
   add_draw_mode("Cotangent Laplacian");
   add_draw_mode("Anisotropic Laplacian");
   add_draw_mode("Planar Region Extraction");
+  add_draw_mode("Erreur plan");
 
   add_draw_mode("Debug plane-region fitting");
   add_draw_mode("Debug contour");
@@ -700,6 +701,40 @@ void Viewer::draw(const std::string& _draw_mode) {
 		prev_draw_mode = current_draw_mode;
 		prev_id_draw_mode = get_draw_mode();
 	}
+	else if (_draw_mode == "Erreur plan") {
+		if (!isModified) {
+			contour_edges = {};
+			contour_vertices = {};
+			lines = {};
+			isModified = true;
+			this->graph = new TopologyGraph(mesh, 1.0f, 1.0f);
+			mtools.extractRegions(*graph);
+			computeFittingError();
+		}
+		glEnable(GL_LIGHTING);
+		draw("Solid Smooth");
+		glEnable(GL_DEPTH_TEST);
+		glEnable(GL_POLYGON_OFFSET_LINE);
+		glPolygonOffset(-1.0, 1.0);
+		glPointSize(10.0f);
+		glBegin(GL_POINTS);
+		for (auto vh{ mesh.vertices_begin() }; vh != mesh.vertices_end(); ++vh) {
+			const float error{ mesh.property(fit_error, vh) };
+			if (error <= 0.05f)
+				glColor3f(0.0f, 1.0f, 0.0f);
+			else if (error > 0.05f && error <= 0.1f)
+				glColor3f(0.0f, 0.0f, 1.0f);
+			else if (error > 0.1f)
+				glColor3f(1.0f, 0.0f, 0.0f);
+			else
+				continue;
+			GL::glVertex(mesh.point(vh));
+		}
+		glEnd();
+		glDisable(GL_POLYGON_OFFSET_LINE);		
+		prev_draw_mode = current_draw_mode;
+		prev_id_draw_mode = get_draw_mode();
+	}
 	else if (_draw_mode == "Debug opposite angles") {
 		static int cur_v_id = -1;
 		static std::vector<HalfedgeHandle> ohs{};
@@ -1044,5 +1079,25 @@ std::vector<Eigen::Vector3f> Viewer::computePlane(const Equation::Plane& plane) 
 	return points;
 }
 
+
+void Viewer::computeFittingError() {
+	mesh.add_property(fit_error);
+	for (auto vh{ mesh.vertices_begin() }; vh != mesh.vertices_end(); ++vh) {
+		mesh.property(fit_error, vh) = -1;
+	}
+	for (auto fh{ mesh.faces_begin() }; fh != mesh.faces_end(); ++fh) {
+		const int id{ this->graph->getFaceRegion(fh) };
+		const Plane& plane{ this->graph->getPlane(id) };
+		const HalfedgeHandle heh{ mesh.halfedge_handle(fh) };
+		const VertexHandle vh_0{ mesh.to_vertex_handle(heh) };
+		const VertexHandle vh_1{ mesh.from_vertex_handle(heh) };
+		const VertexHandle vh_2{ mesh.opposite_vh(heh)};
+
+		if (id == -1) continue;
+		mesh.property(fit_error, vh_0) = plane.distToPoint(mesh.point(vh_0));
+		mesh.property(fit_error, vh_1) = plane.distToPoint(mesh.point(vh_1));
+		mesh.property(fit_error, vh_2) = plane.distToPoint(mesh.point(vh_2));
+	}
+}
 
 //=============================================================================
