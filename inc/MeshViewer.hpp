@@ -35,6 +35,9 @@ public:
   /// open mesh
   virtual bool open_mesh(const char* _filename);
 
+  /// write mesh
+  virtual bool write_mesh(const char* _filename);
+
   /// update buffer with face indices
   void update_face_indices(Mesh &mesh_, vector<unsigned int> &indices_);
 

@@ -40,6 +40,9 @@ public:
   /// open mesh
   virtual bool open_mesh(const char* _filename);
 
+  /// write mesh
+  virtual bool write_mesh(const char* _filename);
+
   //Getter
   OpenMesh::TriMesh_ArrayKernelT<> getMesh();
 

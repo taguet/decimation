@@ -137,6 +137,12 @@ bool Viewer::open_mesh(const char* _filename) {
 	  return false;
 }
 
+bool Viewer::write_mesh(const char* _filename) {
+	if (MeshViewer::write_mesh(_filename)) {
+		return true;
+	}
+	return false;
+}
 
 //-----------------------------------------------------------------------------
 
