@@ -43,12 +43,12 @@ bool TopologyGraph::simplifyGraph() {
 		else {
 			int targetID{ findTargetRegion(region.id, 100.0f) }; //arbitrary threshold
 			if (targetID == -1) {
-				std::cout << "Deleted region " << region.id << std::endl;
+				std::cerr << "Deleted region " << region.id << '\n';
 				ungroupRegion(region.id, true);
 				return true;
 			}
 			else {
-				std::cout << "Merged region " << region.id << " into " << targetID << std::endl;
+				std::cerr << "Merged region " << region.id << " into " << targetID << '\n';
 				regroupRegionIntoTarget(region.id, targetID);
 				return true;
 			}

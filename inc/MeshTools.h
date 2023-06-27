@@ -58,12 +58,13 @@ public:
 		static_assert(std::is_base_of_v<Laplacian, T>);
 		std::unique_ptr<Laplacian> laplacian{ new T(*mesh_) };
 		for (int i{ 0 }; i < iterations; ++i) {
-			std::cout << "Iteration " << i + 1 << std::endl;
+			std::cerr << "Iteration " << i + 1 << '\t';
 			laplacian->computeLaplacians();
 			for (auto v_it{ mesh_->vertices_begin() }; v_it != mesh_->vertices_end(); ++v_it) {
 				mesh_->set_point(v_it, mesh_->point(v_it) + laplacian->laplacian_displacement(v_it) * factor);
 			}
 			mesh_->update_normals();
+			std::cerr << "OK\n";
 		}
 	}
 

@@ -565,7 +565,7 @@ void Viewer::draw(const std::string& _draw_mode) {
 			const Mesh::Color* c{ mesh.vertex_colors() };
 			std::unique_ptr<int[]> color{ new int[3] { c->data()[0], c->data()[1], c->data()[2]} };
 			rgb[-1] = std::move(color);
-			std::cout << "Found " << groups_found.size() << " groups." << std::endl;
+			std::cerr << "Found " << groups_found.size() << " groups.\n";
 		}
 		glDisable(GL_LIGHTING);
 		for (auto f_iter{ mesh.faces_begin() }; f_iter != mesh.faces_end(); ++f_iter) {
@@ -607,7 +607,7 @@ void Viewer::draw(const std::string& _draw_mode) {
 		}
 
 		const Equation::Plane& plane{ graph->getRegion(regionID).plane };
-		std::cout << "Viewing region " << regionID << "\nEquation: "<< plane.a() << "x + " << plane.b() << "y + " << plane.c() << " z + " << plane.d() << " = 0" << std::endl;
+		std::cerr << "Viewing region " << regionID << "\nEquation: "<< plane.a() << "x + " << plane.b() << "y + " << plane.c() << " z + " << plane.d() << " = 0\n";
 		glColor3f(1.0f, 0.0f, 0.0f);
 		std::vector<Eigen::Vector3f> points{ computePlane(plane) };
 		Vector3f& p0{ points[0]};
@@ -658,8 +658,8 @@ void Viewer::draw(const std::string& _draw_mode) {
 				Vector3f p0{ line.evaluate(-2.0f) };
 				auto t = p0[0];
 				Vector3f p1{ line.evaluate(2.0f) };
-				std::cout << "Line: (" << line.origin.transpose() << ") + t*(" << line.direction.transpose() << ")" << std::endl;
-				std::cout << "p0=" << p0.transpose() << "\tp1=" << p1.transpose() << std::endl;
+				std::cerr << "Line: (" << line.origin.transpose() << ") + t*(" << line.direction.transpose() << ")\n";
+				std::cerr << "p0=" << p0.transpose() << "\tp1=" << p1.transpose() << '\n';
 				GL::glVertex(OpenMesh::Vec3f{ p0(0), p0(1), p0(2) });
 				GL::glVertex(OpenMesh::Vec3f{ p1(0), p1(1), p1(2) });
 			}
@@ -706,8 +706,8 @@ void Viewer::draw(const std::string& _draw_mode) {
 			Vector3f p0{ line.evaluate(-2.0f) };
 			auto t = p0[0];
 			Vector3f p1{ line.evaluate(2.0f) };
-			std::cout << "Line: (" << line.origin.transpose() << ") + t*(" << line.direction.transpose() << ")" << std::endl;
-			std::cout << "p0=" << p0.transpose() << "\tp1=" << p1.transpose() << std::endl;
+			std::cerr << "Line: (" << line.origin.transpose() << ") + t*(" << line.direction.transpose() << ")\n";
+			std::cerr << "p0=" << p0.transpose() << "\tp1=" << p1.transpose() << '\n';
 			GL::glVertex(OpenMesh::Vec3f{ p0(0), p0(1), p0(2) });
 			GL::glVertex(OpenMesh::Vec3f{ p1(0), p1(1), p1(2) });
 		}
@@ -776,19 +776,19 @@ void Viewer::draw(const std::string& _draw_mode) {
 
 		if (cur_oh != oh) {
 			cur_oh = oh;
-			std::cout << "v_i=" << mesh.point(mesh.from_vertex_handle(oh)) << '\n';
-			std::cout << "v_j=" << mesh.point(mesh.to_vertex_handle(oh)) << std::endl; 
+			std::cerr << "v_i=" << mesh.point(mesh.from_vertex_handle(oh)) << '\n'
+					  << "v_j=" << mesh.point(mesh.to_vertex_handle(oh)) << '\n';
 			Vec3f a;
 			mesh.calc_edge_vector(left, a);
-			std::cout << "next()=" << a << std::endl;
+			std::cerr << "next()=" << a << '\n';
 			std::pair<float, float> angles{ MeshUtils::getOppositeAngles(mesh, oh) };
 			Vec3f e1, e2;
 			mesh.calc_sector_vectors(left, e1, e2);
-			std::cout << "alpha=" << angles.first << "\te1=" << e1 << "\te2=" << e2 << std::endl;
-			std::cout << "cotan alpha=" << MeshUtils::cotan(angles.first) << std::endl;
+			std::cerr << "alpha=" << angles.first << "\te1=" << e1 << "\te2=" << e2 << '\n'
+					  << "cotan alpha=" << MeshUtils::cotan(angles.first) << '\n';
 			mesh.calc_sector_vectors(right, e1, e2);
-			std::cout << "beta=" << angles.second << "\te1=" << e1 << "\te2=" << e2 << std::endl;
-			std::cout << "cotan beta=" << MeshUtils::cotan(angles.second) << std::endl;
+			std::cerr << "beta=" << angles.second << "\te1=" << e1 << "\te2=" << e2 << '\n'
+					  << "cotan beta=" << MeshUtils::cotan(angles.second) << '\n';
 		}
 
 		draw_1_ring(mesh.vertex_handle(v_id), {0.5, 0.5, 0.5});
@@ -841,9 +841,9 @@ void Viewer::draw(const std::string& _draw_mode) {
 		static int cur_v_id = -1;
 		static CotangentLaplacian debug_clapl{ CotangentLaplacian(mesh) };
 		if (cur_v_id != v_id) {
-			std::cout << "v_i=" << mesh.point(_vh) << '\n';
-			std::cout << "L(v_i)=" << debug_clapl.computeLaplacian(_vh) << '\n';
-			std::cout << "A(v_i)=" << MeshUtils::computeVertexArea(mesh, _vh) << std::endl;
+			std::cerr << "v_i=" << mesh.point(_vh) << '\n'
+					  << "L(v_i)=" << debug_clapl.computeLaplacian(_vh) << '\n'
+					  << "A(v_i)=" << MeshUtils::computeVertexArea(mesh, _vh) << '\n';
 			cur_v_id = v_id;
 		}
 		glDisable(GL_LIGHTING);
@@ -927,13 +927,13 @@ void Viewer::draw(const std::string& _draw_mode) {
 
 		if (cur_oh != oh) {
 			cur_oh = oh;
-			std::cout << "v_i=" << mesh.point(mesh.from_vertex_handle(oh)) << '\n';
-			std::cout << "v_j=" << mesh.point(mesh.to_vertex_handle(oh)) << std::endl;
-			std::cout << "v0=" << p0 << std::endl;
-			std::cout << "v1=" << p1 << std::endl;
-			std::cout << "v2=" << p2 << std::endl;
-			std::cout << "centroid=" << MeshUtils::computeCentroid(mesh, oh) << std::endl;
-			std::cout << (p0 + p1 + p2) / 3.0f << std::endl;
+			std::cerr << "v_i=" << mesh.point(mesh.from_vertex_handle(oh)) << '\n'
+					  << "v_j=" << mesh.point(mesh.to_vertex_handle(oh)) << '\n'
+					  << "v0=" << p0 << '\n'
+					  << "v1=" << p1 << '\n'
+					  << "v2=" << p2 << '\n'
+					  << "centroid=" << MeshUtils::computeCentroid(mesh, oh) << '\n'
+					  << (p0 + p1 + p2) / 3.0f << '\n';
 		}
 
 		glDisable(GL_LIGHTING);
