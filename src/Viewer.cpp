@@ -104,7 +104,6 @@ void Viewer::init() {
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
   glTexImage2D(GL_TEXTURE_2D, 0, 3, 256, 256, 0, GL_RGB, GL_UNSIGNED_BYTE, tex);
-
 }
 
 
@@ -1033,34 +1032,6 @@ void Viewer::keyboard(int key, int x, int y) {
 			glutPostRedisplay();
 			break;
 		}
-		case GLUT_KEY_LEFT:
-		{
-			v_id = (v_id - 1) % mesh.n_vertices();
-			std::cout << "v_id=" << v_id << std::endl;
-			glutPostRedisplay();
-			break;
-		}
-		case GLUT_KEY_RIGHT:
-		{
-			v_id = (v_id + 1) % mesh.n_vertices();
-			std::cout << "v_id=" << v_id << std::endl;
-			glutPostRedisplay();
-			break;
-		}		
-		case GLUT_KEY_UP:
-		{
-			++neighbour_offset;
-			std::cout << "neighbour_offset=" << neighbour_offset << std::endl;
-			glutPostRedisplay();
-			break;
-		}		
-		case GLUT_KEY_DOWN:
-		{
-			--neighbour_offset;
-			std::cout << "neighbour_offset=" << neighbour_offset << std::endl;
-			glutPostRedisplay();
-			break;
-		}
 		case 32:
 		{
 			calledSmoothing = true;
@@ -1074,6 +1045,45 @@ void Viewer::keyboard(int key, int x, int y) {
 		default:
 		{
 			MeshViewer::keyboard(key, x, y);
+			break;
+		}
+	}
+}
+
+
+void Viewer::special(int key, int x, int y) {
+	switch (key) {
+		case GLUT_KEY_LEFT:
+		{
+			v_id = (v_id - 1) % mesh.n_vertices();
+			std::cerr << "v_id=" << v_id << '\n';
+			glutPostRedisplay();
+			break;
+		}
+		case GLUT_KEY_RIGHT:
+		{
+			v_id = (v_id + 1) % mesh.n_vertices();
+			std::cerr << "v_id=" << v_id << '\n';
+			glutPostRedisplay();
+			break;
+		}
+		case GLUT_KEY_UP:
+		{
+			++neighbour_offset;
+			std::cerr << "neighbour_offset=" << neighbour_offset << '\n';
+			glutPostRedisplay();
+			break;
+		}
+		case GLUT_KEY_DOWN:
+		{
+			--neighbour_offset;
+			std::cerr << "neighbour_offset=" << neighbour_offset << '\n';
+			glutPostRedisplay();
+			break;
+		}
+		default:
+		{
+			MeshViewer::special(key, x, y);
 			break;
 		}
 	}

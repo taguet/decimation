@@ -90,11 +90,11 @@ open_mesh(const char* _filename)
 
 bool MeshViewer::write_mesh(const char* _filename) {
 	if (OpenMesh::IO::write_mesh(mesh, _filename)) {
-		std::cerr << "Succesfully wrote mesh to file " << _filename;
+		std::cerr << "Succesfully wrote mesh to file " << _filename << '\n';
 		return true;
 	}
 	else {
-		std::cerr << "Error writing mesh to file " << _filename;
+		std::cerr << "Error writing mesh to file " << _filename << '\n';
 	}
 	return false;
 }

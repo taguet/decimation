@@ -101,6 +101,8 @@ protected:
   /// keyboard interaction
   void keyboard(int key, int x, int y);
 
+  void special(int key, int x, int y);
+
   /// open file explorer
   void browse_meshes();
 
