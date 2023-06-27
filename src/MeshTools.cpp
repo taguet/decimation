@@ -16,7 +16,6 @@ void MeshTools::extractRegions(TopologyGraph& graph) {
 
 
 void MeshTools::growRegions(std::list<Mesh::FaceHandle>& ungrouped_faces, TopologyGraph& graph) {
-	AnisotropicLaplacian lapl{ *mesh_ };	//We need this for filtered normals
 	int g{-1};
 	while (!ungrouped_faces.empty()) {
 		Mesh::FaceHandle fh{ ungrouped_faces.front() };
@@ -27,8 +26,8 @@ void MeshTools::growRegions(std::list<Mesh::FaceHandle>& ungrouped_faces, Topolo
 		MeshUtils::getFaceNeighbors(*mesh_, fh, neighbors);
 		std::cerr << "Region " << g << '\n';
 		for (auto f_neighbor{ neighbors.begin() }; f_neighbor != neighbors.end(); ) {
-			Mesh::Normal f_normal_neighbor{ lapl.filterFaceNormal(*f_neighbor) };
-			Mesh::Normal f_normal{ lapl.filterFaceNormal(fh) };
+			Mesh::Normal f_normal_neighbor{ mesh_->normal(*f_neighbor)};
+			Mesh::Normal f_normal{ mesh_->normal(fh)};
 			if (graph.faceGroup(*f_neighbor) != -1) {
 				f_neighbor = neighbors.erase(f_neighbor);
 				continue;
