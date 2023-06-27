@@ -80,5 +80,11 @@ private:
 	/// @brief Build a topology graph connecting all neighbouring regions.
 	/// @param graph The graph to build.
 	void buildTopologyGraph(TopologyGraph& graph);
+
+	bool faceIsGrouped(const Mesh::FaceHandle fh, const TopologyGraph& graph) const;
+	bool normalsAreCloseEnough(const Mesh::Normal& n_1, const Mesh::Normal& n_2, float threshold) const;
+
+	/// Extends a given neighborhood with that of fh
+	void extendNeighborhood(const Mesh::FaceHandle fh, std::list<Mesh::FaceHandle>& neighbors);
 };
 
