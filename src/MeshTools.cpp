@@ -8,8 +8,9 @@ void MeshTools::extractRegions(TopologyGraph& graph) {
 		graph.faceGroup(f_iter) = -1;
 		ungrouped_faces.push_back(f_iter);
 	}
-
+	std::cerr << "Executing region growing algorithm...\n";
 	growRegions(ungrouped_faces, graph);
+	std::cerr << "Done\nBuilding topology graph...\n";
 	buildTopologyGraph(graph);
 }
 
@@ -24,6 +25,7 @@ void MeshTools::growRegions(std::list<Mesh::FaceHandle>& ungrouped_faces, Topolo
 		graph.addFaceToRegion(g, fh);
 		std::list<Mesh::FaceHandle>  neighbors{  };
 		MeshUtils::getFaceNeighbors(*mesh_, fh, neighbors);
+		std::cerr << "Region " << g << '\n';
 		for (auto f_neighbor{ neighbors.begin() }; f_neighbor != neighbors.end(); ) {
 			Mesh::Normal f_normal_neighbor{ lapl.filterFaceNormal(*f_neighbor) };
 			Mesh::Normal f_normal{ lapl.filterFaceNormal(fh) };
@@ -53,6 +55,9 @@ void MeshTools::buildTopologyGraph(TopologyGraph& graph) {
 			}
 		}
 	}
+	std::cerr << "Done\nFitting planes...\n";
 	graph.fitPlanes();
+	std::cerr << "Done\nSimplifying graph...\n";
 	while (graph.simplifyGraph());	//simplify graph until no changes are made
+	std::cerr << "Done\n";
 }

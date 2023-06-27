@@ -528,7 +528,7 @@ void Viewer::draw(const std::string& _draw_mode) {
 	else if (_draw_mode == "Anisotropic Laplacian") {
 		if (!isModified) {
 			//mtools.taubinSmoothing<UniformLaplacian>(20, 1, -.5);
-			mtools.smoothMesh<AnisotropicLaplacian>(20, 1);
+			mtools.smoothMesh<AnisotropicLaplacian>(2, 1);
 			isModified = true;
 		}
 		prev_draw_mode = current_draw_mode;
@@ -880,7 +880,7 @@ void Viewer::draw(const std::string& _draw_mode) {
 	}
 	else if (_draw_mode == "Debug lissage") {
 		if (calledSmoothing) {
-			mtools.smoothMesh<CotangentLaplacian>(1, 0.05);
+			mtools.smoothMesh<AnisotropicLaplacian>(1, 0.05);
 		}
 		glEnable(GL_LIGHTING);
 
