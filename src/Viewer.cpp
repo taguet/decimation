@@ -1018,6 +1018,28 @@ void Viewer::browse_meshes() {
 	}
 }
 
+
+void Viewer::save_mesh() {
+	OPENFILENAME ofn;
+	wchar_t szPath[100];
+	ZeroMemory(&ofn, sizeof(ofn));
+
+	ofn.lStructSize = sizeof(ofn);
+	ofn.lpstrFilter = L"Mesh\0*.off;*.stl;*.obj\0\0";
+	ofn.lpstrFile = szPath;
+	ofn.lpstrFile[0] = '\0';
+	ofn.lpstrDefExt = L"off";
+	ofn.nMaxFile = 100;
+	ofn.Flags = OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST;
+
+	if (GetSaveFileName(&ofn)) {
+		wstring ws(szPath);
+		string str(ws.begin(), ws.end());
+		write_mesh(str.c_str());
+	}
+}
+
+
 void Viewer::keyboard(int key, int x, int y) {
 	switch (key)
 	{
@@ -1040,6 +1062,11 @@ void Viewer::keyboard(int key, int x, int y) {
 		case 'r':
 		{
 			reset_mesh();
+			break;
+		}
+		case 's':
+		{
+			save_mesh();
 			break;
 		}
 		default:

@@ -103,8 +103,11 @@ protected:
 
   void special(int key, int x, int y);
 
-  /// open file explorer
+  /// open file explorer to open a mesh file
   void browse_meshes();
+
+  /// open file explorer to save a mesh
+  void save_mesh();
 
 private:
 
