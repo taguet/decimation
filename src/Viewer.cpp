@@ -728,12 +728,12 @@ void Viewer::draw(const std::string& _draw_mode) {
 			mtools.extractRegions(*graph);
 			computeFittingError();
 		}
-		glEnable(GL_LIGHTING);
 		draw("Solid Smooth");
 		glEnable(GL_DEPTH_TEST);
 		glEnable(GL_POLYGON_OFFSET_LINE);
 		glPolygonOffset(-1.0, 1.0);
 		glPointSize(10.0f);
+		glDisable(GL_LIGHTING);
 		glBegin(GL_POINTS);
 		for (auto vh{ mesh.vertices_begin() }; vh != mesh.vertices_end(); ++vh) {
 			const float error{ mesh.property(fit_error, vh) };
