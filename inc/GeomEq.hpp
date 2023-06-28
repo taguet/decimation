@@ -47,6 +47,10 @@ namespace Equation {
 		float evaluate(const Vector3f& point) const;
 		float evaluate(const Mesh::Point& point) const;
 
+		float solveX(const float y, const float z) const;
+		float solveY(const float x, const float z) const;
+		float solveZ(const float x, const float y) const;
+
 		/// @brief Computes the intersection between this plane and another given plane.
 		/// @param plane The plane intersecting this object.
 		/// @return A line.

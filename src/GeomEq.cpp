@@ -85,6 +85,21 @@ namespace Equation {
 		return evaluate(point[0], point[1], point[2]);
 	}
 
+
+	float Plane::solveX(const float y, const float z) const {
+		return -(b() * y + c() * z + d()) / a();
+	}
+
+
+	float Plane::solveY(const float x, const float z) const {
+		return -(a() * x + c() * z + d()) / b();
+	}
+
+
+	float Plane::solveZ(const float x, const float y) const {
+		return -(a() * x + b() * y + d()) / c();
+	}
+
 //------------------- LINE --------------------//
 
 	Vector3f Line::evaluate(const float t) const {
