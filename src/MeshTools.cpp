@@ -34,10 +34,10 @@ void MeshTools::growRegions(std::list<Mesh::FaceHandle>& ungrouped_faces, Topolo
 				f_neighbor = neighbors.erase(f_neighbor);
 				continue;
 			}
-			else if (normalsAreCloseEnough(f_normal, f_normal_neighbor, 0.349066f)) {
+			else if (normalsAreCloseEnough(f_normal_neighbor, f_normal, 0.349066f)) {
 				graph.addFaceToRegion(current_region_id, *f_neighbor);
 				extendNeighborhood(*f_neighbor, neighbors);
-				ungrouped_faces.remove(fh);
+				ungrouped_faces.remove(*f_neighbor);
 			}
 			++f_neighbor;
 		}
