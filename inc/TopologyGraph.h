@@ -23,7 +23,7 @@ private:
 		const std::set<Mesh::FaceHandle>& getFaceHandles() const { return faces; }
 		const std::set<Mesh::VertexHandle>& getVertexHandles() const { return vertices; }
 		bool empty() const { return faces.empty(); }
-		bool contains(Mesh::FaceHandle& fh) const { return faces.find(fh) != faces.end(); }
+		bool contains(Mesh::FaceHandle& fh) const { return faces.contains(fh); }
 		float computeArea() const;
 		void fitPlane();
 		float sumVertexProjectedDistances() const;
