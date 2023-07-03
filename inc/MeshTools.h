@@ -100,6 +100,16 @@ private:
 	std::map<RegionID, Quadric> region_quadrics;
 
 	void computeRegionQuadrics();
+
+	Quadric& vertexQuadric(const Mesh::VertexHandle vh) {
+		return mesh->property(v_quadric, vh);
+	}
+
+
+	float& edgeError(Mesh::EdgeHandle eh) {
+		return mesh->property(quadric_error, eh);
+	}
+
 public:
 	EdgeCollapse(Mesh& mesh, TopologyGraph& graph) : mesh{ &mesh }, graph{ &graph } {
 		this->mesh->add_property(v_quadric);
