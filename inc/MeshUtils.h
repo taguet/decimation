@@ -86,5 +86,12 @@ namespace MeshUtils
 	/// @param fh 
 	/// @return A cartesian equation of a plane.
 	Equation::Plane computeFacePlane(const Mesh& mesh, const Mesh::FaceHandle fh);
+
+
+	namespace EdgeCollapse {
+		using Quadric = Eigen::Matrix4f;
+
+		Quadric computeQuadric(const Mesh& mesh, Equation::Plane& plane);
+	}
 };
 
