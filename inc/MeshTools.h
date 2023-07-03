@@ -123,6 +123,7 @@ public:
 
 	Quadric computeQuadric(const Equation::Plane& plane);
 	Quadric computeVertexQuadric(const Mesh::VertexHandle vh);
+	Quadric computeEdgeQuadric(const Mesh::EdgeHandle eh);
 
 	void computeVerticesQuadrics();
 };

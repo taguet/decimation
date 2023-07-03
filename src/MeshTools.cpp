@@ -93,6 +93,14 @@ Quadric EdgeCollapse::computeVertexQuadric(const Mesh::VertexHandle vh) {
 }
 
 
+Quadric EdgeCollapse::computeEdgeQuadric(const Mesh::EdgeHandle eh) {
+	Mesh::HalfedgeHandle heh{ mesh->halfedge_handle(eh, 0) };
+	Mesh::VertexHandle vh_0{ mesh->from_vertex_handle(heh) };
+	Mesh::VertexHandle vh_1{ mesh->to_vertex_handle(heh) };
+	return vertexQuadric(vh_0) + vertexQuadric(vh_1);
+}
+
+
 void EdgeCollapse::computeVerticesQuadrics() {
 	for (auto v_it{ mesh->vertices_begin() }; v_it != mesh->vertices_end(); ++v_it) {
 		if (graph->allNeighborFacesAreInSameRegion(v_it)) {
