@@ -330,7 +330,7 @@ const Line& TopologyGraph::findClosestLine(const Mesh::EdgeHandle eh, const std:
 }
 
 
-bool TopologyGraph::allNeighborFacesAreInSameRegion(const int regionID, const Mesh::VertexHandle vh) const {
+bool TopologyGraph::allNeighborFacesAreInSameRegion(const Mesh::VertexHandle vh) const {
 	std::vector<int> neighbor_faces;
 	for (auto& f_it{ mesh.vf_iter(vh) }; f_it; ++f_it) {
 		neighbor_faces.push_back(faceGroup(f_it));
