@@ -106,6 +106,10 @@ public:
 		this->mesh->add_property(quadric_error);
 	}
 
+	~EdgeCollapse() {
+		this->mesh->remove_property(v_quadric);
+		this->mesh->remove_property(quadric_error);
+	}
 
 	Quadric computeQuadric(const Equation::Plane& plane);
 	Quadric computeVertexQuadric(const Mesh::VertexHandle vh);
