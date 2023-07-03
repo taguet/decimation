@@ -76,3 +76,12 @@ void MeshTools::extendNeighborhood(const Mesh::FaceHandle fh, std::list<Mesh::Fa
 	MeshUtils::getFaceNeighbors(*mesh_, fh, extended_neighborhood);
 	neighbors.splice(neighbors.end(), extended_neighborhood);
 }
+
+
+namespace EdgeCollapse {
+	Quadric computeQuadric(const Mesh& mesh, Equation::Plane& plane) {
+		return plane.parameters * plane.parameters.transpose();
+	}
+
+
+}

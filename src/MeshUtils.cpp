@@ -124,10 +124,3 @@ Equation::Plane MeshUtils::computeFacePlane(const Mesh& mesh, const Mesh::FaceHa
 	float d{ normal[0] * p[0] + normal[1] * p[1] + normal[2] * p[2] };
 	return Equation::Plane{ normal[0], normal[1], normal[2], d };
 }
-
-
-namespace MeshUtils::EdgeCollapse {
-	Quadric computeQuadric(const Mesh& mesh, Equation::Plane& plane) {
-		return plane.parameters * plane.parameters.transpose();
-	}
-}

@@ -88,3 +88,8 @@ private:
 	void extendNeighborhood(const Mesh::FaceHandle fh, std::list<Mesh::FaceHandle>& neighbors);
 };
 
+namespace EdgeCollapse {
+	using Quadric = Eigen::Matrix4f;
+
+	Quadric computeQuadric(const Mesh& mesh, Equation::Plane& plane);
+}
