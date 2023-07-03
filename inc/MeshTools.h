@@ -124,4 +124,5 @@ public:
 	Quadric computeQuadric(const Equation::Plane& plane);
 	Quadric computeVertexQuadric(const Mesh::VertexHandle vh);
 
+	void computeVerticesQuadrics();
 };

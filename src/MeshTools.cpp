@@ -93,7 +93,15 @@ Quadric EdgeCollapse::computeVertexQuadric(const Mesh::VertexHandle vh) {
 }
 
 
-
+void EdgeCollapse::computeVerticesQuadrics() {
+	for (auto v_it{ mesh->vertices_begin() }; v_it != mesh->vertices_end(); ++v_it) {
+		if (graph->allNeighborFacesAreInSameRegion(v_it)) {
+			Mesh::FaceHandle fh{ mesh->vf_iter(v_it) };
+			const RegionID id{ graph->faceGroup(fh) };
+			vertexQuadric(v_it) = region_quadrics.at(id);
+		}
+		else {
+			vertexQuadric(v_it) = computeVertexQuadric(v_it);
 		}
 	}
 }
