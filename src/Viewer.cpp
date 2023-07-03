@@ -10,6 +10,8 @@
 
 #include "Viewer.hpp"
 #include <vector>
+#include <set>
+#include <map>
 #include <float.h>
 
 
@@ -34,7 +36,13 @@ Viewer::Viewer(const char* _title, int _width, int _height): MeshViewer(_title, 
   add_draw_mode("Uniform Laplacian");
   add_draw_mode("Cotangent Laplacian");
   add_draw_mode("Anisotropic Laplacian");
+  add_draw_mode("Planar Region Extraction");
+  add_draw_mode("Erreur plan");
 
+  add_draw_mode("Debug Planar Region Extraction");
+  add_draw_mode("Debug plane-region fitting");
+  add_draw_mode("Debug contour");
+  add_draw_mode("Debug contour projection");
   add_draw_mode("Debug opposite angles");
   add_draw_mode("Debug laplacien cotangente");
   add_draw_mode("Debug lissage");
@@ -96,7 +104,6 @@ void Viewer::init() {
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
   glTexImage2D(GL_TEXTURE_2D, 0, 3, 256, 256, 0, GL_RGB, GL_UNSIGNED_BYTE, tex);
-
 }
 
 
@@ -129,6 +136,12 @@ bool Viewer::open_mesh(const char* _filename) {
 	  return false;
 }
 
+bool Viewer::write_mesh(const char* _filename) {
+	if (MeshViewer::write_mesh(_filename)) {
+		return true;
+	}
+	return false;
+}
 
 //-----------------------------------------------------------------------------
 
@@ -522,6 +535,223 @@ void Viewer::draw(const std::string& _draw_mode) {
 		prev_id_draw_mode = get_draw_mode();
 		draw("Solid Smooth");
 	}
+	else if (_draw_mode == "Planar Region Extraction") {
+		if (!isModified) {
+			isModified = true;
+			this->graph = new TopologyGraph(mesh, 1.0f, 1.0f);
+			mtools.extractRegions(*graph);
+			this->graph->projectContourVertices();
+		}
+		draw("Solid Smooth"); 
+		prev_draw_mode = current_draw_mode;
+		prev_id_draw_mode = get_draw_mode();
+	}
+	else if (_draw_mode == "Debug Planar Region Extraction") {
+		static std::map<int, std::unique_ptr<int[]>> rgb{};
+		if (!isModified) {
+			isModified = true;
+			rgb.clear();
+			this->graph = new TopologyGraph{ mesh, 1.0f, 1.0f };
+			mtools.extractRegions(*graph);
+			srand(0);
+			std::set<int> groups_found{graph->getRegionIDs()};
+			for (int groupID : groups_found) {
+				//Generate color
+				std::unique_ptr<int[]> color{ new int[3] {rand() % 256, rand() % 256, rand() % 256} };
+				rgb[groupID] = std::move(color);
+				Equation::Plane plane{ graph->getRegion(groupID).plane};
+				//std::cout << "z = " << params[1] << "x + " << params[2] << "y + " << params[0] << std::endl;
+			}
+			const Mesh::Color* c{ mesh.vertex_colors() };
+			std::unique_ptr<int[]> color{ new int[3] { c->data()[0], c->data()[1], c->data()[2]} };
+			rgb[-1] = std::move(color);
+			std::cerr << "Found " << groups_found.size() << " groups.\n";
+		}
+		glDisable(GL_LIGHTING);
+		for (auto f_iter{ mesh.faces_begin() }; f_iter != mesh.faces_end(); ++f_iter) {
+			int id{ graph->getFaceRegion(f_iter)};
+			glColor3ub(rgb.at(id)[0], rgb.at(id)[1], rgb.at(id)[2]);
+			glBegin(GL_TRIANGLES);
+			Mesh::HalfedgeHandle heh{ mesh.halfedge_handle(f_iter) };
+			GL::glVertex(mesh.point(mesh.from_vertex_handle(heh)));
+			GL::glVertex(mesh.point(mesh.to_vertex_handle(heh)));
+			GL::glVertex(mesh.point(mesh.to_vertex_handle(mesh.next_halfedge_handle(heh))));
+			glEnd();
+		}
+
+		prev_draw_mode = current_draw_mode;
+		prev_id_draw_mode = get_draw_mode();
+	}
+	else if (_draw_mode == "Debug plane-region fitting") {
+		if (!isModified) {
+			isModified = true;
+			this->graph = new TopologyGraph(mesh, 1.0f, 1.0f);
+			mtools.extractRegions(*graph);
+		}
+
+		//draw("Solid Smooth");
+		set<int> ids{ graph->getRegionIDs() };
+		auto it{ ids.begin() }; 
+		std::advance(it, region_id% graph->size());
+		int regionID{ *it };
+		glEnable(GL_LIGHTING);
+		for (auto fh : graph->getRegion(regionID).getFaceHandles()) {
+			glColor3f(0.0f, 0.0f, 1.0f);
+			glBegin(GL_TRIANGLES);
+			Mesh::HalfedgeHandle heh{ mesh.halfedge_handle(fh) };
+			GL::glNormal(mesh.normal(fh));
+			GL::glVertex(mesh.point(mesh.from_vertex_handle(heh)));
+			GL::glVertex(mesh.point(mesh.to_vertex_handle(heh)));
+			GL::glVertex(mesh.point(mesh.opposite_vh(heh)));
+			glEnd();
+		}
+
+		const Equation::Plane& plane{ graph->getRegion(regionID).plane };
+		std::cerr << "Viewing region " << regionID << "\nEquation: "<< plane.a() << "x + " << plane.b() << "y + " << plane.c() << " z + " << plane.d() << " = 0\n";
+		glColor3f(1.0f, 0.0f, 0.0f);
+		std::vector<Eigen::Vector3f> points{ computePlane(plane) };
+		Vector3f& p0{ points[0]};
+		Vector3f& p1{ points[1] };
+		Vector3f& p2{ points[2] };
+		glBegin(GL_TRIANGLES);
+			GL::glVertex(OpenMesh::Vec3f{ p0[0], p0[1], p0[2] });
+			GL::glVertex(OpenMesh::Vec3f{ p1[0], p1[1], p1[2] });
+			GL::glVertex(OpenMesh::Vec3f{ p2[0], p2[1], p2[2] });
+		glEnd();
+
+		prev_draw_mode = current_draw_mode;
+		prev_id_draw_mode = get_draw_mode();
+	}
+	else if (_draw_mode == "Debug contour") {
+		if (!isModified) {
+			contour_edges = {};
+			contour_vertices = {};
+			lines = {};
+			isModified = true;
+			this->graph = new TopologyGraph(mesh, 1.0f, 1.0f);
+			mtools.extractRegions(*graph);
+			contour_edges = graph->extractContour();
+			for (auto edge : contour_edges) {
+				Mesh::HalfedgeHandle heh{ mesh.halfedge_handle(edge, 0) };
+				contour_vertices.insert(mesh.from_vertex_handle(heh));
+				contour_vertices.insert(mesh.to_vertex_handle(heh));
+			}
+			lines = this->graph->findPlanePlaneIntersections();
+		}
+		glEnable(GL_LIGHTING);
+
+		draw("Solid Smooth");
+
+		glEnable(GL_DEPTH_TEST);
+		glEnable(GL_POLYGON_OFFSET_LINE);
+		glPolygonOffset(-1.0, 1.0);
+		glLineWidth(3.0f);
+		glBegin(GL_LINES);
+			glColor3f(0.0f, 0.0f, 1.0f);	// draw contour on mesh
+			for (auto edge : contour_edges) {
+				Mesh::HalfedgeHandle heh{ mesh.halfedge_handle(edge, 0) };
+				GL::glVertex(mesh.point(mesh.from_vertex_handle(heh)));
+				GL::glVertex(mesh.point(mesh.to_vertex_handle(heh)));
+			}
+			glColor3f(1.0f, 0.0f, 0.0f);	// draw plane plane intersections
+			for (auto& line : lines) {
+				Vector3f p0{ line.evaluate(-2.0f) };
+				auto t = p0[0];
+				Vector3f p1{ line.evaluate(2.0f) };
+				std::cerr << "Line: (" << line.origin.transpose() << ") + t*(" << line.direction.transpose() << ")\n";
+				std::cerr << "p0=" << p0.transpose() << "\tp1=" << p1.transpose() << '\n';
+				GL::glVertex(OpenMesh::Vec3f{ p0(0), p0(1), p0(2) });
+				GL::glVertex(OpenMesh::Vec3f{ p1(0), p1(1), p1(2) });
+			}
+		glEnd();
+		glLineWidth(1.0f);
+		glDisable(GL_POLYGON_OFFSET_LINE);
+
+		prev_draw_mode = current_draw_mode;
+		prev_id_draw_mode = get_draw_mode();
+	}
+	else if (_draw_mode == "Debug contour projection") {
+		if (!isModified) {
+			contour_edges = {};
+			contour_vertices = {};
+			lines = {};
+			isModified = true;
+			this->graph = new TopologyGraph(mesh, 1.0f, 1.0f);
+			mtools.extractRegions(*graph);
+			contour_edges = graph->extractContour();
+			for (auto edge : contour_edges) {
+				Mesh::HalfedgeHandle heh{ mesh.halfedge_handle(edge, 0) };
+				contour_vertices.insert(mesh.from_vertex_handle(heh));
+				contour_vertices.insert(mesh.to_vertex_handle(heh));
+			}
+			this->graph->projectContourVertices();
+		}
+		glEnable(GL_LIGHTING);
+
+		draw("Solid Smooth");
+
+		glEnable(GL_DEPTH_TEST);
+		glEnable(GL_POLYGON_OFFSET_LINE);
+		glPolygonOffset(-1.0, 1.0);
+		glLineWidth(3.0f);
+		glBegin(GL_LINES);
+		glColor3f(0.0f, 0.0f, 1.0f);	// draw contour on mesh
+		for (auto edge : contour_edges) {
+			Mesh::HalfedgeHandle heh{ mesh.halfedge_handle(edge, 0) };
+			GL::glVertex(mesh.point(mesh.from_vertex_handle(heh)));
+			GL::glVertex(mesh.point(mesh.to_vertex_handle(heh)));
+		}
+		glColor3f(1.0f, 0.0f, 0.0f);	// draw plane plane intersections
+		for (auto& line : lines) {
+			Vector3f p0{ line.evaluate(-2.0f) };
+			auto t = p0[0];
+			Vector3f p1{ line.evaluate(2.0f) };
+			std::cerr << "Line: (" << line.origin.transpose() << ") + t*(" << line.direction.transpose() << ")\n";
+			std::cerr << "p0=" << p0.transpose() << "\tp1=" << p1.transpose() << '\n';
+			GL::glVertex(OpenMesh::Vec3f{ p0(0), p0(1), p0(2) });
+			GL::glVertex(OpenMesh::Vec3f{ p1(0), p1(1), p1(2) });
+		}
+		glEnd();
+		glLineWidth(1.0f);
+		glDisable(GL_POLYGON_OFFSET_LINE);
+
+		prev_draw_mode = current_draw_mode;
+		prev_id_draw_mode = get_draw_mode();
+	}
+	else if (_draw_mode == "Erreur plan") {
+		if (!isModified) {
+			contour_edges = {};
+			contour_vertices = {};
+			lines = {};
+			isModified = true;
+			this->graph = new TopologyGraph(mesh, 1.0f, 1.0f);
+			mtools.extractRegions(*graph);
+			computeFittingError();
+		}
+		draw("Solid Smooth");
+		glEnable(GL_DEPTH_TEST);
+		glEnable(GL_POLYGON_OFFSET_LINE);
+		glPolygonOffset(-1.0, 1.0);
+		glPointSize(10.0f);
+		glDisable(GL_LIGHTING);
+		glBegin(GL_POINTS);
+		for (auto vh{ mesh.vertices_begin() }; vh != mesh.vertices_end(); ++vh) {
+			const float error{ mesh.property(fit_error, vh) };
+			if (error <= 0.05f)
+				glColor3f(0.0f, 1.0f, 0.0f);
+			else if (error > 0.05f && error <= 0.1f)
+				glColor3f(0.0f, 0.0f, 1.0f);
+			else if (error > 0.1f)
+				glColor3f(1.0f, 0.0f, 0.0f);
+			else
+				continue;
+			GL::glVertex(mesh.point(vh));
+		}
+		glEnd();
+		glDisable(GL_POLYGON_OFFSET_LINE);		
+		prev_draw_mode = current_draw_mode;
+		prev_id_draw_mode = get_draw_mode();
+	}
 	else if (_draw_mode == "Debug opposite angles") {
 		static int cur_v_id = -1;
 		static std::vector<HalfedgeHandle> ohs{};
@@ -546,19 +776,19 @@ void Viewer::draw(const std::string& _draw_mode) {
 
 		if (cur_oh != oh) {
 			cur_oh = oh;
-			std::cout << "v_i=" << mesh.point(mesh.from_vertex_handle(oh)) << '\n';
-			std::cout << "v_j=" << mesh.point(mesh.to_vertex_handle(oh)) << std::endl; 
+			std::cerr << "v_i=" << mesh.point(mesh.from_vertex_handle(oh)) << '\n'
+					  << "v_j=" << mesh.point(mesh.to_vertex_handle(oh)) << '\n';
 			Vec3f a;
 			mesh.calc_edge_vector(left, a);
-			std::cout << "next()=" << a << std::endl;
+			std::cerr << "next()=" << a << '\n';
 			std::pair<float, float> angles{ MeshUtils::getOppositeAngles(mesh, oh) };
 			Vec3f e1, e2;
 			mesh.calc_sector_vectors(left, e1, e2);
-			std::cout << "alpha=" << angles.first << "\te1=" << e1 << "\te2=" << e2 << std::endl;
-			std::cout << "cotan alpha=" << MeshUtils::cotan(angles.first) << std::endl;
+			std::cerr << "alpha=" << angles.first << "\te1=" << e1 << "\te2=" << e2 << '\n'
+					  << "cotan alpha=" << MeshUtils::cotan(angles.first) << '\n';
 			mesh.calc_sector_vectors(right, e1, e2);
-			std::cout << "beta=" << angles.second << "\te1=" << e1 << "\te2=" << e2 << std::endl;
-			std::cout << "cotan beta=" << MeshUtils::cotan(angles.second) << std::endl;
+			std::cerr << "beta=" << angles.second << "\te1=" << e1 << "\te2=" << e2 << '\n'
+					  << "cotan beta=" << MeshUtils::cotan(angles.second) << '\n';
 		}
 
 		draw_1_ring(mesh.vertex_handle(v_id), {0.5, 0.5, 0.5});
@@ -611,9 +841,9 @@ void Viewer::draw(const std::string& _draw_mode) {
 		static int cur_v_id = -1;
 		static CotangentLaplacian debug_clapl{ CotangentLaplacian(mesh) };
 		if (cur_v_id != v_id) {
-			std::cout << "v_i=" << mesh.point(_vh) << '\n';
-			std::cout << "L(v_i)=" << debug_clapl.computeLaplacian(_vh) << '\n';
-			std::cout << "A(v_i)=" << MeshUtils::computeVertexArea(mesh, _vh) << std::endl;
+			std::cerr << "v_i=" << mesh.point(_vh) << '\n'
+					  << "L(v_i)=" << debug_clapl.computeLaplacian(_vh) << '\n'
+					  << "A(v_i)=" << MeshUtils::computeVertexArea(mesh, _vh) << '\n';
 			cur_v_id = v_id;
 		}
 		glDisable(GL_LIGHTING);
@@ -650,7 +880,7 @@ void Viewer::draw(const std::string& _draw_mode) {
 	}
 	else if (_draw_mode == "Debug lissage") {
 		if (calledSmoothing) {
-			mtools.smoothMesh<CotangentLaplacian>(1, 0.05);
+			mtools.smoothMesh<AnisotropicLaplacian>(1, 0.05);
 		}
 		glEnable(GL_LIGHTING);
 
@@ -697,13 +927,13 @@ void Viewer::draw(const std::string& _draw_mode) {
 
 		if (cur_oh != oh) {
 			cur_oh = oh;
-			std::cout << "v_i=" << mesh.point(mesh.from_vertex_handle(oh)) << '\n';
-			std::cout << "v_j=" << mesh.point(mesh.to_vertex_handle(oh)) << std::endl;
-			std::cout << "v0=" << p0 << std::endl;
-			std::cout << "v1=" << p1 << std::endl;
-			std::cout << "v2=" << p2 << std::endl;
-			std::cout << "centroid=" << MeshUtils::computeCentroid(mesh, oh) << std::endl;
-			std::cout << (p0 + p1 + p2) / 3.0f << std::endl;
+			std::cerr << "v_i=" << mesh.point(mesh.from_vertex_handle(oh)) << '\n'
+					  << "v_j=" << mesh.point(mesh.to_vertex_handle(oh)) << '\n'
+					  << "v0=" << p0 << '\n'
+					  << "v1=" << p1 << '\n'
+					  << "v2=" << p2 << '\n'
+					  << "centroid=" << MeshUtils::computeCentroid(mesh, oh) << '\n'
+					  << (p0 + p1 + p2) / 3.0f << '\n';
 		}
 
 		glDisable(GL_LIGHTING);
@@ -775,7 +1005,7 @@ void Viewer::browse_meshes() {
 	ZeroMemory(&ofn, sizeof(ofn));
 
 	ofn.lStructSize = sizeof(ofn);
-	ofn.lpstrFilter = L"Mesh\0*.off;*.stl\0\0";
+	ofn.lpstrFilter = L"Mesh\0*.off;*.stl;*.obj\0\0";
 	ofn.lpstrFile = szPath;
 	ofn.lpstrFile[0] = '\0';
 	ofn.nMaxFile = 100;
@@ -788,6 +1018,28 @@ void Viewer::browse_meshes() {
 	}
 }
 
+
+void Viewer::save_mesh() {
+	OPENFILENAME ofn;
+	wchar_t szPath[100];
+	ZeroMemory(&ofn, sizeof(ofn));
+
+	ofn.lStructSize = sizeof(ofn);
+	ofn.lpstrFilter = L"Mesh\0*.off;*.stl;*.obj\0\0";
+	ofn.lpstrFile = szPath;
+	ofn.lpstrFile[0] = '\0';
+	ofn.lpstrDefExt = L"off";
+	ofn.nMaxFile = 100;
+	ofn.Flags = OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST;
+
+	if (GetSaveFileName(&ofn)) {
+		wstring ws(szPath);
+		string str(ws.begin(), ws.end());
+		write_mesh(str.c_str());
+	}
+}
+
+
 void Viewer::keyboard(int key, int x, int y) {
 	switch (key)
 	{
@@ -796,31 +1048,9 @@ void Viewer::keyboard(int key, int x, int y) {
 			browse_meshes();
 			break;
 		}
-		case GLUT_KEY_LEFT:
+		case 'p':
 		{
-			v_id = (v_id - 1) % mesh.n_vertices();
-			std::cout << "v_id=" << v_id << std::endl;
-			glutPostRedisplay();
-			break;
-		}
-		case GLUT_KEY_RIGHT:
-		{
-			v_id = (v_id + 1) % mesh.n_vertices();
-			std::cout << "v_id=" << v_id << std::endl;
-			glutPostRedisplay();
-			break;
-		}		
-		case GLUT_KEY_UP:
-		{
-			++neighbour_offset;
-			std::cout << "neighbour_offset=" << neighbour_offset << std::endl;
-			glutPostRedisplay();
-			break;
-		}		
-		case GLUT_KEY_DOWN:
-		{
-			--neighbour_offset;
-			std::cout << "neighbour_offset=" << neighbour_offset << std::endl;
+			++region_id;
 			glutPostRedisplay();
 			break;
 		}
@@ -834,6 +1064,11 @@ void Viewer::keyboard(int key, int x, int y) {
 			reset_mesh();
 			break;
 		}
+		case 's':
+		{
+			save_mesh();
+			break;
+		}
 		default:
 		{
 			MeshViewer::keyboard(key, x, y);
@@ -842,5 +1077,82 @@ void Viewer::keyboard(int key, int x, int y) {
 	}
 }
 
+
+void Viewer::special(int key, int x, int y) {
+	switch (key) {
+		case GLUT_KEY_LEFT:
+		{
+			v_id = (v_id - 1) % mesh.n_vertices();
+			std::cerr << "v_id=" << v_id << '\n';
+			glutPostRedisplay();
+			break;
+		}
+		case GLUT_KEY_RIGHT:
+		{
+			v_id = (v_id + 1) % mesh.n_vertices();
+			std::cerr << "v_id=" << v_id << '\n';
+			glutPostRedisplay();
+			break;
+		}
+		case GLUT_KEY_UP:
+		{
+			++neighbour_offset;
+			std::cerr << "neighbour_offset=" << neighbour_offset << '\n';
+			glutPostRedisplay();
+			break;
+		}
+		case GLUT_KEY_DOWN:
+		{
+			--neighbour_offset;
+			std::cerr << "neighbour_offset=" << neighbour_offset << '\n';
+			glutPostRedisplay();
+			break;
+		}
+		default:
+		{
+			MeshViewer::special(key, x, y);
+			break;
+		}
+	}
+}
+
+
+/// @brief Compute 3 points of a plane
+/// @param plane_params A vector (c, a, b)
+/// @return A 3x3 matrix with each column representing a point.
+std::vector<Eigen::Vector3f> Viewer::computePlane(const Equation::Plane& plane) const {
+	//ax + by + c - z = 0
+	//On trouve 3 points sur le plan
+	float a{ plane.a()};
+	float b{ plane.b()};
+	float c{ plane.c() };
+	float d{ plane.d() };
+	std::vector<Eigen::Vector3f> points{ 3 };
+	points.at(0) = Vector3f{0, 0, -d / c};	//x=0 and y=0
+	points.at(1) = Vector3f{0, -d/b, 0};	//x=0 and z=0
+	points.at(2) = Vector3f{-d/a, 0, 0};	//y=0 and z=0
+	return points;
+}
+
+
+void Viewer::computeFittingError() {
+	mesh.add_property(fit_error);
+	for (auto vh{ mesh.vertices_begin() }; vh != mesh.vertices_end(); ++vh) {
+		mesh.property(fit_error, vh) = -1;
+	}
+	for (auto fh{ mesh.faces_begin() }; fh != mesh.faces_end(); ++fh) {
+		const int id{ this->graph->getFaceRegion(fh) };
+		const Plane& plane{ this->graph->getPlane(id) };
+		const HalfedgeHandle heh{ mesh.halfedge_handle(fh) };
+		const VertexHandle vh_0{ mesh.to_vertex_handle(heh) };
+		const VertexHandle vh_1{ mesh.from_vertex_handle(heh) };
+		const VertexHandle vh_2{ mesh.opposite_vh(heh)};
+
+		if (id == -1) continue;
+		mesh.property(fit_error, vh_0) = plane.distToPoint(mesh.point(vh_0));
+		mesh.property(fit_error, vh_1) = plane.distToPoint(mesh.point(vh_1));
+		mesh.property(fit_error, vh_2) = plane.distToPoint(mesh.point(vh_2));
+	}
+}
 
 //=============================================================================

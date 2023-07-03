@@ -20,6 +20,9 @@
 #include <commdlg.h>
 
 
+using Eigen::Matrix3f;
+
+
 //== CLASS DEFINITION =========================================================
 
 	      
@@ -36,6 +39,9 @@ public:
 
   /// open mesh
   virtual bool open_mesh(const char* _filename);
+
+  /// write mesh
+  virtual bool write_mesh(const char* _filename);
 
   //Getter
   OpenMesh::TriMesh_ArrayKernelT<> getMesh();
@@ -95,14 +101,21 @@ protected:
   /// keyboard interaction
   void keyboard(int key, int x, int y);
 
-  /// open file explorer
+  void special(int key, int x, int y);
+
+  /// open file explorer to open a mesh file
   void browse_meshes();
+
+  /// open file explorer to save a mesh
+  void save_mesh();
 
 private:
 
   OpenMesh::VPropHandleT<Mesh::Scalar>  vweight_, v_mean_curvature_, v_gauss_curvature_;
   OpenMesh::EPropHandleT<Mesh::Scalar>  eweight_;
   OpenMesh::VPropHandleT<Vec3f> initial_coords;
+
+  OpenMesh::VPropHandleT<float> fit_error;
 
   GLuint  textureID_;
   ComputingTools ctools;
@@ -112,8 +125,16 @@ private:
   bool calledSmoothing{ false };
   int v_id{ 0 };
   int neighbour_offset{ 0 };
+  int region_id{ 0 };
+
+  TopologyGraph* graph{ nullptr };
+  std::set<Mesh::EdgeHandle> contour_edges;
+  std::set<Mesh::VertexHandle> contour_vertices;
+  std::vector<Equation::Line> lines;
 
   void draw_1_ring(const VertexHandle vh, Vec3f color);
+  std::vector<Eigen::Vector3f> computePlane(const Equation::Plane& plane) const;
+  void computeFittingError();
 };
 
 

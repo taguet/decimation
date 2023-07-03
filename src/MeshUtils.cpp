@@ -5,6 +5,11 @@ float MeshUtils::computeFaceArea(Mesh& mesh, const OpenMesh::HalfedgeHandle heh)
 	return mesh.calc_sector_area(heh);
 }
 
+float MeshUtils::computeFaceArea(Mesh& mesh, const OpenMesh::FaceHandle fh) {
+	Mesh::HalfedgeHandle heh{ mesh.halfedge_handle(fh) };
+	return computeFaceArea(mesh, heh);
+}
+
 // Computes the vertex area of a given vertex, which corresponds to one third of the sum of all surrounding faces' areas.
 float MeshUtils::computeVertexArea(Mesh& mesh, const OpenMesh::VertexHandle vh) {
 	float area{ 0.0f };
@@ -65,4 +70,45 @@ float MeshUtils::computeVarianceEdgeLength(Mesh& mesh) {
 		variance += powf(mesh.calc_edge_length(e_it) - avrg_edge_length, 2);
 	}
 	return variance / mesh.n_edges();
+}
+
+
+void MeshUtils::getFaceNeighbors(Mesh& mesh, Mesh::FaceHandle fh, std::list<Mesh::FaceHandle>& neighbors) {
+	for (auto f_iter{ mesh.ff_iter(fh) }; f_iter; ++f_iter) {
+		neighbors.push_back(f_iter);
+	}
+}
+
+
+void MeshUtils::projectVertexToLine(Mesh& mesh, const Mesh::VertexHandle vh, const Equation::Line& line) {
+	const Mesh::Point p{ mesh.point(vh) };
+	const Eigen::Vector3f projected{ line.projectPoint(Eigen::Vector3f{p[0], p[1], p[2]}) };
+	mesh.set_point(vh, Mesh::Point{ projected[0], projected[1], projected[2] });
+}
+
+
+Equation::Plane MeshUtils::fitPlaneToVertices(Mesh& mesh, std::set<Mesh::VertexHandle>& vertices) {
+	MatrixXf points{ vertices.size(), 3 }; // point coordinates
+	{
+		std::set<Mesh::VertexHandle>::iterator it{ vertices.begin() };
+		for (int i{ 0 }; i < points.rows(), it != vertices.end(); ++i, ++it) {
+			Mesh::Point p{ mesh.point(*it) };
+			points.row(i) = Vector3f{ p[0], p[1], p[2] };
+		}
+	}
+	MatrixXf XY{ 4,4 };
+	Vector4f Z{ 0, 0, 0, 0 };
+	XY.fill(0);
+
+	for (int i{ 0 }; i < points.rows(); ++i) {
+		float x{ points(i, 0) };
+		float y{ points(i, 1) };
+		float z{ points(i, 2) };
+		XY.row(0) += Vector4f{ 2*x*x, x*y, x*z, 2*x };
+		XY.row(1) += Vector4f{ x*y, 2*y*y, y*z, 2*y };
+		XY.row(2) += Vector4f{ x*z, y*z, 2*z*z, 2*z };
+		XY.row(3) += Vector4f{ 2*x, 2*y, 2*z, 3 };
+		Z += Vector4f{ x*y+x*z, x*y+y*z, x*z+y*z, x+y+z };
+	}
+	return  { Vector4f{XY.inverse() * Z} };
 }

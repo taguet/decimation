@@ -1,8 +1,16 @@
 #pragma once
 
 #include <OpenMesh/Core/Mesh/Types/TriMesh_ArrayKernelT.hh>
+#include <list>
+#include <set>
+#include "GeomEq.hpp"
 
 typedef OpenMesh::TriMesh_ArrayKernelT<>  Mesh;
+using Vector3f = Eigen::Vector3f;
+using Vector4f = Eigen::Vector4f;
+using VectorXf = Eigen::VectorXf;
+using MatrixXf = Eigen::MatrixXf;
+using Matrix2f = Eigen::Matrix2f;
 
 /// @brief Utility class with basic operations to use in algorithms on a mesh.
 class MeshUtils
@@ -13,6 +21,7 @@ public:
 	/// @param heh A halfedge handle belonging to the face.
 	/// @return The area.
 	static float computeFaceArea(Mesh& mesh, const OpenMesh::HalfedgeHandle heh);
+	static float computeFaceArea(Mesh& mesh, const OpenMesh::FaceHandle fh);
 
 	/// @brief Computes the vertex area of a given vertex.
 	/// 
@@ -54,5 +63,22 @@ public:
 	/// @param mesh 
 	/// @return The variance of the edges' length.
 	static float computeVarianceEdgeLength(Mesh& mesh);
+
+
+	static void getFaceNeighbors(Mesh& mesh, const Mesh::FaceHandle, std::list<Mesh::FaceHandle>& neighbors);
+
+
+	/// @brief Projected a given vertex onto a line.
+	/// @param mesh 
+	/// @param vh 
+	/// @param line A parametric equation of a line.
+	static void projectVertexToLine(Mesh& mesh, const Mesh::VertexHandle vh, const Equation::Line& line);
+
+
+	/// @brief Fits plane to a set of vertices by minimizing the orthogonal distance by least squares.
+	/// @param mesh 
+	/// @param vertices 
+	/// @return The cartesian equation of the fitted plane.
+	static Equation::Plane fitPlaneToVertices(Mesh& mesh, std::set<Mesh::VertexHandle>& vertices); 
 };
 
