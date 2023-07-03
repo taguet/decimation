@@ -92,4 +92,5 @@ namespace EdgeCollapse {
 	using Quadric = Eigen::Matrix4f;
 
 	Quadric computeQuadric(const Mesh& mesh, Equation::Plane& plane);
+	Quadric computeVertexQuadric(const Mesh& mesh, const Mesh::VertexHandle vh, const TopologyGraph& graph);
 }

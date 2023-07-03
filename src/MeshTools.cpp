@@ -84,4 +84,12 @@ namespace EdgeCollapse {
 	}
 
 
+	Quadric computeVertexQuadric(const Mesh& mesh, const Mesh::VertexHandle vh, const TopologyGraph& graph) {
+		Quadric quadric{};
+		for (auto& f_it{ mesh.cvf_iter(vh) }; f_it; ++f_it) {
+			Equation::Plane face_plane{ MeshUtils::computeFacePlane(mesh, f_it) };
+			quadric += computeQuadric(mesh, face_plane);
+		}
+		return quadric;
+	}
 }
