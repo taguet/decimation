@@ -101,7 +101,7 @@ private:
 
 	void computeRegionQuadrics();
 public:
-	EdgeCollapse(const Mesh& mesh, const TopologyGraph& graph) : mesh{ &mesh }, graph{ &graph } {
+	EdgeCollapse(Mesh& mesh, TopologyGraph& graph) : mesh{ &mesh }, graph{ &graph } {
 		this->mesh->add_property(v_quadric);
 		this->mesh->add_property(quadric_error);
 	}
