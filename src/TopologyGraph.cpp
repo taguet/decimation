@@ -165,7 +165,7 @@ std::set<Mesh::EdgeHandle> TopologyGraph::extractContour() {
 	for (auto f_it{ mesh.faces_begin() }; f_it != mesh.faces_end(); ++f_it) {
 		for (auto fh_it{ mesh.fh_iter(f_it)}; fh_it; ++fh_it) {
 			Mesh::FaceHandle neighbor_face{ mesh.face_handle(mesh.opposite_halfedge_handle(fh_it)) };
-			if (!areFacesInSameRegion(f_it, neighbor_face)) {
+			if (!facesAreInSameRegion(f_it, neighbor_face)) {
 				contour_edges.insert(mesh.edge_handle(fh_it));
 			}
 		}
@@ -327,4 +327,13 @@ const Line& TopologyGraph::findClosestLine(const Mesh::EdgeHandle eh, const std:
 		}
 	}
 	return *closest_line;
+}
+
+
+bool TopologyGraph::allNeighborFacesAreInSameRegion(const int regionID, const Mesh::VertexHandle vh) const {
+	std::vector<Mesh::FaceHandle> neighbor_faces;
+	for (auto& f_it{ mesh.vf_iter(vh) }; f_it; ++f_it) {
+		neighbor_faces.push_back(f_it);
+	}
+	return std::all_of(neighbor_faces.begin(), neighbor_faces.end(), facesAreInSameRegion);
 }

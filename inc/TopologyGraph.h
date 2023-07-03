@@ -79,6 +79,7 @@ public:
 
 	bool simplifyGraph();
 	bool facesAreInSameRegion(const Mesh::FaceHandle fh_1, const Mesh::FaceHandle fh_2) const;
+	bool allNeighborFacesAreInSameRegion(const int regionID, const Mesh::VertexHandle vh) const;
 	void fitPlanes();
 
 	/// @brief Finds all intersections between each neighboring regions' planes
