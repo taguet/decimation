@@ -78,18 +78,27 @@ void MeshTools::extendNeighborhood(const Mesh::FaceHandle fh, std::list<Mesh::Fa
 }
 
 
-namespace EdgeCollapse {
-	Quadric computeQuadric(const Mesh& mesh, Equation::Plane& plane) {
-		return plane.parameters * plane.parameters.transpose();
+Quadric EdgeCollapse::computeQuadric(Equation::Plane& plane) {
+	return plane.parameters * plane.parameters.transpose();
+}
+
+
+Quadric EdgeCollapse::computeVertexQuadric(const Mesh::VertexHandle vh) {
+	Quadric quadric{};
+	for (auto& f_it{ mesh->cvf_iter(vh) }; f_it; ++f_it) {
+		Equation::Plane face_plane{ MeshUtils::computeFacePlane(*mesh, f_it) };
+		quadric += computeQuadric(face_plane);
 	}
+	return quadric;
+}
 
 
-	Quadric computeVertexQuadric(const Mesh& mesh, const Mesh::VertexHandle vh, const TopologyGraph& graph) {
-		Quadric quadric{};
-		for (auto& f_it{ mesh.cvf_iter(vh) }; f_it; ++f_it) {
-			Equation::Plane face_plane{ MeshUtils::computeFacePlane(mesh, f_it) };
-			quadric += computeQuadric(mesh, face_plane);
+
 		}
-		return quadric;
 	}
+}
+
+
+void computeEdgeErrors(const Mesh& mesh) {
+
 }

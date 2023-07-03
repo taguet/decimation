@@ -10,6 +10,7 @@
 
 typedef OpenMesh::TriMesh_ArrayKernelT<>  Mesh;
 
+using Quadric = Eigen::Matrix4f;
 
 /// @brief Toolset class for modifying a mesh.
 class MeshTools
@@ -88,9 +89,18 @@ private:
 	void extendNeighborhood(const Mesh::FaceHandle fh, std::list<Mesh::FaceHandle>& neighbors);
 };
 
-namespace EdgeCollapse {
-	using Quadric = Eigen::Matrix4f;
+class EdgeCollapse {
 
-	Quadric computeQuadric(const Mesh& mesh, Equation::Plane& plane);
-	Quadric computeVertexQuadric(const Mesh& mesh, const Mesh::VertexHandle vh, const TopologyGraph& graph);
-}
+private:
+	OpenMesh::VPropHandleT<Quadric> v_quadric;
+	OpenMesh::EPropHandleT<float> quadric_error;
+	const Mesh* mesh{ nullptr };
+	const TopologyGraph* graph{ nullptr };
+
+public:
+	EdgeCollapse(const Mesh& mesh, const TopologyGraph& graph) : mesh{ &mesh }, graph{ &graph } {}
+
+	Quadric computeQuadric(Equation::Plane& plane);
+	Quadric computeVertexQuadric(const Mesh::VertexHandle vh);
+
+};
