@@ -78,7 +78,7 @@ public:
 	void removeEdges(int regionID);
 
 	bool simplifyGraph();
-	bool facesAreInSameRegion(Mesh::FaceHandle fh_1, Mesh::FaceHandle fh_2) const;
+	bool facesAreInSameRegion(const Mesh::FaceHandle fh_1, const Mesh::FaceHandle fh_2) const;
 	void fitPlanes();
 
 	/// @brief Finds all intersections between each neighboring regions' planes

@@ -155,7 +155,7 @@ std::pair<int, int> TopologyGraph::getNeighborIDs(Mesh::EdgeHandle eh) const {
 
 
 
-bool TopologyGraph::areFacesInSameRegion(Mesh::FaceHandle fh_1, Mesh::FaceHandle fh_2) const {
+bool TopologyGraph::facesAreInSameRegion(const Mesh::FaceHandle fh_1, const Mesh::FaceHandle fh_2) const {
 	return faceGroup(fh_1) == faceGroup(fh_2);
 }
 
