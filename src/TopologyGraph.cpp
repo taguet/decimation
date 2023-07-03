@@ -155,7 +155,7 @@ std::pair<int, int> TopologyGraph::getNeighborIDs(Mesh::EdgeHandle eh) const {
 
 
 
-bool TopologyGraph::facesAreInSameRegion(const Mesh::FaceHandle fh_1, const Mesh::FaceHandle fh_2) const {
+bool TopologyGraph::facesAreInSameRegion(const Mesh::FaceHandle& fh_1, const Mesh::FaceHandle& fh_2) const {
 	return faceGroup(fh_1) == faceGroup(fh_2);
 }
 
@@ -331,9 +331,9 @@ const Line& TopologyGraph::findClosestLine(const Mesh::EdgeHandle eh, const std:
 
 
 bool TopologyGraph::allNeighborFacesAreInSameRegion(const int regionID, const Mesh::VertexHandle vh) const {
-	std::vector<Mesh::FaceHandle> neighbor_faces;
+	std::vector<int> neighbor_faces;
 	for (auto& f_it{ mesh.vf_iter(vh) }; f_it; ++f_it) {
-		neighbor_faces.push_back(f_it);
+		neighbor_faces.push_back(faceGroup(f_it));
 	}
-	return std::all_of(neighbor_faces.begin(), neighbor_faces.end(), facesAreInSameRegion);
+	return std::equal(neighbor_faces.begin()+1, neighbor_faces.end(), neighbor_faces.begin());
 }
