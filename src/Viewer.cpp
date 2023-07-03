@@ -569,7 +569,7 @@ void Viewer::draw(const std::string& _draw_mode) {
 		}
 		glDisable(GL_LIGHTING);
 		for (auto f_iter{ mesh.faces_begin() }; f_iter != mesh.faces_end(); ++f_iter) {
-			int id{ graph->getFaceRegion(f_iter)};
+			const int id{ graph->faceGroup(f_iter)};
 			glColor3ub(rgb.at(id)[0], rgb.at(id)[1], rgb.at(id)[2]);
 			glBegin(GL_TRIANGLES);
 			Mesh::HalfedgeHandle heh{ mesh.halfedge_handle(f_iter) };
