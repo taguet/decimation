@@ -100,7 +100,7 @@ private:
 public:
 	EdgeCollapse(const Mesh& mesh, const TopologyGraph& graph) : mesh{ &mesh }, graph{ &graph } {}
 
-	Quadric computeQuadric(Equation::Plane& plane);
+	Quadric computeQuadric(const Equation::Plane& plane);
 	Quadric computeVertexQuadric(const Mesh::VertexHandle vh);
 
 };

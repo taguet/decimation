@@ -78,7 +78,7 @@ void MeshTools::extendNeighborhood(const Mesh::FaceHandle fh, std::list<Mesh::Fa
 }
 
 
-Quadric EdgeCollapse::computeQuadric(Equation::Plane& plane) {
+Quadric EdgeCollapse::computeQuadric(const Equation::Plane& plane) {
 	return plane.parameters * plane.parameters.transpose();
 }
 
