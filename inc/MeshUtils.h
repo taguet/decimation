@@ -80,5 +80,8 @@ public:
 	/// @param vertices 
 	/// @return The cartesian equation of the fitted plane.
 	static Equation::Plane fitPlaneToVertices(Mesh& mesh, std::set<Mesh::VertexHandle>& vertices); 
+
+
+	static Equation::Plane computeFacePlane(const Mesh& mesh, const Mesh::FaceHandle fh);
 };
 

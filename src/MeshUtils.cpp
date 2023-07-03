@@ -112,3 +112,15 @@ Equation::Plane MeshUtils::fitPlaneToVertices(Mesh& mesh, std::set<Mesh::VertexH
 	}
 	return  { Vector4f{XY.inverse() * Z} };
 }
+
+
+Equation::Plane MeshUtils::computeFacePlane(const Mesh& mesh, const Mesh::FaceHandle fh) {
+	Mesh::HalfedgeHandle heh{ mesh.halfedge_handle(fh) };
+	Mesh::Normal vec_1, vec_2;
+	mesh.calc_sector_vectors(heh, vec_1, vec_2);	//Compute AB and AC
+	Mesh::Normal normal{ OpenMesh::cross(vec_1, vec_2) };
+	Mesh::Point p{ mesh.point(mesh.to_vertex_handle(heh)) }; //a, b and c
+
+	int d{ normal[0] * p[0] + normal[1] * p[1] + normal[2] * p[2] };
+	return Equation::Plane{ normal[0], normal[1], normal[2], d };
+}
