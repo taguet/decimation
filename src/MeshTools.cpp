@@ -102,3 +102,12 @@ Quadric EdgeCollapse::computeVertexQuadric(const Mesh::VertexHandle vh) {
 void computeEdgeErrors(const Mesh& mesh) {
 
 }
+
+
+void EdgeCollapse::computeRegionQuadrics() {
+	this->region_quadrics = {};
+	std::set<RegionID> regionIDs{ graph->getRegionIDs() };
+	for (auto const& id : regionIDs) {
+		region_quadrics[id] = computeQuadric(graph->getPlane(id));
+	}
+}

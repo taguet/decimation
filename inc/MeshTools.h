@@ -90,13 +90,16 @@ private:
 };
 
 class EdgeCollapse {
+	using RegionID = int;
 
 private:
 	OpenMesh::VPropHandleT<Quadric> v_quadric;
 	OpenMesh::EPropHandleT<float> quadric_error;
 	const Mesh* mesh{ nullptr };
 	const TopologyGraph* graph{ nullptr };
+	std::map<RegionID, Quadric> region_quadrics;
 
+	void computeRegionQuadrics();
 public:
 	EdgeCollapse(const Mesh& mesh, const TopologyGraph& graph) : mesh{ &mesh }, graph{ &graph } {}
 
