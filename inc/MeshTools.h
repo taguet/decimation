@@ -142,5 +142,7 @@ public:
 	void computeVerticesQuadrics();
 	float computeCollapseError(const Vector3f& v, const Quadric& e_quadric);
 
-	Vector3f computeNewVertex(const Mesh::VertexHandle vh_0, const Mesh::VertexHandle vh_1);
+	CollapseResult computeCollapseResult(const Mesh::VertexHandle vh_0, const Mesh::VertexHandle vh_1);
+
+	void computeCosts();
 };

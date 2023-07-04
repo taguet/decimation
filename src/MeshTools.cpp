@@ -120,7 +120,7 @@ float EdgeCollapse::computeCollapseError(const Vector3f& v, const Quadric& e_qua
 }
 
 
-Vector3f EdgeCollapse::computeNewVertex(const Mesh::VertexHandle vh_0, const Mesh::VertexHandle vh_1)
+EdgeCollapse::CollapseResult EdgeCollapse::computeCollapseResult(const Mesh::VertexHandle vh_0, const Mesh::VertexHandle vh_1)
 {
 	Quadric e_quadric{ computeEdgeQuadric(vh_0, vh_1) };
 	Eigen::Matrix4f coeff_mat{ e_quadric };
