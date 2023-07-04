@@ -94,6 +94,15 @@ class EdgeCollapse {
 	using RegionID = int;
 
 private:
+	struct VertexPair {
+		Mesh::VertexHandle vh_0;
+		Mesh::VertexHandle vh_1;
+		VertexPair(Mesh::VertexHandle vh_0, Mesh::VertexHandle vh_1): vh_0{vh_0}, vh_1{vh_1} {}
+		bool operator==(const VertexPair& vp) const {
+			return this->vh_0 == vp.vh_0 && this->vh_1 == vh_1;
+		}
+	};
+
 	OpenMesh::VPropHandleT<Quadric> v_quadric;
 	Mesh* mesh{ nullptr };
 	TopologyGraph* graph{ nullptr };
