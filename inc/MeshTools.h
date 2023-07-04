@@ -98,9 +98,13 @@ private:
 	struct VertexPair {
 		Mesh::VertexHandle vh_0;
 		Mesh::VertexHandle vh_1;
-		VertexPair(Mesh::VertexHandle vh_0, Mesh::VertexHandle vh_1): vh_0{vh_0}, vh_1{vh_1} {}
+		float cost;
+		VertexPair(Mesh::VertexHandle vh_0, Mesh::VertexHandle vh_1, float cost) : vh_0{ vh_0 }, vh_1{ vh_1 }, cost{ cost } {}
 		bool operator==(const VertexPair& vp) const {
 			return this->vh_0 == vp.vh_0 && this->vh_1 == vh_1;
+		}
+		bool operator<(const VertexPair& vp) const {
+			return this->cost < vp.cost;
 		}
 	};
 
