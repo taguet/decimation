@@ -93,8 +93,8 @@ Quadric EdgeCollapse::computeVertexQuadric(const Mesh::VertexHandle vh) {
 }
 
 
-Quadric EdgeCollapse::computeEdgeQuadric(const Mesh::EdgeHandle eh) {
-	Mesh::HalfedgeHandle heh{ mesh->halfedge_handle(eh, 0) };
+Quadric EdgeCollapse::computeEdgeQuadric(const Mesh::VertexHandle vh_0, const Mesh::VertexHandle vh_1) {
+	Mesh::HalfedgeHandle heh{ mesh->find_halfedge(vh_0, vh_1)};
 	Mesh::VertexHandle vh_0{ mesh->from_vertex_handle(heh) };
 	Mesh::VertexHandle vh_1{ mesh->to_vertex_handle(heh) };
 	return vertexQuadric(vh_0) + vertexQuadric(vh_1);
