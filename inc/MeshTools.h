@@ -5,6 +5,7 @@
 #include <map>
 #include <set>
 #include <algorithm>
+#include <queue>
 #include "Laplacian.h"
 #include "TopologyGraph.h""
 
@@ -117,6 +118,7 @@ private:
 	Mesh* mesh{ nullptr };
 	TopologyGraph* graph{ nullptr };
 	std::map<RegionID, Quadric> region_quadrics;
+	std::priority_queue<Collapse> collapses;
 
 	void computeRegionQuadrics();
 

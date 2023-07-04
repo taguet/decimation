@@ -158,8 +158,13 @@ EdgeCollapse::CollapseResult EdgeCollapse::computeCollapseResult(const Mesh::Ver
 }
 
 
+void EdgeCollapse::computeCosts() {
+	for (auto& v_it{ mesh->vertices_begin() }; v_it != mesh->vertices_end(); ++v_it) {
+		for (auto& vv_it{ mesh->vv_iter(v_it) }; vv_it; ++vv_it) {
+			Collapse collapse{ v_it, vv_it, computeCollapseResult(v_it, vv_it)};
+			collapses.push(collapse);
+		}
 	}
-	return new_vertex;
 }
 
 
