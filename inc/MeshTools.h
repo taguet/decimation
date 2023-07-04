@@ -123,6 +123,8 @@ private:
 public:
 	EdgeCollapse(Mesh& mesh, TopologyGraph& graph) : mesh{ &mesh }, graph{ &graph } {
 		this->mesh->add_property(v_quadric);
+		computeRegionQuadrics();
+		computeVerticesQuadrics();
 	}
 
 	~EdgeCollapse() {
