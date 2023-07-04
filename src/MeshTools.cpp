@@ -112,7 +112,10 @@ void EdgeCollapse::computeVerticesQuadrics() {
 }
 
 
-void computeEdgeErrors(const Mesh& mesh) {
+float EdgeCollapse::computeEdgeError(const Vector3f& v, const Quadric& e_quadric) {
+	return v.transpose() * e_quadric * v;
+}
+
 
 }
 

@@ -126,4 +126,7 @@ public:
 	Quadric computeEdgeQuadric(const Mesh::VertexHandle vh_0, const Mesh::VertexHandle vh_1);
 
 	void computeVerticesQuadrics();
+	float computeEdgeError(const Vector3f& v, const Quadric& e_quadric);
+
+	Vector3f computeNewVertex(const Mesh::VertexHandle vh_0, const Mesh::VertexHandle vh_1);
 };
