@@ -113,6 +113,7 @@ void EdgeCollapse::computeVerticesQuadrics() {
 
 
 float EdgeCollapse::computeEdgeError(const Vector3f& v, const Quadric& e_quadric) {
+float EdgeCollapse::computeCollapseError(const Vector3f& v, const Quadric& e_quadric) {
 	Vector4f extended_v;
 	extended_v << v, 1;
 	return (extended_v.transpose() * e_quadric * extended_v).value();
