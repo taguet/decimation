@@ -92,6 +92,7 @@ private:
 
 class EdgeCollapse {
 	using RegionID = int;
+	using Cost = float;
 
 private:
 	struct VertexPair {
@@ -107,6 +108,7 @@ private:
 	Mesh* mesh{ nullptr };
 	TopologyGraph* graph{ nullptr };
 	std::map<RegionID, Quadric> region_quadrics;
+	std::map<Cost, VertexPair> collapses;
 
 	void computeRegionQuadrics();
 
