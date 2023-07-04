@@ -94,7 +94,6 @@ class EdgeCollapse {
 
 private:
 	OpenMesh::VPropHandleT<Quadric> v_quadric;
-	OpenMesh::EPropHandleT<float> quadric_error;
 	Mesh* mesh{ nullptr };
 	TopologyGraph* graph{ nullptr };
 	std::map<RegionID, Quadric> region_quadrics;
@@ -105,20 +104,13 @@ private:
 		return mesh->property(v_quadric, vh);
 	}
 
-
-	float& edgeError(Mesh::EdgeHandle eh) {
-		return mesh->property(quadric_error, eh);
-	}
-
 public:
 	EdgeCollapse(Mesh& mesh, TopologyGraph& graph) : mesh{ &mesh }, graph{ &graph } {
 		this->mesh->add_property(v_quadric);
-		this->mesh->add_property(quadric_error);
 	}
 
 	~EdgeCollapse() {
 		this->mesh->remove_property(v_quadric);
-		this->mesh->remove_property(quadric_error);
 	}
 
 	Quadric computeQuadric(const Equation::Plane& plane);
