@@ -4,6 +4,7 @@
 #include <OpenMesh/Core/Mesh/Types/TriMesh_ArrayKernelT.hh>
 #include <map>
 #include <set>
+#include <algorithm>
 #include "Laplacian.h"
 #include "TopologyGraph.h""
 
