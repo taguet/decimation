@@ -80,6 +80,15 @@ void MeshUtils::getFaceNeighbors(Mesh& mesh, Mesh::FaceHandle fh, std::list<Mesh
 }
 
 
+std::set<Mesh::VertexHandle> MeshUtils::getNeighboringVertices(const Mesh& mesh, const Mesh::VertexHandle vh) {
+	std::set<Mesh::VertexHandle> neighbors;
+	for (auto& vv_it{ mesh.cvv_iter(vh) }; vv_it; ++vv_it) {
+		neighbors.insert(vv_it);
+	}
+	return neighbors;
+}
+
+
 void MeshUtils::projectVertexToLine(Mesh& mesh, const Mesh::VertexHandle vh, const Equation::Line& line) {
 	const Mesh::Point p{ mesh.point(vh) };
 	const Eigen::Vector3f projected{ line.projectPoint(Eigen::Vector3f{p[0], p[1], p[2]}) };
