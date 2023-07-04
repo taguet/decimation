@@ -112,7 +112,6 @@ void EdgeCollapse::computeVerticesQuadrics() {
 }
 
 
-float EdgeCollapse::computeEdgeError(const Vector3f& v, const Quadric& e_quadric) {
 float EdgeCollapse::computeCollapseError(const Vector3f& v, const Quadric& e_quadric) {
 	Vector4f extended_v;
 	extended_v << v, 1;
@@ -127,12 +126,13 @@ EdgeCollapse::CollapseResult EdgeCollapse::computeCollapseResult(const Mesh::Ver
 	coeff_mat.row(3) << 0, 0, 0, 1;
 	Eigen::FullPivLU<Eigen::Matrix4f> lu{ coeff_mat };
 	Vector3f new_vertex;
+	float cost;
 
 	if (lu.isInvertible()) {	// We pick either of the two vertices or their middle
 		const Vector3f p0{ MeshUtils::toEigen(mesh->point(vh_0)) };
 		const Vector3f p1{ MeshUtils::toEigen(mesh->point(vh_1)) };
 		const Vector3f middle{ (p0 + p1) / 2 };
-		const std::vector<float> errors{ computeEdgeError(p0, e_quadric), computeEdgeError(p1, e_quadric), computeEdgeError(middle, e_quadric) };
+		const std::vector<float> errors{ computeCollapseError(p0, e_quadric), computeCollapseError(p1, e_quadric), computeCollapseError(middle, e_quadric) };
 		const float* error_for_v0{ &errors[0]};
 		const float* error_for_v1{ &errors[1]};
 		const float* error_for_middle{ &errors[2]};
@@ -147,10 +147,17 @@ EdgeCollapse::CollapseResult EdgeCollapse::computeCollapseResult(const Mesh::Ver
 		else {
 			new_vertex = middle;
 		}
+		cost = *min_error;
 	}
 	else {	// In this case we have to compute a new vertex
 		const Vector4f vertex_4dim = lu.solve(Vector4f{ 0, 0, 0, 1 });
 		new_vertex = vertex_4dim.head(2);
+		cost = computeCollapseError(new_vertex, e_quadric);
+	}
+	return { new_vertex, cost };
+}
+
+
 	}
 	return new_vertex;
 }
