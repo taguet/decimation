@@ -175,3 +175,10 @@ void EdgeCollapse::computeRegionQuadrics() {
 		region_quadrics[id] = computeQuadric(graph->getPlane(id));
 	}
 }
+
+
+void EdgeCollapse::findNeighboringVertices() {
+	for (auto& v_it{ mesh->vertices_begin() }; v_it != mesh->vertices_end(); ++v_it) {
+		vertexNeighbors(v_it) = MeshUtils::getNeighboringVertices(*mesh, v_it);
+	}
+}

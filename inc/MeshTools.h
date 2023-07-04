@@ -115,22 +115,30 @@ private:
 	};
 
 	OpenMesh::VPropHandleT<Quadric> v_quadric;
+	OpenMesh::VPropHandleT<std::set<Mesh::VertexHandle>> neighbors;
 	Mesh* mesh{ nullptr };
 	TopologyGraph* graph{ nullptr };
 	std::map<RegionID, Quadric> region_quadrics;
 	std::priority_queue<Collapse> collapses;
 
 	void computeRegionQuadrics();
+	void findNeighboringVertices();
 
 	Quadric& vertexQuadric(const Mesh::VertexHandle vh) {
 		return mesh->property(v_quadric, vh);
 	}
 
+	std::set<Mesh::VertexHandle>& vertexNeighbors(const Mesh::VertexHandle vh) {
+		return mesh->property(neighbors, vh);
+	}
+
 public:
 	EdgeCollapse(Mesh& mesh, TopologyGraph& graph) : mesh{ &mesh }, graph{ &graph } {
 		this->mesh->add_property(v_quadric);
+		this->mesh->add_property(neighbors);
 		computeRegionQuadrics();
 		computeVerticesQuadrics();
+		findNeighboringVertices();
 	}
 
 	~EdgeCollapse() {
