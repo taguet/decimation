@@ -94,7 +94,13 @@ class EdgeCollapse {
 	using RegionID = int;
 
 private:
-	struct VertexPair {
+	struct CollapseResult {
+		Vector3f vertex;
+		float cost;
+		CollapseResult(Vector3f& vertex, float cost) : vertex{vertex}, cost{cost} {}
+	};
+
+	struct Collapse {
 		Mesh::VertexHandle vh_0;
 		Mesh::VertexHandle vh_1;
 		float cost;
