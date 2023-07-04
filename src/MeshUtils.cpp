@@ -126,6 +126,6 @@ Equation::Plane MeshUtils::computeFacePlane(const Mesh& mesh, const Mesh::FaceHa
 }
 
 
-Vector3f toEigen(const Mesh::Point& p) {
+Vector3f MeshUtils::toEigen(const Mesh::Point& p) {
 	return Vector3f{ p[0], p[1], p[2] };
 }
