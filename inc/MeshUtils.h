@@ -86,5 +86,8 @@ namespace MeshUtils
 	/// @param fh 
 	/// @return A cartesian equation of a plane.
 	Equation::Plane computeFacePlane(const Mesh& mesh, const Mesh::FaceHandle fh);
+
+
+	Vector3f toEigen(const Mesh::Point& p);
 };
 

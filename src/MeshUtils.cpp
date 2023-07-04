@@ -124,3 +124,8 @@ Equation::Plane MeshUtils::computeFacePlane(const Mesh& mesh, const Mesh::FaceHa
 	float d{ normal[0] * p[0] + normal[1] * p[1] + normal[2] * p[2] };
 	return Equation::Plane{ normal[0], normal[1], normal[2], d };
 }
+
+
+Vector3f toEigen(const Mesh::Point& p) {
+	return Vector3f{ p[0], p[1], p[2] };
+}
