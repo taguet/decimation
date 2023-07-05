@@ -168,6 +168,17 @@ void EdgeCollapse::computeCosts() {
 }
 
 
+void EdgeCollapse::collapse(const Mesh::HalfedgeHandle hh) {
+	Collapse collapse{ collapses.top() };
+	collapses.pop();
+	Vector3f result{ collapse.result.vertex };
+	Mesh::Point created_vertex{ result[0], result[1], result[2]};
+	Mesh::VertexHandle vh{ mesh->to_vertex_handle(hh) };
+	mesh->collapse(hh);
+	mesh->set_point(vh, created_vertex);
+}
+
+
 void EdgeCollapse::computeRegionQuadrics() {
 	this->region_quadrics = {};
 	std::set<RegionID> regionIDs{ graph->getRegionIDs() };

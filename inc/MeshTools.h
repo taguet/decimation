@@ -112,6 +112,9 @@ private:
 		bool operator<(const Collapse& vp) const {
 			return this->result.cost < vp.result.cost;
 		}
+		bool operator>(const Collapse& vp) const {
+			return this->result.cost > vp.result.cost;
+		}
 	};
 
 	OpenMesh::VPropHandleT<Quadric> v_quadric;
@@ -119,7 +122,7 @@ private:
 	Mesh* mesh{ nullptr };
 	TopologyGraph* graph{ nullptr };
 	std::map<RegionID, Quadric> region_quadrics;
-	std::priority_queue<Collapse> collapses;
+	std::priority_queue<Collapse, std::vector<Collapse>, std::greater<Collapse>> collapses;
 
 	void computeRegionQuadrics();
 	void findNeighboringVertices();
@@ -155,4 +158,5 @@ public:
 	CollapseResult computeCollapseResult(const Mesh::VertexHandle vh_0, const Mesh::VertexHandle vh_1);
 
 	void computeCosts();
+	void collapse(const Mesh::HalfedgeHandle hh);
 };
