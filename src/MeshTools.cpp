@@ -84,12 +84,19 @@ Quadric EdgeCollapse::computeQuadric(const Equation::Plane& plane) {
 
 
 Quadric EdgeCollapse::computeVertexQuadric(const Mesh::VertexHandle vh) {
-	Quadric quadric{};
-	for (auto& f_it{ mesh->cvf_iter(vh) }; f_it; ++f_it) {
-		Equation::Plane face_plane{ MeshUtils::computeFacePlane(*mesh, f_it) };
-		quadric += computeQuadric(face_plane);
+	if (graph->allNeighborFacesAreInSameRegion(vh)) {
+		Mesh::FaceHandle fh{ mesh->vf_iter(vh) };
+		const RegionID id{ graph->faceGroup(fh) };
+		return region_quadrics.at(id);
 	}
-	return quadric;
+	else {
+		Quadric quadric{};
+		for (auto& f_it{ mesh->cvf_iter(vh) }; f_it; ++f_it) {
+			Equation::Plane face_plane{ MeshUtils::computeFacePlane(*mesh, f_it) };
+			quadric += computeQuadric(face_plane);
+		}
+		return quadric;
+	}
 }
 
 
@@ -100,14 +107,7 @@ Quadric EdgeCollapse::computeEdgeQuadric(const Mesh::VertexHandle vh_0, const Me
 
 void EdgeCollapse::computeVerticesQuadrics() {
 	for (auto v_it{ mesh->vertices_begin() }; v_it != mesh->vertices_end(); ++v_it) {
-		if (graph->allNeighborFacesAreInSameRegion(v_it)) {
-			Mesh::FaceHandle fh{ mesh->vf_iter(v_it) };
-			const RegionID id{ graph->faceGroup(fh) };
-			vertexQuadric(v_it) = region_quadrics.at(id);
-		}
-		else {
-			vertexQuadric(v_it) = computeVertexQuadric(v_it);
-		}
+		vertexQuadric(v_it) = computeVertexQuadric(v_it);
 	}
 }
 
@@ -161,21 +161,54 @@ EdgeCollapse::CollapseResult EdgeCollapse::computeCollapseResult(const Mesh::Ver
 void EdgeCollapse::computeCosts() {
 	for (auto& v_it{ mesh->vertices_begin() }; v_it != mesh->vertices_end(); ++v_it) {
 		for (auto& vv_it{ mesh->vv_iter(v_it) }; vv_it; ++vv_it) {
-			Collapse collapse{ v_it, vv_it, computeCollapseResult(v_it, vv_it)};
-			collapses.push(collapse);
+			Mesh::EdgeHandle eh{ MeshUtils::findEdge(*mesh, v_it, vv_it) };
+			potentialCollapse(eh) = {eh, computeCollapseResult(v_it, vv_it)};
+			collapses.insert(&potentialCollapse(eh));
 		}
 	}
 }
 
 
 void EdgeCollapse::collapse(const Mesh::HalfedgeHandle hh) {
-	Collapse collapse{ collapses.top() };
-	collapses.pop();
-	Vector3f result{ collapse.result.vertex };
+	Collapse* collapse{ *collapses.begin()};
+	collapses.erase(collapses.begin());
+	Vector3f result{ collapse->result.vertex };
 	Mesh::Point created_vertex{ result[0], result[1], result[2]};
 	Mesh::VertexHandle vh{ mesh->to_vertex_handle(hh) };
+	Mesh::VertexHandle del_vh{ mesh->from_vertex_handle(hh) };
+
+	std::set<Mesh::VertexHandle> modified_vertices{ vertexNeighbors(vh) };
+	modified_vertices.merge(vertexNeighbors(del_vh));
+	modified_vertices.erase(del_vh);
+
 	mesh->collapse(hh);
 	mesh->set_point(vh, created_vertex);
+	
+	updateVertices(modified_vertices);
+	updateCosts(vh);
+}
+
+
+void EdgeCollapse::updateVertex(const Mesh::VertexHandle vh) {
+	vertexNeighbors(vh) = MeshUtils::getNeighboringVertices(*mesh, vh);
+	vertexQuadric(vh) = computeVertexQuadric(vh);
+}
+
+
+void EdgeCollapse::updateVertices(const std::set<Mesh::VertexHandle>& vhs) {
+	for (auto const& vh : vhs) {
+		updateVertex(vh);
+	}
+}
+
+
+void EdgeCollapse::updateCosts(const Mesh::VertexHandle vh) {
+	for (auto& vih_it{ mesh->vih_iter(vh) }; vih_it; ++vih_it) {
+		Mesh::EdgeHandle eh{ mesh->edge_handle(vih_it) };
+		auto collapse_node{ collapses.extract(&potentialCollapse(eh)) };
+		potentialCollapse(eh) = { eh, computeCollapseResult(vh, mesh->from_vertex_handle(vih_it)) };
+		collapse_node.value() = &potentialCollapse(eh);
+	}
 }
 
 

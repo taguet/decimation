@@ -91,6 +91,10 @@ private:
 	void extendNeighborhood(const Mesh::FaceHandle fh, std::list<Mesh::FaceHandle>& neighbors);
 };
 
+
+
+
+
 class EdgeCollapse {
 	using RegionID = int;
 
@@ -98,16 +102,17 @@ private:
 	struct CollapseResult {
 		Vector3f vertex;
 		float cost;
+		CollapseResult() = default;
 		CollapseResult(Vector3f& vertex, float cost) : vertex{vertex}, cost{cost} {}
 	};
 
 	struct Collapse {
-		Mesh::VertexHandle vh_0;
-		Mesh::VertexHandle vh_1;
+		Mesh::EdgeHandle eh;
 		CollapseResult result;
-		Collapse(Mesh::VertexHandle vh_0, Mesh::VertexHandle vh_1, CollapseResult& result) : vh_0{ vh_0 }, vh_1{ vh_1 }, result{ result } {}
+		Collapse() = default;
+		Collapse(Mesh::EdgeHandle eh, CollapseResult& result) : eh{ eh }, result{ result } {}
 		bool operator==(const Collapse& vp) const {
-			return this->vh_0 == vp.vh_0 && this->vh_1 == vh_1;
+			return this->eh == vp.eh;
 		}
 		bool operator<(const Collapse& vp) const {
 			return this->result.cost < vp.result.cost;
@@ -119,13 +124,16 @@ private:
 
 	OpenMesh::VPropHandleT<Quadric> v_quadric;
 	OpenMesh::VPropHandleT<std::set<Mesh::VertexHandle>> neighbors;
+	OpenMesh::EPropHandleT<Collapse> e_collapse;
+
 	Mesh* mesh{ nullptr };
 	TopologyGraph* graph{ nullptr };
 	std::map<RegionID, Quadric> region_quadrics;
-	std::priority_queue<Collapse, std::vector<Collapse>, std::greater<Collapse>> collapses;
+	std::set<Collapse*, std::greater<Collapse*>> collapses;
 
 	void computeRegionQuadrics();
 	void findNeighboringVertices();
+
 
 	Quadric& vertexQuadric(const Mesh::VertexHandle vh) {
 		return mesh->property(v_quadric, vh);
@@ -134,6 +142,15 @@ private:
 	std::set<Mesh::VertexHandle>& vertexNeighbors(const Mesh::VertexHandle vh) {
 		return mesh->property(neighbors, vh);
 	}
+
+	Collapse& potentialCollapse(const Mesh::EdgeHandle eh) {
+		return mesh->property(e_collapse, eh);
+	}	
+	Collapse& potentialCollapse(const Mesh::VertexHandle vh_0, const Mesh::VertexHandle vh_1) {
+		Mesh::EdgeHandle eh{ MeshUtils::findEdge(*mesh, vh_0, vh_1) };
+		return mesh->property(e_collapse, eh);
+	}
+
 
 public:
 	EdgeCollapse(Mesh& mesh, TopologyGraph& graph) : mesh{ &mesh }, graph{ &graph } {
@@ -159,4 +176,7 @@ public:
 
 	void computeCosts();
 	void collapse(const Mesh::HalfedgeHandle hh);
+	void updateVertex(const Mesh::VertexHandle vh);
+	void updateVertices(const std::set<Mesh::VertexHandle>& vhs);
+	void updateCosts(const Mesh::VertexHandle vh);
 };
