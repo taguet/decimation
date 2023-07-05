@@ -88,6 +88,18 @@ std::set<Mesh::VertexHandle> MeshUtils::getNeighboringVertices(const Mesh& mesh,
 	return neighbors;
 }
 
+Mesh::EdgeHandle MeshUtils::findEdge(const Mesh& mesh, const Mesh::VertexHandle vh_0, const Mesh::VertexHandle vh_1)
+{
+	Mesh::HalfedgeHandle hh{ mesh.find_halfedge(vh_0, vh_1) };
+	if (hh == Mesh::InvalidHalfedgeHandle) {
+		hh = mesh.find_halfedge(vh_1, vh_0);
+	}
+
+	if (hh == Mesh::InvalidHalfedgeHandle)	return Mesh::InvalidEdgeHandle;
+
+	return mesh.edge_handle(hh);
+}
+
 
 void MeshUtils::projectVertexToLine(Mesh& mesh, const Mesh::VertexHandle vh, const Equation::Line& line) {
 	const Mesh::Point p{ mesh.point(vh) };
