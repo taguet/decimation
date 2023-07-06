@@ -67,6 +67,7 @@ namespace MeshUtils
 	void getFaceNeighbors(Mesh& mesh, const Mesh::FaceHandle, std::list<Mesh::FaceHandle>& neighbors);
 	std::set<Mesh::VertexHandle> getNeighboringVertices(const Mesh& mesh, const Mesh::VertexHandle vh);
 
+	Mesh::HalfedgeHandle findHalfedge(const Mesh& mesh, const Mesh::VertexHandle vh_0, const Mesh::VertexHandle vh_1);
 	Mesh::EdgeHandle findEdge(const Mesh& mesh, const Mesh::VertexHandle vh_0, const Mesh::VertexHandle vh_1);
 
 	/// @brief Projected a given vertex onto a line.

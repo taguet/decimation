@@ -73,6 +73,7 @@ public:
 
 
 	void extractRegions(TopologyGraph& graph);
+	void simplifyMesh(TopologyGraph& graph, int targetVerticesAmount);
 
 private:
 	/// @brief Region growing algorithm to detect and separate all planar regions.
@@ -101,18 +102,19 @@ class EdgeCollapse {
 private:
 	struct CollapseResult {
 		Vector3f vertex;
-		float cost;
+		float cost{ 0.0f };
 		CollapseResult() = default;
 		CollapseResult(Vector3f& vertex, float cost) : vertex{vertex}, cost{cost} {}
 	};
 
 	struct Collapse {
-		Mesh::EdgeHandle eh;
+		Mesh::VertexHandle vh_0;
+		Mesh::VertexHandle vh_1;
 		CollapseResult result;
 		Collapse() = default;
-		Collapse(Mesh::EdgeHandle eh, CollapseResult& result) : eh{ eh }, result{ result } {}
+		Collapse(Mesh::VertexHandle vh_0, Mesh::VertexHandle vh_1, CollapseResult& result) : vh_0{ vh_0 }, vh_1{ vh_1 }, result { result } {}
 		bool operator==(const Collapse& vp) const {
-			return this->eh == vp.eh;
+			return (this->vh_0 == vp.vh_0 && this->vh_1 == vp.vh_1) || (this->vh_0 == vp.vh_1 && this->vh_1 == vp.vh_0);
 		}
 		bool operator<(const Collapse& vp) const {
 			return this->result.cost < vp.result.cost;
@@ -123,7 +125,6 @@ private:
 	};
 
 	OpenMesh::VPropHandleT<Quadric> v_quadric;
-	OpenMesh::VPropHandleT<std::set<Mesh::VertexHandle>> neighbors;
 	OpenMesh::EPropHandleT<Collapse> e_collapse;
 
 	Mesh* mesh{ nullptr };
@@ -132,15 +133,10 @@ private:
 	std::set<Collapse*, std::greater<Collapse*>> collapses;
 
 	void computeRegionQuadrics();
-	void findNeighboringVertices();
 
 
 	Quadric& vertexQuadric(const Mesh::VertexHandle vh) {
 		return mesh->property(v_quadric, vh);
-	}
-
-	std::set<Mesh::VertexHandle>& vertexNeighbors(const Mesh::VertexHandle vh) {
-		return mesh->property(neighbors, vh);
 	}
 
 	Collapse& potentialCollapse(const Mesh::EdgeHandle eh) {
@@ -152,31 +148,33 @@ private:
 	}
 
 
+	void updateVertex(const Mesh::VertexHandle vh);
+	void updateVertices(const std::set<Mesh::VertexHandle>& vhs);
+	void updatePotentialCollaspes(const Mesh::VertexHandle vh);
+	void computeVerticesQuadrics();
+	void computePotentialCollapses();
+
 public:
 	EdgeCollapse(Mesh& mesh, TopologyGraph& graph) : mesh{ &mesh }, graph{ &graph } {
 		this->mesh->add_property(v_quadric);
-		this->mesh->add_property(neighbors);
+		this->mesh->add_property(e_collapse);
 		computeRegionQuadrics();
 		computeVerticesQuadrics();
-		findNeighboringVertices();
+		computePotentialCollapses();
 	}
 
 	~EdgeCollapse() {
 		this->mesh->remove_property(v_quadric);
+		this->mesh->add_property(e_collapse);
 	}
 
 	Quadric computeQuadric(const Equation::Plane& plane);
 	Quadric computeVertexQuadric(const Mesh::VertexHandle vh);
 	Quadric computeEdgeQuadric(const Mesh::VertexHandle vh_0, const Mesh::VertexHandle vh_1);
 
-	void computeVerticesQuadrics();
 	float computeCollapseError(const Vector3f& v, const Quadric& e_quadric);
 
 	CollapseResult computeCollapseResult(const Mesh::VertexHandle vh_0, const Mesh::VertexHandle vh_1);
 
-	void computeCosts();
-	void collapse(const Mesh::HalfedgeHandle hh);
-	void updateVertex(const Mesh::VertexHandle vh);
-	void updateVertices(const std::set<Mesh::VertexHandle>& vhs);
-	void updateCosts(const Mesh::VertexHandle vh);
+	void collapse();
 };

@@ -15,6 +15,24 @@ void MeshTools::extractRegions(TopologyGraph& graph) {
 }
 
 
+void MeshTools::simplifyMesh(TopologyGraph& graph, int targetVerticesAmount) {
+	EdgeCollapse ec{ *mesh_, graph };
+	mesh_->request_vertex_status();
+	mesh_->request_edge_status();
+	mesh_->request_face_status();
+
+	while (mesh_->n_vertices() > targetVerticesAmount) {
+		std::cerr << mesh_->n_vertices() << '\n';
+		ec.collapse();
+	}	
+	mesh_->update_normals();
+
+	mesh_->release_vertex_status();
+	mesh_->release_edge_status();
+	mesh_->release_face_status();
+}
+
+
 void MeshTools::growRegions(std::list<Mesh::FaceHandle>& ungrouped_faces, TopologyGraph& graph) {
 	int current_region_id{-1};
 	while (!ungrouped_faces.empty()) {
@@ -114,7 +132,7 @@ void EdgeCollapse::computeVerticesQuadrics() {
 
 float EdgeCollapse::computeCollapseError(const Vector3f& v, const Quadric& e_quadric) {
 	Vector4f extended_v;
-	extended_v << v, 1;
+	extended_v << v[0], v[1], v[2], 1;
 	return (extended_v.transpose() * e_quadric * extended_v).value();
 }
 
@@ -151,46 +169,45 @@ EdgeCollapse::CollapseResult EdgeCollapse::computeCollapseResult(const Mesh::Ver
 	}
 	else {	// In this case we have to compute a new vertex
 		const Vector4f vertex_4dim = lu.solve(Vector4f{ 0, 0, 0, 1 });
-		new_vertex = vertex_4dim.head(2);
-		cost = computeCollapseError(new_vertex, e_quadric);
+		new_vertex = vertex_4dim.head(3);
+		cost = computeCollapseError(new_vertex, e_quadric); //TODO check if removing last row messes with the cost computation
 	}
 	return { new_vertex, cost };
 }
 
 
-void EdgeCollapse::computeCosts() {
+void EdgeCollapse::computePotentialCollapses() {
 	for (auto& v_it{ mesh->vertices_begin() }; v_it != mesh->vertices_end(); ++v_it) {
 		for (auto& vv_it{ mesh->vv_iter(v_it) }; vv_it; ++vv_it) {
-			Mesh::EdgeHandle eh{ MeshUtils::findEdge(*mesh, v_it, vv_it) };
-			potentialCollapse(eh) = {eh, computeCollapseResult(v_it, vv_it)};
-			collapses.insert(&potentialCollapse(eh));
+			potentialCollapse(v_it, vv_it) = {v_it, vv_it, computeCollapseResult(v_it, vv_it)};
+			collapses.insert(&potentialCollapse(v_it, vv_it));
 		}
 	}
 }
 
 
-void EdgeCollapse::collapse(const Mesh::HalfedgeHandle hh) {
+void EdgeCollapse::collapse() {
 	Collapse* collapse{ *collapses.begin()};
 	collapses.erase(collapses.begin());
+	if (!collapse->vh_0.is_valid() || !collapse->vh_1.is_valid())	return;
 	Vector3f result{ collapse->result.vertex };
+	Mesh::HalfedgeHandle hh{ MeshUtils::findHalfedge(*mesh, collapse->vh_0, collapse->vh_1)};
+	if (!hh.is_valid())	return;
 	Mesh::Point created_vertex{ result[0], result[1], result[2]};
 	Mesh::VertexHandle vh{ mesh->to_vertex_handle(hh) };
-	Mesh::VertexHandle del_vh{ mesh->from_vertex_handle(hh) };
-
-	std::set<Mesh::VertexHandle> modified_vertices{ vertexNeighbors(vh) };
-	modified_vertices.merge(vertexNeighbors(del_vh));
-	modified_vertices.erase(del_vh);
 
 	mesh->collapse(hh);
 	mesh->set_point(vh, created_vertex);
-	
+
+	mesh->garbage_collection();
+
+	std::set<Mesh::VertexHandle> modified_vertices{ MeshUtils::getNeighboringVertices(*mesh, vh) };
 	updateVertices(modified_vertices);
-	updateCosts(vh);
+	updatePotentialCollaspes(vh);
 }
 
 
 void EdgeCollapse::updateVertex(const Mesh::VertexHandle vh) {
-	vertexNeighbors(vh) = MeshUtils::getNeighboringVertices(*mesh, vh);
 	vertexQuadric(vh) = computeVertexQuadric(vh);
 }
 
@@ -202,12 +219,16 @@ void EdgeCollapse::updateVertices(const std::set<Mesh::VertexHandle>& vhs) {
 }
 
 
-void EdgeCollapse::updateCosts(const Mesh::VertexHandle vh) {
+void EdgeCollapse::updatePotentialCollaspes(const Mesh::VertexHandle vh) {
 	for (auto& vih_it{ mesh->vih_iter(vh) }; vih_it; ++vih_it) {
-		Mesh::EdgeHandle eh{ mesh->edge_handle(vih_it) };
+		Mesh::HalfedgeHandle hh{ mesh->halfedge_handle(vih_it) };
+		Mesh::VertexHandle vh_n{ mesh->from_vertex_handle(hh) };
+		Mesh::EdgeHandle eh{ mesh->edge_handle(hh) };
+
 		auto collapse_node{ collapses.extract(&potentialCollapse(eh)) };
-		potentialCollapse(eh) = { eh, computeCollapseResult(vh, mesh->from_vertex_handle(vih_it)) };
+		potentialCollapse(eh) = Collapse{ vh, vh_n, computeCollapseResult(vh, vh_n) };
 		collapse_node.value() = &potentialCollapse(eh);
+		collapses.insert(std::move(collapse_node));
 	}
 }
 
@@ -220,9 +241,3 @@ void EdgeCollapse::computeRegionQuadrics() {
 	}
 }
 
-
-void EdgeCollapse::findNeighboringVertices() {
-	for (auto& v_it{ mesh->vertices_begin() }; v_it != mesh->vertices_end(); ++v_it) {
-		vertexNeighbors(v_it) = MeshUtils::getNeighboringVertices(*mesh, v_it);
-	}
-}
