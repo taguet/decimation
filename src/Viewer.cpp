@@ -37,6 +37,7 @@ Viewer::Viewer(const char* _title, int _width, int _height): MeshViewer(_title, 
   add_draw_mode("Cotangent Laplacian");
   add_draw_mode("Anisotropic Laplacian");
   add_draw_mode("Planar Region Extraction");
+  add_draw_mode("Mesh Simplification");
   add_draw_mode("Erreur plan");
 
   add_draw_mode("Debug Planar Region Extraction");
@@ -543,6 +544,18 @@ void Viewer::draw(const std::string& _draw_mode) {
 			this->graph->projectContourVertices();
 		}
 		draw("Solid Smooth"); 
+		prev_draw_mode = current_draw_mode;
+		prev_id_draw_mode = get_draw_mode();
+	}
+	else if (_draw_mode == "Mesh Simplification") {
+		if (!isModified) {
+			isModified = true;
+			this->graph = new TopologyGraph(mesh, 1.0f, 1.0f);
+			mtools.extractRegions(*graph);
+			this->graph->projectContourVertices();
+			mtools.simplifyMesh(*graph, graph->size()*2);
+		}
+		draw("Solid Smooth");
 		prev_draw_mode = current_draw_mode;
 		prev_id_draw_mode = get_draw_mode();
 	}
