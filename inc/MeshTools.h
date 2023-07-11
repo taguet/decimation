@@ -102,7 +102,7 @@ class EdgeCollapse {
 private:
 	struct CollapseResult {
 		Vector3f vertex;
-		float cost{ 0.0f };
+		float cost;
 		CollapseResult() = default;
 		CollapseResult(Vector3f& vertex, float cost) : vertex{vertex}, cost{cost} {}
 	};
@@ -120,7 +120,7 @@ private:
 			return this->result.cost < vp.result.cost;
 		}
 		bool operator>(const Collapse& vp) const {
-			return this->result.cost > vp.result.cost;
+			return this->result.cost > vp.result.cost && !(*this == vp);
 		}
 	};
 
@@ -130,7 +130,8 @@ private:
 	Mesh* mesh{ nullptr };
 	TopologyGraph* graph{ nullptr };
 	std::map<RegionID, Quadric> region_quadrics;
-	std::set<Collapse*, std::greater<Collapse*>> collapses;
+	std::set<Collapse, std::greater<Collapse>> collapses;
+	int removed_vertices{ 0 };
 
 	void computeRegionQuadrics();
 
@@ -150,7 +151,7 @@ private:
 
 	void updateVertex(const Mesh::VertexHandle vh);
 	void updateVertices(const std::set<Mesh::VertexHandle>& vhs);
-	void updatePotentialCollaspes(const Mesh::VertexHandle vh);
+	void updatePotentialCollapses(const Mesh::VertexHandle vh);
 	void computeVerticesQuadrics();
 	void computePotentialCollapses();
 
@@ -173,8 +174,11 @@ public:
 	Quadric computeEdgeQuadric(const Mesh::VertexHandle vh_0, const Mesh::VertexHandle vh_1);
 
 	float computeCollapseError(const Vector3f& v, const Quadric& e_quadric);
+	float computeCollapseError(const Vector4f& v, const Quadric& e_quadric);
 
 	CollapseResult computeCollapseResult(const Mesh::VertexHandle vh_0, const Mesh::VertexHandle vh_1);
+
+	int n_vertices();
 
 	void collapse();
 };
