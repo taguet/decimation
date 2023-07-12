@@ -542,15 +542,6 @@ void Viewer::draw(const std::string& _draw_mode) {
 			this->graph = new TopologyGraph(mesh, 1.0f, 1.0f);
 			mtools.extractRegions(*graph);
 			this->graph->projectContourVertices();
-
-			//mesh.request_vertex_status();
-			//mesh.request_edge_status();
-			//mesh.request_face_status();
-
-			//Mesh::HalfedgeHandle hh{ MeshUtils::findHalfedge(mesh, mesh.vertex_handle(440), mesh.vertex_handle(441)) };
-			//Mesh::HalfedgeHandle hh{ mesh.halfedge_handle(100) };
-			//mesh.remove_edge(hh);
-			//mesh.garbage_collection();
 		}
 		draw("Solid Smooth"); 
 		prev_draw_mode = current_draw_mode;
@@ -565,19 +556,7 @@ void Viewer::draw(const std::string& _draw_mode) {
 			mtools.simplifyMesh(*graph, mesh.n_vertices()-20);
 			update_face_indices(mesh, indices);
 		}
-		draw("Solid Smooth"); //TODO FIX DISPLAY; THE MODEL IS FINE
-		/*
-		glEnable(GL_LIGHTING);
-		glBegin(GL_TRIANGLES);
-		for (auto& f_it{ mesh.faces_begin() }; f_it != mesh.faces_end(); ++f_it) {
-			Mesh::HalfedgeHandle hh{ mesh.halfedge_handle(f_it) };
-			GL::glVertex(mesh.point(mesh.from_vertex_handle(hh)));
-			GL::glVertex(mesh.point(mesh.to_vertex_handle(hh)));
-			GL::glVertex(mesh.point(mesh.opposite_vh(hh)));
-		}
-		glEnd();
-		*/
-
+		draw("Solid Smooth");
 		prev_draw_mode = current_draw_mode;
 		prev_id_draw_mode = get_draw_mode();
 	}
