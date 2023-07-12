@@ -563,6 +563,7 @@ void Viewer::draw(const std::string& _draw_mode) {
 			mtools.extractRegions(*graph);
 			this->graph->projectContourVertices();
 			mtools.simplifyMesh(*graph, mesh.n_vertices()-20);
+			update_face_indices(mesh, indices);
 		}
 		draw("Solid Smooth"); //TODO FIX DISPLAY; THE MODEL IS FINE
 		/*
