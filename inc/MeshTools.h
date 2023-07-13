@@ -178,7 +178,7 @@ public:
 
 	CollapseResult computeCollapseResult(const Mesh::VertexHandle vh_0, const Mesh::VertexHandle vh_1);
 
-	int n_vertices();
+	unsigned int n_vertices();
 
 	void collapse();
 };

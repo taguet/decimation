@@ -24,6 +24,8 @@ void MeshTools::simplifyMesh(TopologyGraph& graph, int targetVerticesAmount) {
 	while (ec.n_vertices() > targetVerticesAmount) {
 		//std::cerr << mesh_->n_vertices() << '\n';
 		ec.collapse();
+		//unsigned int test{ mesh_->n_vertices() - ec.n_vertices() };
+		//if (test == 51)	break;
 	}	
 	mesh_->garbage_collection();
 	mesh_->update_normals();
@@ -197,8 +199,24 @@ void EdgeCollapse::computePotentialCollapses() {
 void EdgeCollapse::collapse() {
 	Collapse collapse{ *collapses.begin()};
 	collapses.erase(collapses.begin());
+
+	std::cerr << "Cost: " << collapse.result.cost << '\n';
+
+	Mesh::VertexHandle vh_0{ collapse.vh_0 };
+	Mesh::VertexHandle vh_1{ collapse.vh_1 };
+
+	if (mesh->status(vh_0).deleted() || mesh->status(vh_1).deleted()) {
+		std:cerr << "Potential collapse contained deleted vertex. Skipping.\n";
+		return;
+	}
+
 	if (!collapse.vh_0.is_valid() || !collapse.vh_1.is_valid())	
 		return;
+
+	if (vh_0 == vh_1) {
+		std::cerr << "Potential collapse between two same vertices. Skipping.\n";
+		return;
+	}
 
 	Vector3f result{ collapse.result.vertex };
 	Mesh::HalfedgeHandle hh{ MeshUtils::findHalfedge(*mesh, collapse.vh_0, collapse.vh_1)};
@@ -208,6 +226,11 @@ void EdgeCollapse::collapse() {
 	Mesh::VertexHandle del_vh{ mesh->from_vertex_handle(hh) };
 	Mesh::Point created_vertex{ result[0], result[1], result[2]};
 	Mesh::VertexHandle vh{ mesh->to_vertex_handle(hh) };
+
+	if (!mesh->is_collapse_ok(hh)) {
+		std::cerr << "Collapse not OK. Skipping\n";
+		return;
+	}
 
 	mesh->collapse(hh);
 	mesh->set_point(vh, created_vertex);
@@ -234,7 +257,7 @@ void EdgeCollapse::updateVertices(const std::set<Mesh::VertexHandle>& vhs) {
 }
 
 
-int EdgeCollapse::n_vertices() {
+unsigned int EdgeCollapse::n_vertices() {
 	return mesh->n_vertices() - removed_vertices;
 }
 

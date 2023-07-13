@@ -553,7 +553,7 @@ void Viewer::draw(const std::string& _draw_mode) {
 			this->graph = new TopologyGraph(mesh, 1.0f, 1.0f);
 			mtools.extractRegions(*graph);
 			this->graph->projectContourVertices();
-			mtools.simplifyMesh(*graph, mesh.n_vertices()-20);
+			mtools.simplifyMesh(*graph, mesh.n_vertices() /8);
 			update_face_indices(mesh, indices);
 		}
 		draw("Solid Smooth");
