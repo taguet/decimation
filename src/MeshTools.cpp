@@ -188,6 +188,8 @@ EdgeCollapse::CollapseResult EdgeCollapse::computeCollapseResult(const Mesh::Ver
 
 void EdgeCollapse::computePotentialCollapses() {
 	for (auto& v_it{ mesh->vertices_begin() }; v_it != mesh->vertices_end(); ++v_it) {
+		if (mesh->status(v_it).deleted())
+			continue;
 		for (auto& vv_it{ mesh->vv_iter(v_it) }; vv_it; ++vv_it) {
 			potentialCollapse(v_it, vv_it) = {v_it, vv_it, computeCollapseResult(v_it, vv_it)};
 			collapses.insert(potentialCollapse(v_it, vv_it));

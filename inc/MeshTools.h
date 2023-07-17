@@ -154,6 +154,7 @@ private:
 
 public:
 	EdgeCollapse(Mesh& mesh, TopologyGraph& graph) : mesh{ &mesh }, graph{ &graph } {
+		this->mesh->request_vertex_status();
 		this->mesh->add_property(v_quadric);
 		this->mesh->add_property(e_collapse);
 		computeRegionQuadrics();
@@ -162,6 +163,7 @@ public:
 	}
 
 	~EdgeCollapse() {
+		mesh->release_vertex_status();
 		this->mesh->remove_property(v_quadric);
 		this->mesh->add_property(e_collapse);
 	}
