@@ -280,6 +280,7 @@ void EdgeCollapse::updatePotentialCollapses(const Mesh::VertexHandle vh) {
 		collapses.insert(std::move(collapse_node));
 	}
 	*/
+	collapses.clear();
 	computePotentialCollapses();
 }
 
