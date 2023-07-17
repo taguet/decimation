@@ -191,6 +191,8 @@ void EdgeCollapse::computePotentialCollapses() {
 		if (mesh->status(v_it).deleted())
 			continue;
 		for (auto& vv_it{ mesh->vv_iter(v_it) }; vv_it; ++vv_it) {
+			if (mesh->status(vv_it).deleted())
+				continue;
 			potentialCollapse(v_it, vv_it) = {v_it, vv_it, computeCollapseResult(v_it, vv_it)};
 			collapses.insert(potentialCollapse(v_it, vv_it));
 		}
