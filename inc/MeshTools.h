@@ -117,10 +117,7 @@ private:
 			return (this->vh_0 == vp.vh_0 && this->vh_1 == vp.vh_1) || (this->vh_0 == vp.vh_1 && this->vh_1 == vp.vh_0);
 		}
 		bool operator<(const Collapse& vp) const {
-			return this->result.cost < vp.result.cost;
-		}
-		bool operator>(const Collapse& vp) const {
-			return this->result.cost > vp.result.cost && !(*this == vp);
+			return this->result.cost < vp.result.cost && !(*this == vp);
 		}
 	};
 
@@ -130,7 +127,7 @@ private:
 	Mesh* mesh{ nullptr };
 	TopologyGraph* graph{ nullptr };
 	std::map<RegionID, Quadric> region_quadrics;
-	std::set<Collapse, std::greater<Collapse>> collapses;
+	std::set<Collapse> collapses;
 	int removed_vertices{ 0 };
 
 	void computeRegionQuadrics();
