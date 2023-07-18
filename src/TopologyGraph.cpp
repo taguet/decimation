@@ -335,5 +335,7 @@ bool TopologyGraph::allNeighborFacesAreInSameRegion(const Mesh::VertexHandle vh)
 	for (auto& f_it{ mesh.vf_iter(vh) }; f_it; ++f_it) {
 		neighbor_faces.push_back(faceGroup(f_it));
 	}
+	if (neighbor_faces.size() == 0 || neighbor_faces.size() == 1)
+		return true;
 	return std::equal(neighbor_faces.begin()+1, neighbor_faces.end(), neighbor_faces.begin());
 }
