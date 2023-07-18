@@ -128,6 +128,8 @@ Quadric EdgeCollapse::computeEdgeQuadric(const Mesh::VertexHandle vh_0, const Me
 
 void EdgeCollapse::computeVerticesQuadrics() {
 	for (auto v_it{ mesh->vertices_begin() }; v_it != mesh->vertices_end(); ++v_it) {
+		if (mesh->status(v_it).deleted() || mesh->is_isolated(v_it))
+			continue;
 		vertexQuadric(v_it) = computeVertexQuadric(v_it);
 	}
 }
