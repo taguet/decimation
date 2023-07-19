@@ -151,7 +151,7 @@ Equation::Plane MeshUtils::computeFacePlane(const Mesh& mesh, const Mesh::FaceHa
 	Mesh::Point p{ mesh.point(mesh.to_vertex_handle(heh)) }; //a, b and c
 
 	float d{ normal[0] * p[0] + normal[1] * p[1] + normal[2] * p[2] };
-	return Equation::Plane{ normal[0], normal[1], normal[2], d };
+	return Equation::Plane{ normal[0], normal[1], normal[2], -d };
 }
 
 
