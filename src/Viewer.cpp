@@ -40,6 +40,7 @@ Viewer::Viewer(const char* _title, int _width, int _height): MeshViewer(_title, 
   add_draw_mode("Mesh Simplification");
   add_draw_mode("Erreur plan");
 
+  add_draw_mode("Debug Mesh Simplification");
   add_draw_mode("Debug Planar Region Extraction");
   add_draw_mode("Debug plane-region fitting");
   add_draw_mode("Debug contour");
@@ -553,10 +554,30 @@ void Viewer::draw(const std::string& _draw_mode) {
 			this->graph = new TopologyGraph(mesh, 1.0f, 1.0f);
 			mtools.extractRegions(*graph);
 			this->graph->projectContourVertices();
-			mtools.simplifyMesh(*graph, mesh.n_vertices() /8);
+			mtools.simplifyMesh(*graph, mesh.n_vertices() /2);
 			update_face_indices(mesh, indices);
 		}
 		draw("Solid Smooth");
+		prev_draw_mode = current_draw_mode;
+		prev_id_draw_mode = get_draw_mode();
+	}
+	else if (_draw_mode == "Debug Mesh Simplification") {
+		if (!isModified) {
+			isModified = true;
+			this->graph = new TopologyGraph(mesh, 1.0f, 1.0f);
+			mtools.extractRegions(*graph);
+			this->graph->projectContourVertices();
+			mesh.request_vertex_status();
+			mesh.request_edge_status();
+			mesh.request_face_status();
+			ec = new EdgeCollapse{ mesh, *graph };
+		}
+		if (calledCollapse && ec != nullptr) {
+			ec->collapse();
+			mesh.garbage_collection();
+			update_face_indices(mesh, indices);
+		}
+		draw("Hidden Line"); 
 		prev_draw_mode = current_draw_mode;
 		prev_id_draw_mode = get_draw_mode();
 	}
@@ -988,6 +1009,7 @@ void Viewer::draw(const std::string& _draw_mode) {
   else 
 	  MeshViewer::draw(_draw_mode);
 	calledSmoothing = false;
+	calledCollapse = false;
 }
 
 void Viewer::draw_1_ring(const VertexHandle vh, Vec3f color) {
@@ -1071,6 +1093,7 @@ void Viewer::keyboard(int key, int x, int y) {
 		case 32:
 		{
 			calledSmoothing = true;
+			calledCollapse = true;
 			break;
 		}
 		case 'r':

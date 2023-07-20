@@ -123,6 +123,7 @@ private:
 
   bool isModified{ false };
   bool calledSmoothing{ false };
+  bool calledCollapse{ false };
   int v_id{ 0 };
   int neighbour_offset{ 0 };
   int region_id{ 0 };
@@ -131,6 +132,7 @@ private:
   std::set<Mesh::EdgeHandle> contour_edges;
   std::set<Mesh::VertexHandle> contour_vertices;
   std::vector<Equation::Line> lines;
+  EdgeCollapse* ec{ nullptr };
 
   void draw_1_ring(const VertexHandle vh, Vec3f color);
   std::vector<Eigen::Vector3f> computePlane(const Equation::Plane& plane) const;
