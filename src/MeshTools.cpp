@@ -25,7 +25,7 @@ void MeshTools::simplifyMesh(TopologyGraph& graph, int targetVerticesAmount) {
 		//std::cerr << mesh_->n_vertices() << '\n';
 		ec.collapse();
 		//unsigned int test{ mesh_->n_vertices() - ec.n_vertices() };
-		//if (test == 51)	break;
+		//if (test == 60)	break;
 	}	
 	mesh_->garbage_collection();
 	mesh_->update_normals();
@@ -111,10 +111,15 @@ Quadric EdgeCollapse::computeVertexQuadric(const Mesh::VertexHandle vh) {
 		return region_quadrics.at(id);
 	}
 	else {
-		Quadric quadric{};
-		for (auto& f_it{ mesh->cvf_iter(vh) }; f_it; ++f_it) {
-			Equation::Plane face_plane{ MeshUtils::computeFacePlane(*mesh, f_it) };
-			quadric += computeQuadric(face_plane);
+		Quadric quadric{Eigen::Matrix4f::Zero()};
+		for (auto& voh_it{ mesh->cvf_iter(vh) }; voh_it; ++voh_it) {
+			Mesh::FaceHandle fh{ mesh->face_handle(voh_it) };
+			Equation::Plane face_plane{ MeshUtils::computeFacePlane(*mesh, fh) };
+			Quadric q = computeQuadric(face_plane);
+			quadric += q;
+
+			//std::cerr << "Plane: " << face_plane << '\n';
+			//std::cerr << q << "\n\n";
 		}
 		return quadric;
 	}
@@ -233,20 +238,26 @@ void EdgeCollapse::collapse() {
 	Mesh::Point created_vertex{ result[0], result[1], result[2]};
 	Mesh::VertexHandle vh{ mesh->to_vertex_handle(hh) };
 
-	if (!mesh->is_collapse_ok(hh)) {
-		std::cerr << "Collapse not OK. Skipping\n";
-		return;
-	}
+	//if (!mesh->is_collapse_ok(hh)) {
+	//	std::cerr << "Collapse not OK. Skipping\n";
+	//	return;
+	//}
 
-	mesh->collapse(hh);
+
 	mesh->set_point(vh, created_vertex);
+	mesh->set_point(del_vh, created_vertex);
+
+	//std::cerr << "v0 quadric : " << vertexQuadric(vh) << '\n';
+	//std::cerr << "v1 quadric : " << vertexQuadric(del_vh) << '\n';
+	mesh->collapse(hh);
 	++removed_vertices;
 	std::cerr << "Merged " << del_vh.idx() << " into " << vh.idx() << '\n';
-
+	std::cerr << "New vertex : " << created_vertex << '\n';
 	//mesh->garbage_collection();
 
 	std::set<Mesh::VertexHandle> modified_vertices{ MeshUtils::getNeighboringVertices(*mesh, vh) };
-	updateVertices(modified_vertices);
+	//updateVertices(modified_vertices);
+	computeVerticesQuadrics();
 	updatePotentialCollapses(vh);
 }
 
