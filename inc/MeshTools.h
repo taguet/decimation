@@ -117,7 +117,7 @@ private:
 			return (this->vh_0 == vp.vh_0 && this->vh_1 == vp.vh_1) || (this->vh_0 == vp.vh_1 && this->vh_1 == vp.vh_0);
 		}
 		bool operator<(const Collapse& vp) const {
-			return this->result.cost < vp.result.cost && !(*this == vp);
+			return this->result.cost < vp.result.cost;
 		}
 	};
 
