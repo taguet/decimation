@@ -100,6 +100,11 @@ namespace Equation {
 		return -(a() * x + b() * y + d()) / c();
 	}
 
+	std::ostream& operator<<(std::ostream& os, const Plane& plane) {
+		os << plane.a() << "x + " << plane.b() << "y + " << plane.c() << "z + " << plane.d() << " = 0";
+		return os;
+	}
+
 //------------------- LINE --------------------//
 
 	Vector3f Line::evaluate(const float t) const {

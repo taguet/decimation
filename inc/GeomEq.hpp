@@ -65,8 +65,10 @@ namespace Equation {
 		Vector3f projectPoint(const Vector3f& p) const;
 		Vector3f projectPoint(const Mesh::Point& p) const;
 
-
 		Vector4f parameters;	/// The parameters a, b, c and d
 	};
+
+
+	std::ostream& operator<<(std::ostream& os, const Plane& plane);
 }
 #endif
