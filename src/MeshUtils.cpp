@@ -148,6 +148,7 @@ Equation::Plane MeshUtils::computeFacePlane(const Mesh& mesh, const Mesh::FaceHa
 	Mesh::Normal vec_1, vec_2;
 	mesh.calc_sector_vectors(heh, vec_1, vec_2);	//Compute AB and AC
 	Mesh::Normal normal{ OpenMesh::cross(vec_1, vec_2) };
+	normal.normalize();
 	Mesh::Point p{ mesh.point(mesh.to_vertex_handle(heh)) }; //a, b and c
 
 	float d{ normal[0] * p[0] + normal[1] * p[1] + normal[2] * p[2] };
