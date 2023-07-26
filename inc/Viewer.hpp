@@ -18,6 +18,7 @@
 #include "MeshTools.h"
 #include <Windows.h>
 #include <commdlg.h>
+#include <chrono>
 
 
 using Eigen::Matrix3f;

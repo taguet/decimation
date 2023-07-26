@@ -540,3 +540,5 @@ doc/html/_formulas_dark.tex
 doc/html/_formulas.tex
 *.off
 dat/2faces.mtl
+dat/rounded_cube1_anis40-1.stl
+dat/rounded_cube1_anis20-1.stl

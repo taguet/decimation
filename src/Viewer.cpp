@@ -550,12 +550,17 @@ void Viewer::draw(const std::string& _draw_mode) {
 	}
 	else if (_draw_mode == "Mesh Simplification") {
 		if (!isModified) {
+			auto start{ std::chrono::steady_clock::now() };
 			isModified = true;
 			this->graph = new TopologyGraph(mesh, 1.0f, 1.0f);
 			mtools.extractRegions(*graph);
 			this->graph->projectContourVertices();
-			mtools.simplifyMesh(*graph, mesh.n_vertices() /2);
+			mtools.simplifyMesh(*graph, graph->size()*2);
 			update_face_indices(mesh, indices);
+			auto end{ std::chrono::steady_clock::now() };
+			auto duration{ std::chrono::duration_cast<std::chrono::milliseconds>(end - start) };
+
+			std::cerr << "Executed in " << duration.count() << " milliseconds.\n\n";
 		}
 		draw("Solid Smooth");
 		prev_draw_mode = current_draw_mode;
@@ -574,7 +579,7 @@ void Viewer::draw(const std::string& _draw_mode) {
 		}
 		if (calledCollapse && ec != nullptr) {
 			ec->collapse();
-			mesh.garbage_collection();
+			//mesh.garbage_collection();
 			update_face_indices(mesh, indices);
 		}
 		draw("Hidden Line"); 
@@ -812,7 +817,9 @@ void Viewer::draw(const std::string& _draw_mode) {
 		if (cur_oh != oh) {
 			cur_oh = oh;
 			std::cerr << "v_i=" << mesh.point(mesh.from_vertex_handle(oh)) << '\n'
-					  << "v_j=" << mesh.point(mesh.to_vertex_handle(oh)) << '\n';
+					  << "left hh: " << left << '\n'
+					  << "v_j=" << mesh.point(mesh.to_vertex_handle(oh)) << '\n'
+					  << "right hh: " << right << '\n';
 			Vec3f a;
 			mesh.calc_edge_vector(left, a);
 			std::cerr << "next()=" << a << '\n';
@@ -915,7 +922,7 @@ void Viewer::draw(const std::string& _draw_mode) {
 	}
 	else if (_draw_mode == "Debug lissage") {
 		if (calledSmoothing) {
-			mtools.smoothMesh<AnisotropicLaplacian>(1, 0.05);
+			mtools.smoothMesh<AnisotropicLaplacian>(1, 1.0);
 		}
 		glEnable(GL_LIGHTING);
 

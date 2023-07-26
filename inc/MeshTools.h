@@ -152,6 +152,9 @@ private:
 	void computeVerticesQuadrics();
 	void computePotentialCollapses();
 
+	const float* findMinError(const std::vector<float>& errors, const float epsilon);
+	bool lessThan(float a, float b, float epsilon);
+
 public:
 	EdgeCollapse(Mesh& mesh, TopologyGraph& graph) : mesh{ &mesh }, graph{ &graph } {
 		this->mesh->request_vertex_status();

@@ -16,10 +16,12 @@ void MeshTools::extractRegions(TopologyGraph& graph) {
 
 
 void MeshTools::simplifyMesh(TopologyGraph& graph, int targetVerticesAmount) {
-	EdgeCollapse ec{ *mesh_, graph };
 	mesh_->request_vertex_status();
 	mesh_->request_edge_status();
 	mesh_->request_face_status();
+	//mesh_->request_face_normals();
+	//mesh_->request_vertex_normals();
+	EdgeCollapse ec{ *mesh_, graph };
 
 	while (ec.n_vertices() > targetVerticesAmount) {
 		//std::cerr << mesh_->n_vertices() << '\n';
@@ -30,9 +32,9 @@ void MeshTools::simplifyMesh(TopologyGraph& graph, int targetVerticesAmount) {
 	mesh_->garbage_collection();
 	mesh_->update_normals();
 
-	mesh_->release_vertex_status();
-	mesh_->release_edge_status();
 	mesh_->release_face_status();
+	mesh_->release_edge_status();
+	mesh_->release_vertex_status();
 }
 
 
@@ -112,14 +114,11 @@ Quadric EdgeCollapse::computeVertexQuadric(const Mesh::VertexHandle vh) {
 	}
 	else {
 		Quadric quadric{Eigen::Matrix4f::Zero()};
-		for (auto& voh_it{ mesh->cvf_iter(vh) }; voh_it; ++voh_it) {
-			Mesh::FaceHandle fh{ mesh->face_handle(voh_it) };
-			Equation::Plane face_plane{ MeshUtils::computeFacePlane(*mesh, fh) };
-			Quadric q = computeQuadric(face_plane);
-			quadric += q;
-
-			//std::cerr << "Plane: " << face_plane << '\n';
-			//std::cerr << q << "\n\n";
+		for (auto& f_it{ mesh->cvf_iter(vh) }; f_it; ++f_it) {
+			if (mesh->status(f_it).deleted())
+				continue;
+			Equation::Plane face_plane{ MeshUtils::computeFacePlane(*mesh, f_it) };
+			quadric += computeQuadric(face_plane);
 		}
 		return quadric;
 	}
@@ -172,7 +171,7 @@ EdgeCollapse::CollapseResult EdgeCollapse::computeCollapseResult(const Mesh::Ver
 		const float* error_for_v1{ &errors[1]};
 		const float* error_for_middle{ &errors[2]};
 
-		const float* min_error{ &(*std::min_element(errors.begin(), errors.end())) };
+		const float* min_error{ findMinError(errors, 0.000001) };
 		if (min_error == error_for_v0) {
 			new_vertex = p0;
 		}
@@ -182,7 +181,9 @@ EdgeCollapse::CollapseResult EdgeCollapse::computeCollapseResult(const Mesh::Ver
 		else {
 			new_vertex = middle;
 		}
+		//new_vertex = middle;
 		cost = *min_error;
+		//cost = *error_for_middle;
 	}
 	else {	// In this case we have to compute a new vertex
 		const Vector4f vertex_4dim = lu.solve(Vector4f{ 0, 0, 0, 1 });
@@ -238,10 +239,10 @@ void EdgeCollapse::collapse() {
 	Mesh::Point created_vertex{ result[0], result[1], result[2]};
 	Mesh::VertexHandle vh{ mesh->to_vertex_handle(hh) };
 
-	//if (!mesh->is_collapse_ok(hh)) {
-	//	std::cerr << "Collapse not OK. Skipping\n";
-	//	return;
-	//}
+	if (!mesh->is_collapse_ok(hh)) {
+		std::cerr << "Collapse not OK. Skipping\n";
+		return;
+	}
 
 
 	mesh->set_point(vh, created_vertex);
@@ -306,3 +307,24 @@ void EdgeCollapse::computeRegionQuadrics() {
 	}
 }
 
+
+bool EdgeCollapse::lessThan(float a, float b, float epsilon) {
+	return (b - a) > ((fabs(a) < fabs(b) ? fabs(b) : fabs(a)) * epsilon);
+}
+
+
+const float* EdgeCollapse::findMinError(const std::vector<float>& errors, const float epsilon) {
+	assert(!errors.empty());
+	const float* min{ &errors.at(0)};
+	if (errors.size() == 1) {
+		return min;
+	}
+	else {
+		for (auto& it{ errors.cbegin()+1 }; it != errors.cend(); ++it) {
+			if (lessThan(*it, *min, epsilon)) {
+				min = &(*it);
+			}
+		}
+	}
+	return min;
+}
