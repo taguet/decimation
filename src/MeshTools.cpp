@@ -257,8 +257,12 @@ void EdgeCollapse::collapse() {
 	//mesh->garbage_collection();
 
 	std::set<Mesh::VertexHandle> modified_vertices{ MeshUtils::getNeighboringVertices(*mesh, vh) };
-	//updateVertices(modified_vertices);
-	computeVerticesQuadrics();
+	for (auto& vhn : modified_vertices) {
+		std::set<Mesh::VertexHandle> one_ring{ MeshUtils::getNeighboringVertices(*mesh, vhn) };
+		modified_vertices.merge(one_ring);
+	}
+	updateVertices(modified_vertices);
+	//computeVerticesQuadrics();
 	updatePotentialCollapses(vh);
 }
 
