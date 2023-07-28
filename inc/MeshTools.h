@@ -107,17 +107,26 @@ private:
 		CollapseResult(Vector3f& vertex, float cost) : vertex{vertex}, cost{cost} {}
 	};
 
-	struct Collapse {
+	struct Edge {
 		Mesh::VertexHandle vh_0;
 		Mesh::VertexHandle vh_1;
+		Edge() = default;
+		Edge(Mesh::VertexHandle vh_0, Mesh::VertexHandle vh_1) : vh_0{ vh_0 }, vh_1{ vh_1 } {}
+		bool operator==(const Edge& e) const {
+			return (this->vh_0 == e.vh_0 && this->vh_1 == e.vh_1) || (this->vh_0 == e.vh_1 && this->vh_1 == e.vh_0);
+		}
+	};
+
+	struct Collapse {
+		Edge edge;
 		CollapseResult result;
 		Collapse() = default;
-		Collapse(Mesh::VertexHandle vh_0, Mesh::VertexHandle vh_1, CollapseResult& result) : vh_0{ vh_0 }, vh_1{ vh_1 }, result { result } {}
-		bool operator==(const Collapse& vp) const {
-			return (this->vh_0 == vp.vh_0 && this->vh_1 == vp.vh_1) || (this->vh_0 == vp.vh_1 && this->vh_1 == vp.vh_0);
+		Collapse(Mesh::VertexHandle vh_0, Mesh::VertexHandle vh_1, CollapseResult& result) : edge{Edge(vh_0, vh_1)}, result{result} {}
+		bool operator==(const Collapse& c) const {
+			return this->edge == c.edge;;
 		}
-		bool operator<(const Collapse& vp) const {
-			return this->result.cost < vp.result.cost;
+		bool operator<(const Collapse& c) const {
+			return this->result.cost < c.result.cost;
 		}
 	};
 

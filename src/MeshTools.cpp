@@ -214,15 +214,15 @@ void EdgeCollapse::collapse() {
 
 	std::cerr << "Cost: " << collapse.result.cost << '\n';
 
-	Mesh::VertexHandle vh_0{ collapse.vh_0 };
-	Mesh::VertexHandle vh_1{ collapse.vh_1 };
+	Mesh::VertexHandle vh_0{ collapse.edge.vh_0};
+	Mesh::VertexHandle vh_1{ collapse.edge.vh_1 };
 
 	if (mesh->status(vh_0).deleted() || mesh->status(vh_1).deleted()) {
 		std:cerr << "Potential collapse contained deleted vertex. Skipping.\n";
 		return;
 	}
 
-	if (!collapse.vh_0.is_valid() || !collapse.vh_1.is_valid())	
+	if (!collapse.edge.vh_0.is_valid() || !collapse.edge.vh_1.is_valid())	
 		return;
 
 	if (vh_0 == vh_1) {
@@ -231,7 +231,7 @@ void EdgeCollapse::collapse() {
 	}
 
 	Vector3f result{ collapse.result.vertex };
-	Mesh::HalfedgeHandle hh{ MeshUtils::findHalfedge(*mesh, collapse.vh_0, collapse.vh_1)};
+	Mesh::HalfedgeHandle hh{ MeshUtils::findHalfedge(*mesh, collapse.edge.vh_0, collapse.edge.vh_1)};
 	if (!hh.is_valid())	
 		return;
 
