@@ -157,7 +157,7 @@ private:
 
 	void updateVertex(const Mesh::VertexHandle vh);
 	void updateVertices(const std::set<Mesh::VertexHandle>& vhs);
-	void updatePotentialCollapses(const Mesh::VertexHandle vh);
+	void updatePotentialCollapses(const std::set<Mesh::VertexHandle>& vhs);
 	void computeVerticesQuadrics();
 	void computePotentialCollapses();
 

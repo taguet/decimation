@@ -262,8 +262,7 @@ void EdgeCollapse::collapse() {
 		modified_vertices.merge(one_ring);
 	}
 	updateVertices(modified_vertices);
-	//computeVerticesQuadrics();
-	updatePotentialCollapses(vh);
+	updatePotentialCollapses(modified_vertices);
 }
 
 
@@ -284,22 +283,51 @@ unsigned int EdgeCollapse::n_vertices() {
 }
 
 
-void EdgeCollapse::updatePotentialCollapses(const Mesh::VertexHandle vh) {
-	/*
-	for (auto& vih_it{ mesh->vih_iter(vh) }; vih_it; ++vih_it) {
-		Mesh::HalfedgeHandle hh{ mesh->halfedge_handle(vih_it) };
-		Mesh::VertexHandle vh_n{ mesh->from_vertex_handle(hh) };
-		Mesh::EdgeHandle eh{ mesh->edge_handle(hh) };
+void EdgeCollapse::updatePotentialCollapses(const std::set<Mesh::VertexHandle>& vhs) {
+	
+	//for (auto& vih_it{ mesh->vih_iter(vh) }; vih_it; ++vih_it) {
+	//	Mesh::HalfedgeHandle hh{ mesh->halfedge_handle(vih_it) };
+	//	Mesh::VertexHandle vh_neighbor{ mesh->from_vertex_handle(hh) };
+	//	Mesh::EdgeHandle eh{ mesh->edge_handle(hh) };
 
-		auto collapse_node{ collapses.extract(potentialCollapse(eh)) };
-		std::cerr << (potentialCollapse(eh) == collapse_node.value()) << '\n';
-		potentialCollapse(eh) = Collapse{ vh, vh_n, computeCollapseResult(vh, vh_n) };
-		collapse_node.value() = potentialCollapse(eh);
-		collapses.insert(std::move(collapse_node));
+	//	Collapse& obsolete{ potentialCollapse(eh) };
+	//	auto collapse_node{ collapses.extract(std::find(collapses.begin(), collapses.end(), obsolete)) };
+	//	//std::cerr << (potentialCollapse(eh) == collapse_node.value()) << '\n';
+	//	Collapse& collapse{ collapse_node.value() };
+	//	collapse = Collapse{ vh, vh_neighbor, computeCollapseResult(vh, vh_neighbor) };
+	//	potentialCollapse(eh) = collapse;
+	//	collapses.insert(std::move(collapse_node));
+	//}
+	
+	std::set<Mesh::EdgeHandle> updated;
+	for (auto& vh : vhs) {
+		for (auto& vih_it{ mesh->vih_iter(vh) }; vih_it; ++vih_it) {
+			Mesh::EdgeHandle eh{ mesh->edge_handle(vih_it) };
+			if (updated.contains(eh)) {
+				continue;
+			}
+
+			Collapse& obsolete{ potentialCollapse(eh) };
+			auto obsolete_it{ std::find(collapses.begin(), collapses.end(), obsolete) };
+			if (obsolete_it != collapses.end()) {
+				auto collapse_node{ collapses.extract(obsolete_it) };
+				Collapse& collapse{ collapse_node.value() };
+				collapse = Collapse{ mesh->from_vertex_handle(vih_it), mesh->to_vertex_handle(vih_it),
+					computeCollapseResult(mesh->from_vertex_handle(vih_it), mesh->to_vertex_handle(vih_it)) };
+				potentialCollapse(eh) = collapse;
+				collapses.insert(std::move(collapse_node));
+			}
+			else {
+				potentialCollapse(eh) = Collapse{ mesh->from_vertex_handle(vih_it), mesh->to_vertex_handle(vih_it),
+					computeCollapseResult(mesh->from_vertex_handle(vih_it), mesh->to_vertex_handle(vih_it)) };
+				collapses.insert(potentialCollapse(eh));
+			}
+			updated.insert(eh);
+		}
 	}
-	*/
-	collapses.clear();
-	computePotentialCollapses();
+
+	//collapses.clear();
+	//computePotentialCollapses();
 }
 
 
