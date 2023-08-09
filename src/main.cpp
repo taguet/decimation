@@ -31,7 +31,7 @@
 
 #define PATH_DATA "dat/"
 //#define FILENAME "bumpy_sphere.off"
-#define FILENAME "rounded_cube1.stl"
+#define FILENAME "rounded_cube1_anis40-1.stl"
 
 //torus.off : 288v
 //bumpy_sphere.off : 5724v

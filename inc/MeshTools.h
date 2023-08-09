@@ -110,7 +110,7 @@ private:
 	struct Edge {
 		Mesh::VertexHandle vh_0;
 		Mesh::VertexHandle vh_1;
-		Edge() = default;
+		Edge() : vh_0{ Mesh::InvalidVertexHandle }, vh_1{ Mesh::InvalidVertexHandle } {}
 		Edge(Mesh::VertexHandle vh_0, Mesh::VertexHandle vh_1) : vh_0{ vh_0 }, vh_1{ vh_1 } {}
 		bool operator==(const Edge& e) const {
 			return (this->vh_0 == e.vh_0 && this->vh_1 == e.vh_1) || (this->vh_0 == e.vh_1 && this->vh_1 == e.vh_0);
@@ -160,6 +160,8 @@ private:
 	void updatePotentialCollapses(const std::set<Mesh::VertexHandle>& vhs);
 	void computeVerticesQuadrics();
 	void computePotentialCollapses();
+	void computePotentialCollapse(const Mesh::VertexHandle vh_0, const Mesh::VertexHandle vh_1);
+	void removeOutdatedCollapses(const std::set<Mesh::VertexHandle>& modified_vertices);
 
 	const float* findMinError(const std::vector<float>& errors, const float epsilon);
 	bool lessThan(float a, float b, float epsilon);

@@ -201,10 +201,15 @@ void EdgeCollapse::computePotentialCollapses() {
 		for (auto& vv_it{ mesh->vv_iter(v_it) }; vv_it; ++vv_it) {
 			if (mesh->status(vv_it).deleted())
 				continue;
-			potentialCollapse(v_it, vv_it) = {v_it, vv_it, computeCollapseResult(v_it, vv_it)};
-			collapses.insert(potentialCollapse(v_it, vv_it));
+			computePotentialCollapse(v_it, vv_it);
 		}
 	}
+}
+
+
+void EdgeCollapse::computePotentialCollapse(const Mesh::VertexHandle vh_0, const Mesh::VertexHandle vh_1) {
+	potentialCollapse(vh_0, vh_1) = { vh_0, vh_1, computeCollapseResult(vh_0, vh_1) };
+	collapses.insert(potentialCollapse(vh_0, vh_1));
 }
 
 
@@ -212,13 +217,13 @@ void EdgeCollapse::collapse() {
 	Collapse collapse{ *collapses.begin()};
 	collapses.erase(collapses.begin());
 
-	std::cerr << "Cost: " << collapse.result.cost << '\n';
+	//std::cerr << "Cost: " << collapse.result.cost << '\n';
 
 	Mesh::VertexHandle vh_0{ collapse.edge.vh_0};
 	Mesh::VertexHandle vh_1{ collapse.edge.vh_1 };
 
 	if (mesh->status(vh_0).deleted() || mesh->status(vh_1).deleted()) {
-		std:cerr << "Potential collapse contained deleted vertex. Skipping.\n";
+		//std:cerr << "Potential collapse contained deleted vertex. Skipping.\n";
 		return;
 	}
 
@@ -226,7 +231,7 @@ void EdgeCollapse::collapse() {
 		return;
 
 	if (vh_0 == vh_1) {
-		std::cerr << "Potential collapse between two same vertices. Skipping.\n";
+		//std::cerr << "Potential collapse between two same vertices. Skipping.\n";
 		return;
 	}
 
@@ -240,7 +245,7 @@ void EdgeCollapse::collapse() {
 	Mesh::VertexHandle vh{ mesh->to_vertex_handle(hh) };
 
 	if (!mesh->is_collapse_ok(hh)) {
-		std::cerr << "Collapse not OK. Skipping\n";
+		//std::cerr << "Collapse not OK. Skipping\n";
 		return;
 	}
 
@@ -248,19 +253,34 @@ void EdgeCollapse::collapse() {
 	mesh->set_point(vh, created_vertex);
 	mesh->set_point(del_vh, created_vertex);
 
-	//std::cerr << "v0 quadric : " << vertexQuadric(vh) << '\n';
-	//std::cerr << "v1 quadric : " << vertexQuadric(del_vh) << '\n';
+
 	mesh->collapse(hh);
 	++removed_vertices;
+
+	std::set<Mesh::VertexHandle> modified_vertices{ MeshUtils::getNeighboringVertices(*mesh, vh)};
+	std::set<Mesh::VertexHandle> two_ring{};
+	for (auto vh_ : modified_vertices) {
+		two_ring.merge(MeshUtils::getNeighboringVertices(*mesh, vh_));
+	}
+	std::set<Mesh::VertexHandle> three_ring{};
+	for (auto vh_ : two_ring) {
+		three_ring.merge(MeshUtils::getNeighboringVertices(*mesh, vh_));
+	}	
+	std::set<Mesh::VertexHandle> four_ring{};
+	for (auto vh_ : three_ring) {
+		four_ring.merge(MeshUtils::getNeighboringVertices(*mesh, vh_));
+	}
+	modified_vertices.merge(four_ring);
+
+	modified_vertices.insert(vh);
+	////std::set<Mesh::VertexHandle> modified_vertices{};
+	////for (auto& v_it{ mesh->vertices_begin() }; v_it != mesh->vertices_end(); ++v_it) {
+	////	modified_vertices.insert(v_it);
+	////}
+
 	std::cerr << "Merged " << del_vh.idx() << " into " << vh.idx() << '\n';
 	std::cerr << "New vertex : " << created_vertex << '\n';
-	//mesh->garbage_collection();
 
-	std::set<Mesh::VertexHandle> modified_vertices{ MeshUtils::getNeighboringVertices(*mesh, vh) };
-	for (auto& vhn : modified_vertices) {
-		std::set<Mesh::VertexHandle> one_ring{ MeshUtils::getNeighboringVertices(*mesh, vhn) };
-		modified_vertices.merge(one_ring);
-	}
 	updateVertices(modified_vertices);
 	updatePotentialCollapses(modified_vertices);
 }
@@ -284,50 +304,52 @@ unsigned int EdgeCollapse::n_vertices() {
 
 
 void EdgeCollapse::updatePotentialCollapses(const std::set<Mesh::VertexHandle>& vhs) {
-	
-	//for (auto& vih_it{ mesh->vih_iter(vh) }; vih_it; ++vih_it) {
-	//	Mesh::HalfedgeHandle hh{ mesh->halfedge_handle(vih_it) };
-	//	Mesh::VertexHandle vh_neighbor{ mesh->from_vertex_handle(hh) };
-	//	Mesh::EdgeHandle eh{ mesh->edge_handle(hh) };
+	static int i{ 0 };
 
-	//	Collapse& obsolete{ potentialCollapse(eh) };
-	//	auto collapse_node{ collapses.extract(std::find(collapses.begin(), collapses.end(), obsolete)) };
-	//	//std::cerr << (potentialCollapse(eh) == collapse_node.value()) << '\n';
-	//	Collapse& collapse{ collapse_node.value() };
-	//	collapse = Collapse{ vh, vh_neighbor, computeCollapseResult(vh, vh_neighbor) };
-	//	potentialCollapse(eh) = collapse;
-	//	collapses.insert(std::move(collapse_node));
-	//}
-	
-	std::set<Mesh::EdgeHandle> updated;
-	for (auto& vh : vhs) {
-		for (auto& vih_it{ mesh->vih_iter(vh) }; vih_it; ++vih_it) {
-			Mesh::EdgeHandle eh{ mesh->edge_handle(vih_it) };
-			if (updated.contains(eh)) {
+	removeOutdatedCollapses(vhs);
+	//collapses.clear();
+	for (auto& v_it : vhs) {	// Recompute all operations on potentially modified edges		
+		if (mesh->status(v_it).deleted())
+			continue;
+		for (auto& vv_it{ mesh->vv_iter(v_it) }; vv_it; ++vv_it) {
+			if (mesh->status(vv_it).deleted())
 				continue;
-			}
-
-			Collapse& obsolete{ potentialCollapse(eh) };
-			auto obsolete_it{ std::find(collapses.begin(), collapses.end(), obsolete) };
-			if (obsolete_it != collapses.end()) {
-				auto collapse_node{ collapses.extract(obsolete_it) };
-				Collapse& collapse{ collapse_node.value() };
-				collapse = Collapse{ mesh->from_vertex_handle(vih_it), mesh->to_vertex_handle(vih_it),
-					computeCollapseResult(mesh->from_vertex_handle(vih_it), mesh->to_vertex_handle(vih_it)) };
-				potentialCollapse(eh) = collapse;
-				collapses.insert(std::move(collapse_node));
-			}
-			else {
-				potentialCollapse(eh) = Collapse{ mesh->from_vertex_handle(vih_it), mesh->to_vertex_handle(vih_it),
-					computeCollapseResult(mesh->from_vertex_handle(vih_it), mesh->to_vertex_handle(vih_it)) };
-				collapses.insert(potentialCollapse(eh));
-			}
-			updated.insert(eh);
+			computePotentialCollapse(v_it, vv_it);
 		}
 	}
-
 	//collapses.clear();
 	//computePotentialCollapses();
+	
+	//++i;
+	//if (i == 60) {
+	//	for (auto& col : collapses) {
+	//		std::cerr << "(" << col.edge.vh_0 << ", " << col.edge.vh_1 << ")\n";
+	//	}
+	//	//for (auto vh : vhs) {
+	//	//	std::cerr << vh << '\n';
+	//	//}
+	//	exit(0);
+	//}
+
+	//std::cerr << collapses.size() << '\n';
+}
+
+
+void EdgeCollapse::removeOutdatedCollapses(const std::set<Mesh::VertexHandle>& modified_vertices) {
+	for (auto& collapse_it{ collapses.begin() }; collapse_it != collapses.end(); ) {
+		const Edge& edge{ collapse_it->edge };
+		Mesh::EdgeHandle eh{ MeshUtils::findEdge(*mesh, edge.vh_0, edge.vh_1) };
+
+		if (!eh.is_valid() || mesh->status(eh).deleted() || mesh->status(edge.vh_0).deleted() || mesh->status(edge.vh_1).deleted()) {	// If operation on deleted edge
+			collapse_it = collapses.erase(collapse_it);
+			continue;
+		}
+		else if (modified_vertices.contains(edge.vh_0) || modified_vertices.contains(edge.vh_1)) {	// Remove operations on obsolete edges
+			collapse_it = collapses.erase(collapse_it);
+			continue;
+		}
+		++collapse_it;
+	}
 }
 
 

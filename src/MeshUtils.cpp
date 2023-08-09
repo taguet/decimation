@@ -81,7 +81,7 @@ void MeshUtils::getFaceNeighbors(Mesh& mesh, Mesh::FaceHandle fh, std::list<Mesh
 
 
 std::set<Mesh::VertexHandle> MeshUtils::getNeighboringVertices(const Mesh& mesh, const Mesh::VertexHandle vh) {
-	std::set<Mesh::VertexHandle> neighbors;
+	std::set<Mesh::VertexHandle> neighbors{};
 	for (auto& vv_it{ mesh.cvv_iter(vh) }; vv_it; ++vv_it) {
 		neighbors.insert(vv_it);
 	}
