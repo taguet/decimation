@@ -125,9 +125,6 @@ private:
 		bool operator==(const Collapse& c) const {
 			return this->edge == c.edge;;
 		}
-		bool operator<(const Collapse& c) const {
-			return this->result.cost < c.result.cost;
-		}
 	};
 
 	OpenMesh::VPropHandleT<Quadric> v_quadric;
@@ -136,7 +133,8 @@ private:
 	Mesh* mesh{ nullptr };
 	TopologyGraph* graph{ nullptr };
 	std::map<RegionID, Quadric> region_quadrics;
-	std::set<Collapse> collapses;
+	std::map<float, std::deque<Collapse>> collapses{};
+	std::set<Mesh::VertexHandle> skipped_vertices{};
 	int removed_vertices{ 0 };
 
 	void computeRegionQuadrics();
