@@ -121,8 +121,7 @@ void TopologyGraph::removeEdges(int regionID) {
 
 void TopologyGraph::addFaceToRegion(int regionID, Mesh::FaceHandle fh) {
 	faceGroup(fh) = regionID;
-	auto it_region{ regions.find(regionID) };
-	if (it_region == regions.end()) {
+	if (!regions.contains(regionID)) {
 		regions.insert(std::make_pair(regionID, Node{ *this, regionID }));
 	}
 	regions.at(regionID).add(fh);

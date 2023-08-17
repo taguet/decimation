@@ -3,10 +3,10 @@
 
 void MeshTools::extractRegions(TopologyGraph& graph) {
 	//initialization
-	std::list<OpenMesh::FaceHandle> ungrouped_faces{};
+	std::set<OpenMesh::FaceHandle> ungrouped_faces{};
 	for (auto f_iter{ mesh_->faces_begin() }; f_iter != mesh_->faces_end(); ++f_iter) {
 		graph.faceGroup(f_iter) = -1;
-		ungrouped_faces.push_back(f_iter);
+		ungrouped_faces.insert(f_iter);
 	}
 	std::cerr << "Executing region growing algorithm...\n";
 	growRegions(ungrouped_faces, graph);
@@ -39,29 +39,28 @@ void MeshTools::simplifyMesh(TopologyGraph& graph, int targetVerticesAmount) {
 }
 
 
-void MeshTools::growRegions(std::list<Mesh::FaceHandle>& ungrouped_faces, TopologyGraph& graph) {
+void MeshTools::growRegions(std::set<Mesh::FaceHandle>& ungrouped_faces, TopologyGraph& graph) {
 	int current_region_id{-1};
 	while (!ungrouped_faces.empty()) {
-		Mesh::FaceHandle fh{ ungrouped_faces.front() };
-		ungrouped_faces.pop_front();
-		graph.faceGroup(fh) = ++current_region_id;
-		graph.addFaceToRegion(current_region_id, fh);
+		Mesh::FaceHandle fh{ ungrouped_faces.extract(ungrouped_faces.begin()).value()};	// Pop first ungrouped face
+		graph.addFaceToRegion(++current_region_id, fh);
+
 		std::list<Mesh::FaceHandle>  neighbors;
 		MeshUtils::getFaceNeighbors(*mesh_, fh, neighbors);
 		std::cerr << "Region " << current_region_id << '\n';
 
 		for (auto f_neighbor{ neighbors.begin() }; f_neighbor != neighbors.end(); ) {
-			Mesh::Normal f_normal_neighbor{ mesh_->normal(*f_neighbor)};
+			Mesh::Normal f_neighbor_normal{ mesh_->normal(*f_neighbor)};
 			Mesh::Normal f_normal{ mesh_->normal(fh)};
 
 			if (faceIsGrouped(*f_neighbor, graph)) {
 				f_neighbor = neighbors.erase(f_neighbor);
 				continue;
 			}
-			else if (normalsAreCloseEnough(f_normal_neighbor, f_normal, 0.349066f)) {
+			else if (normalsAreCloseEnough(f_neighbor_normal, f_normal, 0.349066f)) {
 				graph.addFaceToRegion(current_region_id, *f_neighbor);
 				extendNeighborhood(*f_neighbor, neighbors);
-				ungrouped_faces.remove(*f_neighbor);
+				ungrouped_faces.erase(*f_neighbor);
 			}
 			++f_neighbor;
 		}

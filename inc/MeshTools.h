@@ -79,7 +79,7 @@ private:
 	/// @brief Region growing algorithm to detect and separate all planar regions.
 	/// @param ungrouped_faces Every faces in the mesh that haven't been sorted in a group yet.
 	/// @param graph The topology graph to update throughout the process.
-	void growRegions(std::list<Mesh::FaceHandle>& ungrouped_faces, TopologyGraph& graph);
+	void growRegions(std::set<Mesh::FaceHandle>& ungrouped_faces, TopologyGraph& graph);
 
 	/// @brief Build a topology graph connecting all neighbouring regions.
 	/// @param graph The graph to build.
