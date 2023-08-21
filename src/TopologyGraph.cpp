@@ -4,6 +4,7 @@ TopologyGraph::TopologyGraph(Mesh& mesh, float area_threshold, float fitting_thr
 	: mesh{ mesh }, area_threshold{ area_threshold }, fitting_threshold{ fitting_threshold }
 {
 	this->mesh.add_property(f_group);
+	this->mesh.add_property(f_area);
 	for (auto f_it{ mesh.faces_begin() }; f_it != mesh.faces_end(); ++f_it) {
 		faceGroup(f_it) = -1;
 	}
@@ -27,9 +28,16 @@ void TopologyGraph::connectRegions(int regionID_1, int regionID_2) {
 float TopologyGraph::Node::computeArea() const {
 	float area{ 0.0f };
 	for (auto face : faces) {
-		area += MeshUtils::computeFaceArea(parent->mesh, face);
+		area += parent->face_area(face);
 	}
 	return area;
+}
+
+
+void TopologyGraph::computeFaceAreas() {
+	for (auto f_it{ mesh.faces_begin() }; f_it != mesh.faces_end(); ++f_it) {
+		face_area(f_it) = MeshUtils::computeFaceArea(mesh, f_it);
+	}
 }
 
 
@@ -242,8 +250,8 @@ void TopologyGraph::Node::add(Mesh::FaceHandle fh) {
 
 
 void TopologyGraph::Node::regroupIntoSelf(Node& region) {
-	faces.insert(region.faces.begin(), region.faces.end());
-	vertices.insert(region.vertices.begin(), region.vertices.end());
+	faces.merge(region.faces);
+	vertices.merge(region.vertices);
 	for (auto fh : region.getFaceHandles()) {
 		parent->faceGroup(fh) = id;
 	}
@@ -339,4 +347,9 @@ bool TopologyGraph::allNeighborFacesAreInSameRegion(const Mesh::VertexHandle vh)
 	if (neighbor_faces.size() == 1)
 		return true;
 	return std::equal(neighbor_faces.begin()+1, neighbor_faces.end(), neighbor_faces.begin());
+}
+
+
+float& TopologyGraph::face_area(const Mesh::FaceHandle fh) {
+	return mesh.property(f_area, fh);
 }

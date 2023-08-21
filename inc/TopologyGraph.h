@@ -38,7 +38,9 @@ private:
 	Mesh& mesh;
 
 	OpenMesh::FPropHandleT<int> f_group;
+	OpenMesh::FPropHandleT<float> f_area;
 
+	float& face_area(const Mesh::FaceHandle fh);
 	int findTargetRegion(int regionID, float fitting_threshold) const;
 	void regroupRegionIntoTarget(int regionID, int targetID);
 	void ungroupRegion(int regionID, bool removeGroup);
@@ -53,6 +55,8 @@ public:
 	int size() {
 		return regions.size();
 	}
+
+	void computeFaceAreas();
 
 	void addFaceToRegion(int regionID, Mesh::FaceHandle fh);
 

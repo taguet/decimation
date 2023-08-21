@@ -592,7 +592,12 @@ void Viewer::draw(const std::string& _draw_mode) {
 			isModified = true;
 			rgb.clear();
 			this->graph = new TopologyGraph{ mesh, 1.0f, 1.0f };
+
+			//auto start{ std::chrono::steady_clock::now() };
 			mtools.extractRegions(*graph);
+			//auto end{ std::chrono::steady_clock::now() };
+			//auto duration{ std::chrono::duration_cast<std::chrono::milliseconds>(end - start) }; 
+			//std::cerr << "Regions extracted in " << duration.count() << " milliseconds.\n\n";
 			srand(0);
 			std::set<int> groups_found{graph->getRegionIDs()};
 			for (int groupID : groups_found) {
