@@ -121,7 +121,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;_USE_MATH_DEFINES;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>false</ConformanceMode>
-      <AdditionalIncludeDirectories>C:\Users\benja\OneDrive\Documents\Decimation\Decimation\inc;C:\Users\benja\OneDrive\Documents\Decimation\Source_Code_Lib\lib\freeglut\include;C:\Users\benja\OneDrive\Documents\Decimation\Source_Code_Lib\lib\OpenMesh\src;C:\Users\benja\OneDrive\Documents\Decimation\Source_Code_Lib\lib\taucs-win32\include;C:\Users\benja\OneDrive\Documents\Libs\eigen-3.4.0\eigen-3.4.0;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Users\benja\OneDrive\Documents\Decimation\Decimation\inc;C:\Users\benja\OneDrive\Documents\Decimation\Source_Code_Lib\lib\freeglut\include;C:\Users\benja\OneDrive\Documents\Decimation\Source_Code_Lib\lib\OpenMesh\src;C:\Users\benja\OneDrive\Documents\Decimation\Source_Code_Lib\lib\taucs-win32\include;C:\Users\benja\OneDrive\Documents\Libs\eigen-3.4.0\eigen-3.4.0</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <LanguageStandard>stdcpp20</LanguageStandard>
     </ClCompile>
@@ -154,7 +154,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;_USE_MATH_DEFINES;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>C:\Users\benja\OneDrive\Documents\Decimation\Source_Code_Lib\inc;C:\Users\benja\OneDrive\Documents\Decimation\Source_Code_Lib\lib\freeglut\include;C:\Users\benja\OneDrive\Documents\Decimation\Source_Code_Lib\lib\OpenMesh\src;C:\Users\benja\OneDrive\Documents\Decimation\Source_Code_Lib\lib\taucs-win32\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Users\benja\OneDrive\Documents\Decimation\Source_Code_Lib\inc;C:\Users\benja\OneDrive\Documents\Decimation\Source_Code_Lib\lib\freeglut\include;C:\Users\benja\OneDrive\Documents\Decimation\Source_Code_Lib\lib\OpenMesh\src;C:\Users\benja\OneDrive\Documents\Decimation\Source_Code_Lib\lib\taucs-win32\include;C:\Users\benja\OneDrive\Documents\Decimation\Decimation\inc;C:\Users\benja\OneDrive\Documents\Libs\eigen-3.4.0\eigen-3.4.0;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
