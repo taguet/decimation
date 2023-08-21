@@ -250,11 +250,11 @@ void TopologyGraph::Node::add(Mesh::FaceHandle fh) {
 
 
 void TopologyGraph::Node::regroupIntoSelf(Node& region) {
-	faces.merge(region.faces);
-	vertices.merge(region.vertices);
 	for (auto fh : region.getFaceHandles()) {
 		parent->faceGroup(fh) = id;
 	}
+	faces.merge(region.faces);
+	vertices.merge(region.vertices);
 	fitPlane();
 }
 
