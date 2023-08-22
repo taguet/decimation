@@ -16,6 +16,7 @@ private:
 	public:
 		const int id;
 		Plane plane;
+		float sum_vertex_distance{ 0.0f };
 
 		Node(TopologyGraph& parent, int id) : id{ id }, parent{ &parent } {}
 		void add(Mesh::FaceHandle fh);
@@ -26,7 +27,7 @@ private:
 		bool contains(Mesh::FaceHandle& fh) const { return faces.contains(fh); }
 		float computeArea() const;
 		void fitPlane();
-		float sumVertexProjectedDistances() const;
+		float sumVertexProjectedDistances();
 	private:
 		TopologyGraph* parent{ nullptr };
 		std::set<Mesh::FaceHandle> faces{};
@@ -41,7 +42,7 @@ private:
 	OpenMesh::FPropHandleT<float> f_area;
 
 	float& face_area(const Mesh::FaceHandle fh);
-	int findTargetRegion(int regionID, float fitting_threshold) const;
+	int findTargetRegion(int regionID, float fitting_threshold);
 	void regroupRegionIntoTarget(int regionID, int targetID);
 	void ungroupRegion(int regionID, bool removeGroup);
 	std::map<std::pair<int, int>, Line> filterLinesByRegion(const int region_id, const std::map<std::pair<int, int>, Line> &contour_lines) const;
@@ -85,6 +86,7 @@ public:
 	bool facesAreInSameRegion(const Mesh::FaceHandle& fh_1, const Mesh::FaceHandle& fh_2) const;
 	bool allNeighborFacesAreInSameRegion(const Mesh::VertexHandle vh) const;
 	void fitPlanes();
+	void computeVertexProjectedDistances();
 
 	/// @brief Finds all intersections between each neighboring regions' planes
 	/// @return The equation of a line.

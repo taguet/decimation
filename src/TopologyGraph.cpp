@@ -66,13 +66,13 @@ bool TopologyGraph::simplifyGraph() {
 }
 
 
-int TopologyGraph::findTargetRegion(int regionID, float fitting_threshold) const {
+int TopologyGraph::findTargetRegion(int regionID, float fitting_threshold)  {
 	std::set<int> neighborIDs{ edges.at(regionID) };
 	int targetID{ -1 };
 	float min_sum{ std::numeric_limits<float>::max() };
 	for (int id : neighborIDs) {
-		const Node& neighbor{ getRegion(id) };
-		float sum{ neighbor.sumVertexProjectedDistances() };
+		Node& neighbor{ getRegion(id) };
+		float sum{ neighbor.sum_vertex_distance };
 		if (sum < min_sum) {
 			min_sum = sum;
 			targetID = id;
@@ -88,6 +88,13 @@ int TopologyGraph::findTargetRegion(int regionID, float fitting_threshold) const
 void TopologyGraph::fitPlanes() {
 	for (auto& region_pair : regions) {
 		region_pair.second.fitPlane();
+	}
+}
+
+
+void TopologyGraph::computeVertexProjectedDistances() {
+	for (auto& region_pair : regions) {
+		region_pair.second.sumVertexProjectedDistances();
 	}
 }
 
@@ -256,6 +263,7 @@ void TopologyGraph::Node::regroupIntoSelf(Node& region) {
 	faces.merge(region.faces);
 	vertices.merge(region.vertices);
 	fitPlane();
+	sumVertexProjectedDistances();
 }
 
 
@@ -264,13 +272,14 @@ void TopologyGraph::Node::fitPlane() {
 }
 
 
-float TopologyGraph::Node::sumVertexProjectedDistances() const {
+float TopologyGraph::Node::sumVertexProjectedDistances() {
 	Mesh& mesh{ parent->mesh };
 	float sum{ 0.0f };
 	for (auto& vh : vertices) {
 		Mesh::Point p{ mesh.point(vh) };
 		sum += plane.distToPoint(Vector3f{ p[0], p[1], p[2]});
 	}
+	sum_vertex_distance = sum;
 	return sum;
 }
 

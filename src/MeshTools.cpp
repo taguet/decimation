@@ -80,6 +80,7 @@ void MeshTools::buildTopologyGraph(TopologyGraph& graph) {
 	graph.fitPlanes();
 	std::cerr << "Done\nSimplifying graph...\n";
 	graph.computeFaceAreas();
+	graph.computeVertexProjectedDistances();
 	while (graph.simplifyGraph());	//simplify graph until no changes are made
 	std::cerr << "Done\n";
 }
