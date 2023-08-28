@@ -70,6 +70,10 @@ namespace MeshUtils
 	Mesh::HalfedgeHandle findHalfedge(const Mesh& mesh, const Mesh::VertexHandle vh_0, const Mesh::VertexHandle vh_1);
 	Mesh::EdgeHandle findEdge(const Mesh& mesh, const Mesh::VertexHandle vh_0, const Mesh::VertexHandle vh_1);
 
+	/// @brief Finds the face adjacent to another face, i.e. the face across the given halfedge
+	/// @return THe adjacent face's handle.
+	Mesh::FaceHandle getAdjacentFace(const Mesh& mesh, const Mesh::FaceHandle fh, const Mesh::HalfedgeHandle hh);
+
 	/// @brief Projected a given vertex onto a line.
 	/// @param mesh 
 	/// @param vh 

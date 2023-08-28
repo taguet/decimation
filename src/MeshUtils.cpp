@@ -109,6 +109,13 @@ Mesh::EdgeHandle MeshUtils::findEdge(const Mesh& mesh, const Mesh::VertexHandle 
 }
 
 
+Mesh::FaceHandle MeshUtils::getAdjacentFace(const Mesh& mesh, const Mesh::FaceHandle fh, const Mesh::HalfedgeHandle hh) {
+	assert(mesh.face_handle(hh) == fh);	// Make sure the halfedge belongs to the given face
+	Mesh::HalfedgeHandle hh_opp{ mesh.opposite_halfedge_handle(hh) };
+	return mesh.face_handle(hh_opp);
+}
+
+
 void MeshUtils::projectVertexToLine(Mesh& mesh, const Mesh::VertexHandle vh, const Equation::Line& line) {
 	const Mesh::Point p{ mesh.point(vh) };
 	const Eigen::Vector3f projected{ line.projectPoint(Eigen::Vector3f{p[0], p[1], p[2]}) };
