@@ -60,8 +60,7 @@ OpenMesh::Vec3f CotangentLaplacian::computeLaplacian(const OpenMesh::VertexHandl
 
 //============== ANISOTROPIC LAPLACIAN =================
 
-AnisotropicLaplacian::AnisotropicLaplacian(Mesh& mesh) : Laplacian(mesh) {
-	variance_edge_length = MeshUtils::computeVarianceEdgeLength(*mesh_);
+AnisotropicLaplacian::AnisotropicLaplacian(Mesh& mesh) : filter{mesh}, Laplacian(mesh) {
 }
 
 
@@ -76,7 +75,7 @@ OpenMesh::Vec3f AnisotropicLaplacian::computeLaplacian(const OpenMesh::VertexHan
 			--i;
 			continue;
 		}
-		OpenMesh::Vec3f f_normal{ filterFaceNormal(face) };
+		OpenMesh::Vec3f f_normal{ filter.filterFaceNormal(face) };
 		OpenMesh::Vec3f normal{ mesh_->normal(face) };
 		OpenMesh::Vec3f toCentroid{ centroid - p_i };
 		sum += dot(toCentroid, f_normal) * normal;
@@ -90,43 +89,5 @@ OpenMesh::Vec3f AnisotropicLaplacian::computeLaplacian(const OpenMesh::VertexHan
 
 void AnisotropicLaplacian::computeLaplacians() {
 	Laplacian::computeLaplacians();
-	variance_edge_length = MeshUtils::computeVarianceEdgeLength(*mesh_);
-}
-
-
-Mesh::Normal AnisotropicLaplacian::filterFaceNormal(const OpenMesh::FaceHandle fh, float threshold) {
-	float area{ MeshUtils::computeFaceArea(*mesh_, mesh_->halfedge_handle(fh)) };
-	Mesh::Normal f_normal{ weighFaceNormal(fh, fh, area, threshold) };
-	for (auto ff_it{ mesh_->ff_iter(fh) }; ff_it; ++ff_it) {
-		if (dot(mesh_->normal(ff_it), mesh_->normal(fh)) < cos(threshold))
-			continue;
-		f_normal += weighFaceNormal(fh, ff_it, area, threshold);
-	}
-	return f_normal / f_normal.norm();
-}
-
-
-float AnisotropicLaplacian::computeDistanceWeight(const OpenMesh::FaceHandle fh1, const OpenMesh::FaceHandle fh2) {
-	Mesh::Point c_0, c_1;
-	c_0 = MeshUtils::computeCentroid(*mesh_, mesh_->halfedge_handle(fh1));
-	c_1 = MeshUtils::computeCentroid(*mesh_, mesh_->halfedge_handle(fh2));
-	float sqr_dst{ (c_0 - c_1).sqrnorm() };
-	return exp(-sqr_dst / (2 * variance_edge_length));
-}
-
-
-float AnisotropicLaplacian::computeProximityWeight(const OpenMesh::FaceHandle fh1, const OpenMesh::FaceHandle fh2, float threshold) {
-	Mesh::Normal n_0, n_1;
-	n_0 = mesh_->normal(fh1);
-	n_1 = mesh_->normal(fh2);
-	float num{ pow(1 - dot(n_0, n_1), 2.0f) };
-	float denom{ pow(1 - cos(threshold), 2.0f) };
-	return exp(-num / denom);
-}
-
-
-Mesh::Normal AnisotropicLaplacian::weighFaceNormal(const OpenMesh::FaceHandle fh_i, const OpenMesh::FaceHandle fh_j, const float area, const float threshold) {
-	float alpha{ computeDistanceWeight(fh_i, fh_j) };
-	float beta{ computeProximityWeight(fh_i, fh_j, threshold) };
-	return area * alpha * beta * mesh_->normal(fh_j);
+	filter.update();
 }

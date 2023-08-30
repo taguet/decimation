@@ -19,6 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\BilateralFiltering.cpp" />
     <ClCompile Include="src\ComputingTools.cpp" />
     <ClCompile Include="src\GeomEq.cpp" />
     <ClCompile Include="src\GlutExaminer.cpp" />
@@ -35,6 +36,7 @@
     <ClCompile Include="src\Viewer.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="inc\BilateralFiltering.h" />
     <ClInclude Include="inc\ComputingTools.hpp" />
     <ClInclude Include="inc\GeomEq.hpp" />
     <ClInclude Include="inc\Geometry.hpp" />
