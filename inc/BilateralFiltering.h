@@ -7,6 +7,11 @@ class BilateralFiltering
 {
 public:
 	BilateralFiltering(Mesh& mesh);
+	~BilateralFiltering();
+
+	void initializeNormals();
+
+	void filterFaceNormals(int iteration = 1, float threshold = 0.349066f);
 
 	/// @brief Computes the filtered normal of a given face.
 	/// @param fh A given face handle.
@@ -40,9 +45,12 @@ public:
 
 	void update();
 
+	Mesh::Normal& filteredNormal(const Mesh::FaceHandle fh);
+
 protected:
 	Mesh::Normal weighFaceNormal(const OpenMesh::FaceHandle fh_i, const OpenMesh::FaceHandle fh_j, const float area, const float threshold);
 	float variance_edge_length;
 	Mesh* mesh{ nullptr };
+	OpenMesh::FPropHandleT<Mesh::Normal> filtered_normals;
 };
 

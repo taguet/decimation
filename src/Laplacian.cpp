@@ -75,7 +75,7 @@ OpenMesh::Vec3f AnisotropicLaplacian::computeLaplacian(const OpenMesh::VertexHan
 			--i;
 			continue;
 		}
-		OpenMesh::Vec3f f_normal{ filter.filterFaceNormal(face) };
+		OpenMesh::Vec3f f_normal{ filter.filteredNormal(face) };
 		OpenMesh::Vec3f normal{ mesh_->normal(face) };
 		OpenMesh::Vec3f toCentroid{ centroid - p_i };
 		sum += dot(toCentroid, f_normal) * normal;
@@ -88,6 +88,7 @@ OpenMesh::Vec3f AnisotropicLaplacian::computeLaplacian(const OpenMesh::VertexHan
 
 
 void AnisotropicLaplacian::computeLaplacians() {
+	filter.filterFaceNormals(1);
 	Laplacian::computeLaplacians();
 	filter.update();
 }
