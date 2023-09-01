@@ -65,6 +65,24 @@ bool TopologyGraph::simplifySmallRegions() {
 	return false;
 }
 
+bool TopologyGraph::simplifyLargeRegions()
+{
+	for (auto it{ regions.begin() }; it != regions.end(); ++it) {
+		Node& source_region{ it->second };
+		std::set<int> neighborIDs{ edges.at(source_region.id) };
+		for (int id : neighborIDs) {
+			Node& target_region{ getRegion(id) };
+			Plane& plane_source{ source_region.plane };
+			Plane& plane_target{ target_region.plane };
+			if (plane_source.isCoplanar(plane_target)) {
+				regroupRegionIntoTarget(source_region.id, target_region.id);
+				return true;
+			}
+		}
+	}
+	return false;
+}
+
 
 int TopologyGraph::findTargetRegion(int regionID, float fitting_threshold)  {
 	std::set<int> neighborIDs{ edges.at(regionID) };
