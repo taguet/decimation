@@ -51,12 +51,12 @@ bool TopologyGraph::simplifyGraph() {
 		else {
 			int targetID{ findTargetRegion(region.id, 100.0f) }; //arbitrary threshold
 			if (targetID == -1) {
-				std::cerr << "Deleted region " << region.id << '\n';
+				//std::cerr << "Deleted region " << region.id << '\n';
 				ungroupRegion(region.id, true);
 				return true;
 			}
 			else {
-				std::cerr << "Merged region " << region.id << " into " << targetID << '\n';
+				//std::cerr << "Merged region " << region.id << " into " << targetID << '\n';
 				regroupRegionIntoTarget(region.id, targetID);
 				return true;
 			}
@@ -177,10 +177,15 @@ bool TopologyGraph::facesAreInSameRegion(const Mesh::FaceHandle& fh_1, const Mes
 std::set<Mesh::EdgeHandle> TopologyGraph::extractContour() {
 	std::set<Mesh::EdgeHandle> contour_edges{};
 	for (auto f_it{ mesh.faces_begin() }; f_it != mesh.faces_end(); ++f_it) {
-		for (auto fh_it{ mesh.fh_iter(f_it)}; fh_it; ++fh_it) {
-			Mesh::FaceHandle neighbor_face{ mesh.face_handle(mesh.opposite_halfedge_handle(fh_it)) };
+		for (auto fhh_it{ mesh.fh_iter(f_it) }; fhh_it; ++fhh_it) {
+			Mesh::EdgeHandle eh{ mesh.edge_handle(fhh_it) };
+			if (mesh.is_boundary(eh)) {
+				continue;
+			}
+
+			Mesh::FaceHandle neighbor_face{ MeshUtils::getAdjacentFace(mesh, f_it, fhh_it)};
 			if (!facesAreInSameRegion(f_it, neighbor_face)) {
-				contour_edges.insert(mesh.edge_handle(fh_it));
+				contour_edges.insert(mesh.edge_handle(fhh_it));
 			}
 		}
 	}
