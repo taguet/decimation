@@ -41,6 +41,14 @@ namespace Equation {
 	}
 
 
+	bool Plane::isCoplanar(const Plane& plane) const {
+		Vector3f n0{ getNormal() };
+		Vector3f n1{ plane.getNormal() };
+		std::cerr << n0.dot(n1) << '\n';
+		return n0.dot(n1) >= cos(0.349066f);
+	}
+
+
 	float Plane::distFromOrigin() const {
 		Vector3f normal{ getNormal() };
 		return d() / normal.norm();

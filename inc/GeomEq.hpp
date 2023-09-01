@@ -65,6 +65,8 @@ namespace Equation {
 		Vector3f projectPoint(const Vector3f& p) const;
 		Vector3f projectPoint(const Mesh::Point& p) const;
 
+		bool isCoplanar(const Plane& plane) const;
+
 		Vector4f parameters;	/// The parameters a, b, c and d
 	};
 
