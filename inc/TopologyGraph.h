@@ -82,7 +82,7 @@ public:
 
 	void removeEdges(int regionID);
 
-	bool simplifyGraph();
+	bool simplifySmallRegions();
 	bool facesAreInSameRegion(const Mesh::FaceHandle& fh_1, const Mesh::FaceHandle& fh_2) const;
 	bool allNeighborFacesAreInSameRegion(const Mesh::VertexHandle vh) const;
 	void fitPlanes();

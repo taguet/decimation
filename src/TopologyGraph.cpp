@@ -41,7 +41,7 @@ void TopologyGraph::computeFaceAreas() {
 }
 
 
-bool TopologyGraph::simplifyGraph() {
+bool TopologyGraph::simplifySmallRegions() {
 	for (auto it{ regions.begin() }; it != regions.end(); ) {
 		Node& region{ it->second };
 		if (region.computeArea() > area_threshold) {	//Check whether region is very small
