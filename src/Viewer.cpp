@@ -49,7 +49,7 @@ Viewer::Viewer(const char* _title, int _width, int _height): MeshViewer(_title, 
   add_draw_mode("Debug laplacien cotangente");
   add_draw_mode("Debug lissage");
   add_draw_mode("Debug centroïde");
-
+  add_draw_mode("Debug normal angles");
   init();
 }
 
@@ -387,7 +387,7 @@ void Viewer::color_coding(OpenMesh::VPropHandleT<Mesh::Scalar> _curv) {
 
 
 void Viewer::draw(const std::string& _draw_mode) {
-
+	current_draw_mode = _draw_mode;
 
  if (_draw_mode == "Mean Curvature") {
 
@@ -519,8 +519,8 @@ void Viewer::draw(const std::string& _draw_mode) {
 	}
 	else if (_draw_mode == "Cotangent Laplacian") {
 		if (!isModified) {
-			//mtools.taubinSmoothing<UniformLaplacian>(20, 1, -.5);
-			mtools.smoothMesh<CotangentLaplacian>(20, .05);
+			mtools.taubinSmoothing<CotangentLaplacian>(50, .005, -.005);
+			//mtools.smoothMesh<CotangentLaplacian>(20, .005);
 			isModified = true;
 		}
 		prev_draw_mode = current_draw_mode;
@@ -529,9 +529,13 @@ void Viewer::draw(const std::string& _draw_mode) {
 	}
 	else if (_draw_mode == "Anisotropic Laplacian") {
 		if (!isModified) {
+			auto start{ std::chrono::steady_clock::now() };
 			//mtools.taubinSmoothing<UniformLaplacian>(20, 1, -.5);
 			mtools.smoothMesh<AnisotropicLaplacian>(20, 1);
-			isModified = true;
+			isModified = true; 
+			auto end{ std::chrono::steady_clock::now() };
+			auto duration{ std::chrono::duration_cast<std::chrono::milliseconds>(end - start) };
+			std::cerr << "Regions extracted in " << duration.count() << " milliseconds.\n\n";
 		}
 		prev_draw_mode = current_draw_mode;
 		prev_id_draw_mode = get_draw_mode();
@@ -539,10 +543,15 @@ void Viewer::draw(const std::string& _draw_mode) {
 	}
 	else if (_draw_mode == "Planar Region Extraction") {
 		if (!isModified) {
+			auto start{ std::chrono::steady_clock::now() };
 			isModified = true;
 			this->graph = new TopologyGraph(mesh, 1.0f, 1.0f);
 			mtools.extractRegions(*graph);
 			this->graph->projectContourVertices();
+			auto end{ std::chrono::steady_clock::now() };
+			auto duration{ std::chrono::duration_cast<std::chrono::milliseconds>(end - start) };
+
+			std::cerr << "Executed in " << duration.count() << " milliseconds.\n\n";
 		}
 		draw("Solid Smooth"); 
 		prev_draw_mode = current_draw_mode;
@@ -593,11 +602,11 @@ void Viewer::draw(const std::string& _draw_mode) {
 			rgb.clear();
 			this->graph = new TopologyGraph{ mesh, 1.0f, 1.0f };
 
-			//auto start{ std::chrono::steady_clock::now() };
+			auto start{ std::chrono::steady_clock::now() };
 			mtools.extractRegions(*graph);
-			//auto end{ std::chrono::steady_clock::now() };
-			//auto duration{ std::chrono::duration_cast<std::chrono::milliseconds>(end - start) }; 
-			//std::cerr << "Regions extracted in " << duration.count() << " milliseconds.\n\n";
+			auto end{ std::chrono::steady_clock::now() };
+			auto duration{ std::chrono::duration_cast<std::chrono::milliseconds>(end - start) }; 
+			std::cerr << "Regions extracted in " << duration.count() << " milliseconds.\n\n";
 			srand(0);
 			std::set<int> groups_found{graph->getRegionIDs()};
 			for (int groupID : groups_found) {
@@ -610,7 +619,11 @@ void Viewer::draw(const std::string& _draw_mode) {
 			const Mesh::Color* c{ mesh.vertex_colors() };
 			std::unique_ptr<int[]> color{ new int[3] { c->data()[0], c->data()[1], c->data()[2]} };
 			rgb[-1] = std::move(color);
-			std::cerr << "Found " << groups_found.size() << " groups.\n";
+			std::cerr << "Found " << groups_found.size() << " out of " << graph->size() << " groups.\n";
+			for (int i : groups_found) {
+				//for (auto face : graph->getRegion(i).getFaceHandles())
+				//std::cerr << i << ": " << face.idx() << "\n";
+			}
 		}
 		glDisable(GL_LIGHTING);
 		for (auto f_iter{ mesh.faces_begin() }; f_iter != mesh.faces_end(); ++f_iter) {
@@ -723,6 +736,7 @@ void Viewer::draw(const std::string& _draw_mode) {
 			isModified = true;
 			this->graph = new TopologyGraph(mesh, 1.0f, 1.0f);
 			mtools.extractRegions(*graph);
+			auto start{ std::chrono::steady_clock::now() };
 			contour_edges = graph->extractContour();
 			for (auto edge : contour_edges) {
 				Mesh::HalfedgeHandle heh{ mesh.halfedge_handle(edge, 0) };
@@ -730,6 +744,10 @@ void Viewer::draw(const std::string& _draw_mode) {
 				contour_vertices.insert(mesh.to_vertex_handle(heh));
 			}
 			this->graph->projectContourVertices();
+			auto end{ std::chrono::steady_clock::now() };
+			auto duration{ std::chrono::duration_cast<std::chrono::milliseconds>(end - start) };
+
+			std::cerr << "Executed in " << duration.count() << " milliseconds.\n\n";
 		}
 		glEnable(GL_LIGHTING);
 
@@ -782,11 +800,11 @@ void Viewer::draw(const std::string& _draw_mode) {
 		glBegin(GL_POINTS);
 		for (auto vh{ mesh.vertices_begin() }; vh != mesh.vertices_end(); ++vh) {
 			const float error{ mesh.property(fit_error, vh) };
-			if (error <= 0.05f)
+			if (error <= 0.1f)
 				glColor3f(0.0f, 1.0f, 0.0f);
-			else if (error > 0.05f && error <= 0.1f)
+			else if (error > 0.1f && error <= 0.2f)
 				glColor3f(0.0f, 0.0f, 1.0f);
-			else if (error > 0.1f)
+			else if (error > 0.2f)
 				glColor3f(1.0f, 0.0f, 0.0f);
 			else
 				continue;
@@ -860,8 +878,6 @@ void Viewer::draw(const std::string& _draw_mode) {
 			GL::glVertex(mesh.point(mesh.to_vertex_handle(right)));
 			GL::glVertex(mesh.point(mesh.to_vertex_handle(mesh.next_halfedge_handle(right))));
 		glEnd();
-		glDisable(GL_POLYGON_OFFSET_LINE);
-
 		glDisable(GL_POLYGON_OFFSET_LINE);
 
 		glColor3f(.2, .2, .2);
@@ -1017,6 +1033,66 @@ void Viewer::draw(const std::string& _draw_mode) {
 		prev_draw_mode = current_draw_mode;
 		prev_id_draw_mode = get_draw_mode();
 	}
+	else if (_draw_mode == "Debug normal angles") {
+		static int cur_e_id = -1;
+		if (cur_e_id != e_id) {
+			cur_e_id = e_id;
+			EdgeHandle eh{ mesh.edge_handle(e_id) };
+			HalfedgeHandle hh0{ mesh.halfedge_handle(eh, 0) };
+			HalfedgeHandle hh1{ mesh.halfedge_handle(eh, 1) };
+			if (hh0 != Mesh::InvalidHalfedgeHandle && hh1 != Mesh::InvalidHalfedgeHandle) {
+				FaceHandle fh0{ mesh.face_handle(hh0) };
+				FaceHandle fh1{ mesh.face_handle(hh1) };
+				if (fh0.is_valid() && fh1.is_valid()) {
+					Mesh::Normal n0{ mesh.normal(fh0) };
+					Mesh::Normal n1{ mesh.normal(fh1) };
+					float cos{ dot(n0, n1) };
+					float sin{ cross(n0, n1).length() };
+					float angle{ acosf(cos) };
+					std::cerr << "Normal 1 (" << n0 << ")\tNormal 2(" << n1 << ")\n";
+					std::cerr << "cos = " << cos << "\tsin = " << sin << "\nAngle = " << angle << "(" << rad_to_deg(angle) << ")\n";
+					std::cerr << "Normals are close ? (> cos(" << deg_to_rad(20.0f) << ")=" << cosf(deg_to_rad(20.0f)) << "\t" << (dot(n0, n1) > cosf(deg_to_rad(20.0f))) << "\n\n";
+				}
+			}
+		}
+		EdgeHandle eh{ mesh.edge_handle(e_id) };
+		Mesh::VertexHandle vh_0, vh_1;
+		MeshUtils::vertex_handles(mesh, eh, vh_0, vh_1); 
+		glDisable(GL_LIGHTING);
+		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+		glEnable(GL_POLYGON_OFFSET_LINE);
+
+		glPolygonOffset(1.0, -1.0);
+		glBegin(GL_LINES);
+			glColor3f(0.0, 0.0, 1.0);
+			GL::glVertex(mesh.point(vh_0));
+			GL::glVertex(mesh.point(vh_1));
+		glEnd(); 
+		glDisable(GL_POLYGON_OFFSET_LINE);
+
+		glColor3f(.2, .2, .2);
+		glEnableClientState(GL_VERTEX_ARRAY);
+		GL::glVertexPointer(mesh.points());
+
+
+		glEnable(GL_DEPTH_TEST);
+		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+		glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, &indices[0]);
+
+		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+		glEnable(GL_POLYGON_OFFSET_FILL);
+		glPolygonOffset(1.0, 1.0);
+		glColor3f(0.0, 0.0, 0.0);
+		glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, &indices[0]);
+		glDisable(GL_POLYGON_OFFSET_FILL);
+
+		HalfedgeHandle hh{ MeshUtils::findHalfedge(mesh, vh_0, vh_1) };
+		draw_normal(mesh.face_handle(hh), 1.0f);
+		draw_normal(mesh.face_handle(mesh.opposite_halfedge_handle(hh)), 1.0f);
+
+		prev_draw_mode = current_draw_mode;
+		prev_id_draw_mode = get_draw_mode();
+	}
 
   else 
 	  MeshViewer::draw(_draw_mode);
@@ -1036,6 +1112,19 @@ void Viewer::draw_1_ring(const VertexHandle vh, Vec3f color) {
 	}
 	glEnd();
 	glDisable(GL_POLYGON_OFFSET_LINE);
+}
+
+void Viewer::draw_normal(const FaceHandle fh, float length) {
+	if (!fh.is_valid())	return;
+	Vec3f centroid{ MeshUtils::computeCentroid(mesh, mesh.halfedge_handle(fh)) };
+	Vec3f dest{ centroid + mesh.normal(fh) * length };
+
+	glBegin(GL_LINES);
+		glColor3f(1.0f, 0.0f, 0.0f);
+		glLineWidth(1.0f);
+		GL::glVertex(centroid);
+		GL::glVertex(dest);
+	glEnd();
 }
 
 // Colors faces of the 1-ring of a given vertex
@@ -1130,30 +1219,54 @@ void Viewer::keyboard(int key, int x, int y) {
 void Viewer::special(int key, int x, int y) {
 	switch (key) {
 		case GLUT_KEY_LEFT:
-		{
-			v_id = (v_id - 1) % mesh.n_vertices();
-			std::cerr << "v_id=" << v_id << '\n';
+		{			
+			if (current_draw_mode == "Debug normal angles") {
+				e_id = (e_id - 1) % mesh.n_edges();
+				std::cerr << "e_id=" << e_id << '\n';
+			}
+			else {
+				v_id = (v_id - 1) % mesh.n_vertices();
+				std::cerr << "v_id=" << v_id << '\n';
+			}
 			glutPostRedisplay();
 			break;
 		}
 		case GLUT_KEY_RIGHT:
 		{
-			v_id = (v_id + 1) % mesh.n_vertices();
-			std::cerr << "v_id=" << v_id << '\n';
+			if (current_draw_mode == "Debug normal angles") {
+				e_id = (e_id + 1) % mesh.n_edges();
+				std::cerr << "e_id=" << e_id << '\n';
+			}
+			else {
+				v_id = (v_id + 1) % mesh.n_vertices();
+				std::cerr << "v_id=" << v_id << '\n';
+			}
 			glutPostRedisplay();
 			break;
 		}
 		case GLUT_KEY_UP:
 		{
-			++neighbour_offset;
-			std::cerr << "neighbour_offset=" << neighbour_offset << '\n';
+			if (current_draw_mode == "Debug normal angles") {
+				e_id = (e_id + 100) % mesh.n_edges();
+				std::cerr << "e_id=" << e_id << '\n';
+			}
+			else {
+				++neighbour_offset;
+				std::cerr << "neighbour_offset=" << neighbour_offset << '\n';
+			}
 			glutPostRedisplay();
 			break;
 		}
 		case GLUT_KEY_DOWN:
 		{
-			--neighbour_offset;
-			std::cerr << "neighbour_offset=" << neighbour_offset << '\n';
+			if (current_draw_mode == "Debug normal angles") {
+				e_id = (e_id - 100) % mesh.n_edges();
+				std::cerr << "e_id=" << e_id << '\n';
+			}
+			else {
+				--neighbour_offset;
+				std::cerr << "neighbour_offset=" << neighbour_offset << '\n';
+			}
 			glutPostRedisplay();
 			break;
 		}
@@ -1191,13 +1304,13 @@ void Viewer::computeFittingError() {
 	}
 	for (auto fh{ mesh.faces_begin() }; fh != mesh.faces_end(); ++fh) {
 		const int id{ this->graph->getFaceRegion(fh) };
+		if (id == -1) continue;
 		const Plane& plane{ this->graph->getPlane(id) };
 		const HalfedgeHandle heh{ mesh.halfedge_handle(fh) };
 		const VertexHandle vh_0{ mesh.to_vertex_handle(heh) };
 		const VertexHandle vh_1{ mesh.from_vertex_handle(heh) };
 		const VertexHandle vh_2{ mesh.opposite_vh(heh)};
 
-		if (id == -1) continue;
 		mesh.property(fit_error, vh_0) = plane.distToPoint(mesh.point(vh_0));
 		mesh.property(fit_error, vh_1) = plane.distToPoint(mesh.point(vh_1));
 		mesh.property(fit_error, vh_2) = plane.distToPoint(mesh.point(vh_2));
