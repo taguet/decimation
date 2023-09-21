@@ -544,3 +544,5 @@ dat/rounded_cube1_anis40-1.stl
 dat/rounded_cube1_anis20-1.stl
 Decimation.vcxproj
 Decimation.vcxproj
+*.mtl
+*.stl
