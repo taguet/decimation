@@ -126,6 +126,7 @@ private:
   bool calledSmoothing{ false };
   bool calledCollapse{ false };
   int v_id{ 0 };
+  int e_id{ 0 };
   int neighbour_offset{ 0 };
   int region_id{ 0 };
 
@@ -136,6 +137,7 @@ private:
   EdgeCollapse* ec{ nullptr };
 
   void draw_1_ring(const VertexHandle vh, Vec3f color);
+  void draw_normal(const FaceHandle fh, float length);
   std::vector<Eigen::Vector3f> computePlane(const Equation::Plane& plane) const;
   void computeFittingError();
 };
