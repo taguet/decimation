@@ -44,8 +44,7 @@ namespace Equation {
 	bool Plane::isCoplanar(const Plane& plane) const {
 		Vector3f n0{ getNormal() };
 		Vector3f n1{ plane.getNormal() };
-		std::cerr << n0.dot(n1) << '\n';
-		return n0.dot(n1) >= cos(0.349066f);
+		return fabsf(1.0f - n0.dot(n1)) < std::numeric_limits<float>::epsilon();
 	}
 
 
