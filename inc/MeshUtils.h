@@ -74,6 +74,10 @@ namespace MeshUtils
 	/// @return THe adjacent face's handle.
 	Mesh::FaceHandle getAdjacentFace(const Mesh& mesh, const Mesh::FaceHandle fh, const Mesh::HalfedgeHandle hh);
 
+
+	/// @brief Finds the vertices forming an edge.
+	void vertex_handles(const Mesh& mesh, const Mesh::EdgeHandle eh, Mesh::VertexHandle& vh_0, Mesh::VertexHandle& vh_1);
+
 	/// @brief Projected a given vertex onto a line.
 	/// @param mesh 
 	/// @param vh 
