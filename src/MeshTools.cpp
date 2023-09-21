@@ -81,7 +81,11 @@ void MeshTools::buildTopologyGraph(TopologyGraph& graph) {
 	std::cerr << "Done\nSimplifying graph...\n";
 	graph.computeFaceAreas();
 	graph.computeVertexProjectedDistances();
+	std::cerr << "\tSimplifying small regions...\t";
 	while (graph.simplifySmallRegions());	//simplify graph until no changes are made
+	std::cerr << "Done\n";
+	std::cerr << "\tSimplifying large regions...\t";
+	while (graph.simplifyLargeRegions());
 	std::cerr << "Done\n";
 }
 
@@ -92,7 +96,7 @@ bool MeshTools::faceIsGrouped(const Mesh::FaceHandle fh, const TopologyGraph& gr
 
 
 bool MeshTools::normalsAreCloseEnough(const Mesh::Normal& n_1, const Mesh::Normal& n_2, float threshold) const {
-	return dot(n_1, n_2) > sin(threshold);
+	return dot(n_1, n_2) > cos(threshold);	//The higher the threshold, the closer the normals have to be?
 }
 
 
