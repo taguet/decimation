@@ -116,6 +116,14 @@ Mesh::FaceHandle MeshUtils::getAdjacentFace(const Mesh& mesh, const Mesh::FaceHa
 }
 
 
+void MeshUtils::vertex_handles(const Mesh& mesh, const Mesh::EdgeHandle eh, Mesh::VertexHandle& vh_0, Mesh::VertexHandle& vh_1) {
+	Mesh::HalfedgeHandle hh{ mesh.halfedge_handle(eh, 0) };
+	if (!eh.is_valid())		hh = mesh.halfedge_handle(eh, 1);
+	vh_0 = mesh.from_vertex_handle(hh);
+	vh_1 = mesh.to_vertex_handle(hh);
+}
+
+
 void MeshUtils::projectVertexToLine(Mesh& mesh, const Mesh::VertexHandle vh, const Equation::Line& line) {
 	const Mesh::Point p{ mesh.point(vh) };
 	const Eigen::Vector3f projected{ line.projectPoint(Eigen::Vector3f{p[0], p[1], p[2]}) };
@@ -146,7 +154,8 @@ Equation::Plane MeshUtils::fitPlaneToVertices(Mesh& mesh, std::set<Mesh::VertexH
 		XY.row(3) += Vector4f{ 2*x, 2*y, 2*z, 3 };
 		Z += Vector4f{ x*y+x*z, x*y+y*z, x*z+y*z, x+y+z };
 	}
-	return  { Vector4f{XY.inverse() * Z} };
+	return Eigen::FullPivLU<MatrixXf>(XY).solve(Z);
+	//return  { Vector4f{XY.inverse() * Z} };
 }
 
 
