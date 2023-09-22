@@ -671,11 +671,14 @@ void Viewer::draw(const std::string& _draw_mode) {
 		Vector3f& p0{ points[0]};
 		Vector3f& p1{ points[1] };
 		Vector3f& p2{ points[2] };
+		std::cerr << "P0(" << p0 << ")\tnP1(" << p1 << "\nP2" << p2 << "\n";
 		glBegin(GL_TRIANGLES);
 			GL::glVertex(OpenMesh::Vec3f{ p0[0], p0[1], p0[2] });
 			GL::glVertex(OpenMesh::Vec3f{ p1[0], p1[1], p1[2] });
 			GL::glVertex(OpenMesh::Vec3f{ p2[0], p2[1], p2[2] });
 		glEnd();
+		VertexHandle vh{ *graph->getRegion(regionID).getVertexHandles().begin()};
+		draw_vector(plane.getNormal(), MeshUtils::toEigen(mesh.point(vh)));
 
 		prev_draw_mode = current_draw_mode;
 		prev_id_draw_mode = get_draw_mode();
@@ -1126,6 +1129,18 @@ void Viewer::draw_normal(const FaceHandle fh, float length) {
 		GL::glVertex(dest);
 	glEnd();
 }
+
+
+void Viewer::draw_vector(const Vector3f vec, const Vector3f position) {
+	Vector3f dest{ position + vec };
+	glBegin(GL_LINES);
+		glColor3f(1.0f, 0.0f, 0.0f);
+		glLineWidth(1.0f);
+		GL::glVertex(Vec3f(position[0], position[1], position[2]));
+		GL::glVertex(Vec3f(dest[0], dest[1], dest[2]));
+	glEnd();
+}
+
 
 // Colors faces of the 1-ring of a given vertex
 void Viewer::color_1_ring(Mesh::VertexHandle _vh) {

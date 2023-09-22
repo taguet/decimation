@@ -138,6 +138,7 @@ private:
 
   void draw_1_ring(const VertexHandle vh, Vec3f color);
   void draw_normal(const FaceHandle fh, float length);
+  void draw_vector(const Vector3f vec, const Vector3f position);
   std::vector<Eigen::Vector3f> computePlane(const Equation::Plane& plane) const;
   void computeFittingError();
 };
