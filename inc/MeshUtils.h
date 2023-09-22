@@ -100,5 +100,5 @@ namespace MeshUtils
 
 
 	Vector3f toEigen(const Mesh::Point& p);
-};
+}
 

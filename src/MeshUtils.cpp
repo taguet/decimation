@@ -131,31 +131,59 @@ void MeshUtils::projectVertexToLine(Mesh& mesh, const Mesh::VertexHandle vh, con
 }
 
 
+//Equation::Plane MeshUtils::fitPlaneToVertices(Mesh& mesh, std::set<Mesh::VertexHandle>& vertices) {
+//	MatrixXf points{ vertices.size(), 3 }; // point coordinates
+//	{
+//		std::set<Mesh::VertexHandle>::iterator it{ vertices.begin() };
+//		for (int i{ 0 }; i < points.rows(), it != vertices.end(); ++i, ++it) {
+//			Mesh::Point p{ mesh.point(*it) };
+//			points.row(i) = Vector3f{ p[0], p[1], p[2] };
+//		}
+//	}
+//	MatrixXf XY{ 4,4 };
+//	Vector4f Z{ 0, 0, 0, 0 };
+//	XY.fill(0);
+//
+//	for (int i{ 0 }; i < points.rows(); ++i) {
+//		float x{ points(i, 0) };
+//		float y{ points(i, 1) };
+//		float z{ points(i, 2) };
+//		XY.row(0) += Vector4f{ 2*x*x, x*y, x*z, 2*x };
+//		XY.row(1) += Vector4f{ x*y, 2*y*y, y*z, 2*y };
+//		XY.row(2) += Vector4f{ x*z, y*z, 2*z*z, 2*z };
+//		XY.row(3) += Vector4f{ 2*x, 2*y, 2*z, 3 };
+//		Z += Vector4f{ x*y+x*z, x*y+y*z, x*z+y*z, x+y+z };
+//	}
+//	return Eigen::FullPivLU<MatrixXf>(XY).solve(Z);
+//	//return  { Vector4f{XY.inverse() * Z} };
+//}
+
+
 Equation::Plane MeshUtils::fitPlaneToVertices(Mesh& mesh, std::set<Mesh::VertexHandle>& vertices) {
-	MatrixXf points{ vertices.size(), 3 }; // point coordinates
+	// PCA
+	MatrixXf points{ vertices.size(), 3 };
 	{
-		std::set<Mesh::VertexHandle>::iterator it{ vertices.begin() };
-		for (int i{ 0 }; i < points.rows(), it != vertices.end(); ++i, ++it) {
-			Mesh::Point p{ mesh.point(*it) };
-			points.row(i) = Vector3f{ p[0], p[1], p[2] };
+		int p_i{ 0 };
+		for (auto v_it{ vertices.begin() }; v_it != vertices.end(); ++v_it, ++p_i) {
+			Mesh::Point p{ mesh.point(*v_it) };
+			points.row(p_i) << p[0], p[1], p[2];
 		}
 	}
-	MatrixXf XY{ 4,4 };
-	Vector4f Z{ 0, 0, 0, 0 };
-	XY.fill(0);
 
-	for (int i{ 0 }; i < points.rows(); ++i) {
-		float x{ points(i, 0) };
-		float y{ points(i, 1) };
-		float z{ points(i, 2) };
-		XY.row(0) += Vector4f{ 2*x*x, x*y, x*z, 2*x };
-		XY.row(1) += Vector4f{ x*y, 2*y*y, y*z, 2*y };
-		XY.row(2) += Vector4f{ x*z, y*z, 2*z*z, 2*z };
-		XY.row(3) += Vector4f{ 2*x, 2*y, 2*z, 3 };
-		Z += Vector4f{ x*y+x*z, x*y+y*z, x*z+y*z, x+y+z };
-	}
-	return Eigen::FullPivLU<MatrixXf>(XY).solve(Z);
-	//return  { Vector4f{XY.inverse() * Z} };
+	MatrixXf centered{ points.rowwise() - points.colwise().mean() };	// Center the data by subtracting the mean of each column to each row
+
+	////std::cerr << "means:" << points.colwise().mean() << "\n";
+	MatrixXf cov{ (centered.transpose() * centered) / vertices.size() };
+	Eigen::SelfAdjointEigenSolver<MatrixXf> eig(cov);
+	MatrixXf eigenvectors{ eig.eigenvectors() };
+	MatrixXf pca_transform{ eigenvectors.rightCols(3) };	// Last two columns are the direction vectors, third last is normal.
+	// We can get the normal from the eigenvectors
+	Vector3f normal{ pca_transform.col(0).normalized()};
+	////std::cerr << "Normal:" << normal << "\n";
+	// Get a point from the plane
+	Vector3f point{ points.colwise().mean() };
+	////std::cerr << "Point:" << point << "\n";
+	return Equation::Plane(normal[0], normal[1], normal[2], -normal.dot(point));
 }
 
 
